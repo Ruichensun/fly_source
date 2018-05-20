@@ -1,23 +1,30 @@
 # Prepare data file names
 # data_dir = "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS"
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/")
+setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
-##Finding out when the fly is moving vs not moving
-moving_status = function(input_file) {
-  # a = read.csv("ProcessedData_Fly230_E1T1_WT.csv",header=T,stringsAsFactors=F)
-  a = read.csv(input_file, header = T, stringsAsFactors = F)
-  speed_threshold = 28 # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% corresponds to 28.6
-  framerate = 50
-  ##Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than a speed threshold
-  fly_pos = a$fly_pos.framerate.50
-  starting_point = 21
-  fly_pos = fly_pos[starting_point:length(fly_pos)]
-  fly_moving_status = c(diff(c(a$fly_pos.framerate.50[starting_point - 1], fly_pos)))
+# Finding out when the fly is moving vs not moving
+# Input: fly_pos 
+# Output: a vector of 0 and 1 of (length of input) - 1 
+fly_pos_to_moving_status = function(fly_pos){ 
+  # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% corresponds to 28.6
+  speed_threshold = 28 
+  fly_moving_status = diff(fly_pos)
+  # Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than a speed threshold
   fly_moving_status_discretized = replace(fly_moving_status, fly_moving_status >
-                                            28, 0)
+                                            speed_threshold, 0)
   fly_moving_status_discretized = replace(fly_moving_status_discretized,
                                           fly_moving_status_discretized != 0,
                                           1)
+  return(fly_moving_status_discretized)
+}
+
+moving_status = function(input_file) {
+  # a = read.csv("ProcessedData_Fly230_E1T1_WT.csv",header=T,stringsAsFactors=F)
+  a = read.csv(input_file, header = T, stringsAsFactors = F)
+  fly_pos = a$fly_pos.framerate.50
+  fly_moving_status = fly_pos_to_moving_status(fly_pos)
+  starting_point = 21
+  fly_moving_status = fly_moving_status[(starting_point-1):length(fly_moving_status)]
   
   # for (i in 2:(length(fly_moving_status_discretized)-1)){
   #   if ((fly_moving_status_discretized[i-1]==0)&(fly_moving_status_discretized[i+1]==0)){
@@ -84,7 +91,7 @@ moving_status = function(input_file) {
   # Movement_Difference = list(normalized_x,Movement_Difference)
   # names(Movement_Difference) = c("Pairs", "Duration")
   # return(Movement_Difference)
-  return(cumsum(fly_moving_status_discretized))
+  return(cumsum(fly_moving_status))
 }
 
 ###Calculating all the flies' cumulated moving status together by types (T/R/N)
