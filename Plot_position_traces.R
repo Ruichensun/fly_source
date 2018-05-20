@@ -8,47 +8,53 @@ library(rafalib)
 # fly.info = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
 
 pdf("WT_full_traces_051918.pdf")
-for(ind in 1:nrow(fly.info.include[fly.info.include$Genotype=="WT",])){
+for (ind in 1:nrow(fly.info.include[fly.info.include$Genotype == "WT", ])) {
   path = paste0("data/",
-                fly.info.include[fly.info.include$Genotype=="WT",]$experimenter[ind],
+                fly.info.include[fly.info.include$Genotype == "WT", ]$experimenter[ind],
                 "/CS/")
   input.file = list.files(path = paste0("data/",
-                                        fly.info.include[fly.info.include$Genotype=="WT",]$experimenter[ind],
+                                        fly.info.include[fly.info.include$Genotype ==
+                                                           "WT", ]$experimenter[ind],
                                         "/CS/"))
-  dbf.files <- input.file[grep(paste0(
-                           "Fly",fly.info.include[fly.info.include$Genotype=="WT",]$Fly[ind],"_"),
-                           input.file, fixed=T)]
+  dbf.files <- input.file[grep(paste0("Fly", fly.info.include[fly.info.include$Genotype ==
+                                                                "WT", ]$Fly[ind], "_"),
+                               input.file,
+                               fixed = T)]
   print(dbf.files)
-  mypar(length(dbf.files),1)
-  for(ind.session in 1:length(dbf.files)){
-    
-    input.file.plotting = read.csv(paste0(path, dbf.files[ind.session]),header=T,stringsAsFactors=F)
+  mypar(length(dbf.files), 1)
+  for (ind.session in 1:length(dbf.files)) {
+    input.file.plotting = read.csv(paste0(path, dbf.files[ind.session]),
+                                   header = T,
+                                   stringsAsFactors = F)
     framerate = 50
     fly_pos = input.file.plotting$fly_pos.framerate.50
     starting_point = 21
     fly_pos = fly_pos[starting_point:length(fly_pos)]
-    print(length(fly_pos)/framerate)
-    plot((c(1:length(fly_pos)/framerate)),
-           fly_pos,
-         type='l',
-         pch=16,cex=0.4,main = paste0(path, dbf.files[ind.session]), 
-         ylab = "", xlab = "Time (sec)", 
-         ylim=c(0,800),
-         col="black", 
-         yaxt ="n"
+    print(length(fly_pos) / framerate)
+    plot((c(1:length(fly_pos) / framerate)),
+         fly_pos,
+         type = 'l',
+         pch = 16,
+         cex = 0.4,
+         main = paste0(path, dbf.files[ind.session]),
+         ylab = "",
+         xlab = "Time (sec)",
+         ylim = c(0, 800),
+         col = "black",
+         yaxt = "n"
          # xaxt = "n"
          # xlim = c(0,length(fly_pos)/framerate),
          # axis(2,
          #      c(0,767),
          #      labels=c("0","767")
-         #  ),      
+         #  ),
          # axis(1,
          #      c(0,length(fly_pos)/framerate),
          #      labels=c("0",as.character(length(fly_pos)/framerate)))
-         )
+    )
     # lines(t,pos_fly_position_info,col="blue")
-    axis(2,c(0,767),labels=c("0","767"))
-    }
+    axis(2, c(0, 767), labels = c("0", "767"))
+  }
 }
 dev.off()
 
@@ -56,60 +62,72 @@ dev.off()
 
 
 # For spontaneous behavior's long recording
-setwd('D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS')
+setwd(
+  'D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS'
+)
 #For train flies' traces
 filename = "ProcessedData_Fly87_E1_WT.csv"
-input.file.plotting = read.csv(filename,header=T,stringsAsFactors=F)
+input.file.plotting = read.csv(filename, header = T, stringsAsFactors =
+                                 F)
 framerate = 20
 fly_pos = input.file.plotting$fly.position
 starting_point = 21
 fly_pos = fly_pos[starting_point:length(fly_pos)]
-pdf("D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/Spontaneous_40min_Fly467_2015Nov4.pdf")
-mypar(6,1)
-plot((c(1:length(fly_pos))/(framerate*60)),
+pdf(
+  "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/Spontaneous_40min_Fly467_2015Nov4.pdf"
+)
+mypar(6, 1)
+plot((c(1:length(fly_pos)) / (framerate * 60)),
      fly_pos,
-     type='l',
-     pch=16,cex=0.4,
-     main = "", 
-     ylab = "", xlab = "Time (min)", 
-     ylim=c(0,800),
-     col="black", 
-     yaxt ="n"
-     # xaxt = 
-     )
+     type = 'l',
+     pch = 16,
+     cex = 0.4,
+     main = "",
+     ylab = "",
+     xlab = "Time (min)",
+     ylim = c(0, 800),
+     col = "black",
+     yaxt = "n"
+     # xaxt =
+)
 # lines(t,pos_fly_position_info,col="blue")
-axis(2,c(0,767),labels=c("0","767"))
+axis(2, c(0, 767), labels = c("0", "767"))
 dev.off()
 
 
 
 filename = "ProcessedData_Fly467_E1_M_2015Nov5.csv"
-input.file.plotting = read.csv(filename,header=T,stringsAsFactors=F)
+input.file.plotting = read.csv(filename, header = T, stringsAsFactors =
+                                 F)
 framerate = 20
 fly_pos = input.file.plotting$fly.position
 starting_point = 21
 fly_pos = fly_pos[starting_point:length(fly_pos)]
-pdf("D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/Spontaneous_40min_Fly467_2015Nov4.pdf")
-mypar(6,1)
-plot((c(1:length(fly_pos))/(framerate*60)),
+pdf(
+  "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/Spontaneous_40min_Fly467_2015Nov4.pdf"
+)
+mypar(6, 1)
+plot((c(1:length(fly_pos)) / (framerate * 60)),
      fly_pos,
-     type='l',
-     pch=16,cex=0.4,
-     main = "", 
-     ylab = "", xlab = "Time (min)", 
-     ylim=c(0,800),
-     col="black", 
-     yaxt ="n"
-     # xaxt = 
+     type = 'l',
+     pch = 16,
+     cex = 0.4,
+     main = "",
+     ylab = "",
+     xlab = "Time (min)",
+     ylim = c(0, 800),
+     col = "black",
+     yaxt = "n"
+     # xaxt =
 )
 # lines(t,pos_fly_position_info,col="blue")
-axis(2,c(0,767),labels=c("0","767"))
+axis(2, c(0, 767), labels = c("0", "767"))
 dev.off()
 
 
-# 
-# 
-# 
+#
+#
+#
 # #plot original traces
 #   for (j in fly_number1:fly_number2){
 #     fly_files = dir(pattern = paste0("Fly",j,"_.*\\.csv$"), full.names = TRUE, ignore.case = TRUE);
@@ -133,9 +151,9 @@ dev.off()
 #             pos_fly_position_info[k] <- pos_fly_position_info[k-1];
 #           }
 #         }
-#         output_title_0 = gsub("ProcessedData_","",basename(test_files[i])) 
+#         output_title_0 = gsub("ProcessedData_","",basename(test_files[i]))
 #         output_title_1 = gsub(".csv","",output_title_0)
-#         plot(t,pos_fly_position_info,type='b',pch=16,cex=0.4,main = output_title_1, ylab = "Position", xlab = "Time (sec)", ylim=c(0,800),col="grey")        
+#         plot(t,pos_fly_position_info,type='b',pch=16,cex=0.4,main = output_title_1, ylab = "Position", xlab = "Time (sec)", ylim=c(0,800),col="grey")
 #         lines(t,pos_fly_position_info,col="blue")
 #       }
 #     }
@@ -143,13 +161,13 @@ dev.off()
 # dev.off()
 # graphics.off()
 # }
-# 
+#
 # #plot smoothened traces
 # plot_fly_smoothened_test_traces <- function(fly_number1,fly_number2){
-# 
+#
 #   test_file_number = c()
 #   test_files = c()
-# 
+#
 # #pdf(paste0("Fly_",fly_number1,"-",fly_number2, "_smoothened_test_traces.pdf"))
 #     for (j in fly_number1:fly_number2){
 #      fly_files = dir(pattern = paste0("Fly",j,"_.*\\.csv$"), full.names = TRUE, ignore.case = TRUE);
@@ -158,19 +176,19 @@ dev.off()
 #        for (i in 1:length(test_file_number)){
 #          test_files[[j]][i] <- fly_files[as.numeric(test_file_number[i])]
 #        }
-#        
-#        for (i in 1:length(test_files[[j]])){  
+#
+#        for (i in 1:length(test_files[[j]])){
 #          pos_fly_position_info_s = get_fly_position_smoothened(test_files[[j]][i])
 #          t = (1:length(pos_fly_position_info_s))/framerate
-#          output_title_0 = gsub("ProcessedData_","",basename(test_files[[j]][i])) 
+#          output_title_0 = gsub("ProcessedData_","",basename(test_files[[j]][i]))
 #          output_title_1 = gsub(".csv","",output_title_0)
 #          print(output_title_1)
-#          plot(t,pos_fly_position_info_s,type='b',pch=16,cex=0.4,main = output_title_1, ylab = "Position", xlab = "Time (sec)", ylim=c(0,800),col="grey")        
+#          plot(t,pos_fly_position_info_s,type='b',pch=16,cex=0.4,main = output_title_1, ylab = "Position", xlab = "Time (sec)", ylim=c(0,800),col="grey")
 #          lines(t,pos_fly_position_info_s,col="blue")
 #        }
 #      }
 #    }
-# 
+#
 # #dev.off()
 # graphics.off()
 # }
