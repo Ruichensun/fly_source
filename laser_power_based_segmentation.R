@@ -23,7 +23,7 @@ one_fly_laser_statistics <- function(input_file,
                               "Total Laser Exposure in Seconds" #2)
                               
   } else{
-    data_start = 20
+    data_start = 21
     
     fly_pos = fly.position.raw[data_start:length(fly.position.raw)]
     fly_laser = fly.laser.raw[data_start:length(fly.laser.raw)]
