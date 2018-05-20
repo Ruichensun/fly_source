@@ -12,7 +12,6 @@ sessions <- c("E1",
 
 query.genotype <- c("WT","CS")
 
-
 ## Read metric names
 metrices <- read.table("metrics/list_metrices.csv",
                        stringsAsFactors=F,
