@@ -123,54 +123,7 @@ pass_fly_QC <- function(input_file,
   else {
     return(TRUE)
   }
-  
-  ## range 0 - 767
-  ## One end
-  # chamber_end = rep(0,length(fly_pos))
-  # chamber_end[fly_pos >=0 & fly_pos < chamber_end_thres] = -1
-  # chamber_end[fly_pos <= 767 & fly_pos > 767-chamber_end_thres] = 1
-  # #chamber_end[fly_pos >=chamber_end_thres & fly_pos < chamber_end_thres*2] = -0.5
-  # #chamber_end[fly_pos <= 767-chamber_end_thres & fly_pos > 767-chamber_end_thres*2] = 0.5
-  # chamber_end[fly_pos >= 383.5-chamber_end_thres & fly_pos < 383.5+chamber_end_thres] = 0.5
-  #
-  # end2end = rle(chamber_end)$values
-  # end2end = end2end[end2end!=0]
-  #
-  # end2end = rle(end2end)$values
-  # end2end = end2end[end2end != 0.5]
-  # if(length(end2end) >= 10){
-  #   ## start: end2end[-length(end2end)]
-  #   ## end: end2end[-1]
-  #   incomplete_lap = sum(end2end[-length(end2end)] == end2end[-1])
-  #   complete_lap = sum(end2end[-length(end2end)] != end2end[-1])
-  #   tot_lap = complete_lap+incomplete_lap
-  #   #print(end2end)
-  #   #print(paste(complete_lap,incomplete_lap,tot_lap))
-  #   if(complete_lap >= 10 & incomplete_lap/tot_lap <=0.2){
-  #     return(TRUE)
-  #   }
-  # }
-  # return(FALSE)
 }
-
-
-#input_files = commandArgs(trailingOnly=TRUE)
-
-#max_pause = NULL
-#for(input_file in input_files){
-#    mp = pass_fly_QC(input_file)#
-
-#    if(!is.na(mp)){
-#        max_pause = c(max_pause,log10(mp))
-#    }
-#if(!pass_fly_QC(input_file)){
-#    print(input_file)
-#}
-#}
-#hist(max_pause,20)
-
-
-
 
 metrices = c(
   "Number of Pause Starts",
@@ -211,7 +164,6 @@ metrices = c(
   #18
   "First Pause Duration",
   #19
-  # "State_transitions (Pause not at the end): pp, pw, ww, wp",#20
   "Transition Probability (Pause not at the end): Pause to Pause",
   #20
   "Transition Probability (Pause not at the end): Pause to Walking",
@@ -379,7 +331,6 @@ fly.info.mutants = read.csv(
   header = T,
   stringsAsFactors = F
 )
-# fly.info.mutants = fly.info.mutants[fly.info.mutants$Genotype %in% c("SUN1","SUN2","SUN3","R3","R5"),]
 
 shared.info = c(
   "Fly",
@@ -440,7 +391,12 @@ excl.fly.Mutant = na.omit(read.csv(
 )[, 1:3]) #Added June 12, 2017
 
 excl.fly.WT = data.frame(cbind(
-  # c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,277:400,1:120,1:221,1:100), ###Batch 1 ES-WT: 1-276; Batch 2 ES-WT: 276-400; Batch 3 ES-WT: 400-present (as of June 28, 2017)
+  
+  # c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,277:400,1:120,1:221,1:100), 
+  #Batch 1 ES-WT: 1-276; 
+  #Batch 2 ES-WT: 276-400; 
+  #Batch 3 ES-WT: 400-present (as of June 28, 2017)
+  
   c(58, 48, 1:400, 1:100, 1:40),
   # c("JG","RS","JD",rep("ES",12), rep("ES",124),rep("JG",120),rep("JE",221),rep("RS",100)),
   c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40)),
@@ -602,13 +558,7 @@ for (ind in 1:nrow(fly.info)) {
 # write.csv(fly.info,
 write.csv(
   fly.info[ind.include, ],
-  # "data/fly_info_pass_QC.csv",
-  # "data/fly_info_CS_July2016-Dec2016.csv",
-  # "data/fly_info_CS_Jan2017-Mar2017.csv",
-  # "data/fly_info_CS_Mar2017_present20-95.csv",
-  # "data/fly_info_CS_Mar2017_present.csv",
-  # "data/fly_info_Jan_2018_present_B1_B3.csv",
-  "data/fly_info_May12_test3_2018_present_B1_B3.csv",
+  "data/fly_info.csv",
   quote = F,
   row.names = F
 )
@@ -623,7 +573,7 @@ for (ind in 1:length(metrices)) {
   metric.df = NULL
   
   for (session in sessions) {
-    print(session)
+    # print(session)
     metric <- sapply(all_ofs[[session]],
                      function(x) {
                        ##if((length(x) == 1) & (is.na(x))){
@@ -755,7 +705,7 @@ for (ind in 1:length(metrices)) {
     sep = ","
   )
   
-  print(paste("Finished metric", ind))
+  # print(paste("Finished metric", ind))
   ##print(metrices[ind])
 }
 
