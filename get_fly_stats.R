@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
-source("get_fly_speed_and_position.R")
+source("fly_source/get_fly_speed_and_position.R")
 
 metrices = c(
   "Number of Pause Starts", #1
