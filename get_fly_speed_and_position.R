@@ -261,7 +261,6 @@ one_fly_statistics <- function(input_file,
   #   else{is_pause_middle_plot[i]=-100}
   # }
   
-  
   # pause_middle_dur<-rle(is_pause_middle)$length[rle(is_pause_middle)$values==1]
   # avg_pause_middle_dur<-(mean(pause_middle_dur))/framerate
   # frac_pause_middle<-(sum(pause_middle_dur))/experiment_time
