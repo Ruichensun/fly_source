@@ -397,12 +397,12 @@ excl.fly.WT = data.frame(cbind(
   #Batch 2 ES-WT: 276-400; 
   #Batch 3 ES-WT: 400-present (as of June 28, 2017)
   
-  c(58, 48, 1:400, 1:100, 1:40),
+  c(58, 48, 1:400, 1:100, 1:40,118,122),
   # c("JG","RS","JD",rep("ES",12), rep("ES",124),rep("JG",120),rep("JE",221),rep("RS",100)),
-  c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40)),
+  c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
   #added JD's 40 flies on 5/19/18, maybe removed later
   
-  c(rep("WT", 542))
+  c(rep("WT", 544))
 ))
 colnames(excl.fly.WT) = colnames(excl.fly.Mutant)
 excl.fly = rbind(excl.fly.Mutant,
