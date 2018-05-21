@@ -16,11 +16,13 @@ one_fly_laser_statistics <- function(input_file,
     total_laser_ON = NA
     
     ret = list(number_of_laser_clicks,
-               total_laser_ON #in seconds)
+               total_laser_ON #in seconds
+               )
                
                names(ret) = c("Number of Laser Punishments",
                               #1
-                              "Total Laser Exposure in Seconds" #2)
+                              "Total Laser Exposure in Seconds" #2
+                              )
                               
   } else{
     data_start = 21
@@ -97,13 +99,15 @@ one_fly_laser_statistics <- function(input_file,
     
     ## Return output
     ret = list(number_of_laser_clicks,
-               total_laser_ON #in seconds)
+               total_laser_ON #in seconds
+               )
                
                
                
                names(ret) = c("Number of Laser Punishments",
                               #1
-                              "Total Laser Exposure in Seconds" #2)
+                              "Total Laser Exposure in Seconds" #2
+                              )
                               return(ret)
                               
   }
@@ -115,7 +119,7 @@ one_fly_laser_statistics <- function(input_file,
 #Step 2: Run the function from Step 1 on all files.
 
 
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/")
+setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 sessions <- c(
   "E1",
   "E1T1",
@@ -221,9 +225,10 @@ save.image("all_ofls.Rdata")
 #
 ###
 metrics = c("Number of Laser Punishments", #1
-            "Total Laser Exposure in Seconds" #2)
+            "Total Laser Exposure in Seconds" #2
+            )
             
-            sessions <- c(
+sessions <- c(
               "E1",
               "E1T1",
               "E1T1E1",
@@ -505,36 +510,41 @@ metrics = c("Number of Laser Punishments", #1
                                        "RS")
             
             ################################################
-            query.genotype <- "WT"
+            query.genotype <- c("WT","CS")
             
             # query.fly = c(metric.df.WT.AllT1$Fly)
             # query.experimenter = c(metric.df.WT.AllT1$Experimenter)
-            #
             # query.fly <- c(longer_heat_1stT1$Fly,longer_heat_1stR1$Fly)
-            #
             # query.experimenter <- c(as.character(longer_heat_1stT1$Experimenter), as.character(longer_heat_1stR1$Experimenter))
-            #
             # query.fly <- c(shorter_heat_1stT1$Fly,shorter_heat_1stR1$Fly)
-            #
             # query.experimenter <- c(as.character(shorter_heat_1stT1$Experimenter), as.character(shorter_heat_1stR1$Experimenter))
-            #
             # query.fly <- c(longer_heat_allT1$Fly,longer_heat_allR1$Fly)
-            #
             # query.experimenter <- c(as.character(longer_heat_allT1$Experimenter), as.character(longer_heat_allR1$Experimenter))
-            
             # query.fly <- c(shorter_heat_allT1$Fly,shorter_heat_allR1$Fly)
-            #
             # query.experimenter <- c(as.character(shorter_heat_allT1$Experimenter), as.character(shorter_heat_allR1$Experimenter))
-            
             # query.fly <- c(metric.df.WT.T1$Fly,metric.df.WT.R1$Fly)
-            
-            query.fly <-
-              fly.info.include[fly.info.include$Genotype == "WT", ]$Fly
-            
             # query.experimenter<-c(as.character(metric.df.WT.T1$Experimenter), as.character(metric.df.WT.R1$Experimenter))
+            query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                                      (fly.info.include$Genotype == "CS")) &
+                                                     (fly.info.include$experimenter!="SW"), ]$Fly
             
             
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                            (fly.info.include$Genotype == "CS")) &
+                                           (fly.info.include$experimenter!="SW"), ]$experimenter
             
+            
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "WT") |
+                                  (fly.info.include$Genotype == "CS")) &
+                                 (fly.info.include$experimenter!="SW"), ],
+              "fly_info_include_WT.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+
             ## Read metric names
             metrices <- read.table("metrics/list_metrices.csv",
                                    stringsAsFactors = F,
@@ -603,7 +613,7 @@ metrics = c("Number of Laser Punishments", #1
             #
             
             pdf(
-              "fly_metric_allmetricdf_CS_051818_JDES_allflies_Filter1.pdf",
+              "fly_metric_allmetricdf_CS_allflies_Filter1_052118.pdf",
               onefile = T,
               width = 10
             )
@@ -630,14 +640,14 @@ metrics = c("Number of Laser Punishments", #1
                 ind <- metric.df$Session == query.session &
                   metric.df$Genotype %in% query.genotype &
                   metric.df$Category == category &
-                  metric.df$Fly %in% query.fly
-                # metric.df$Experimenter  %in%  query.experimenter
+                  metric.df$Fly %in% query.fly&
+                metric.df$Experimenter  %in%  query.experimenter
                 
                 ind.E1 <- metric.df$Session == "E1" &
                   metric.df$Genotype %in% query.genotype &
                   metric.df$Category == category &
-                  metric.df$Fly %in% query.fly
-                # metric.df$Experimenter  %in%  query.experimenter
+                  metric.df$Fly %in% query.fly&
+                  metric.df$Experimenter  %in%  query.experimenter
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
                 z = metric.df[ind, "Value"]
@@ -649,13 +659,15 @@ metrics = c("Number of Laser Punishments", #1
                 query.session = gsub("X", category, session)
                 ind <- metric.df$Session == query.session &
                   metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category
-                # ((metric.df$Experimenter == "ES")|(metric.df$Experimenter == "JD")|(metric.df$Experimenter == "RS"))
+                  metric.df$Category == category &
+                  metric.df$Fly %in% query.fly&
+                  metric.df$Experimenter  %in%  query.experimenter
                 
                 ind.E1 <- metric.df$Session == "E1" &
                   metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category
-                # ((metric.df$Experimenter == "ES")|(metric.df$Experimenter == "JD")|(metric.df$Experimenter == "RS"))
+                  metric.df$Category == category &
+                  metric.df$Fly %in% query.fly&
+                  metric.df$Experimenter  %in%  query.experimenter
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
                 z = metric.df[ind, "Value"]
@@ -670,11 +682,14 @@ metrics = c("Number of Laser Punishments", #1
                 if (grepl("N", session) == F) {
                   ind <- metric.df$Session == session &
                     metric.df$Genotype %in% query.genotype &
-                    metric.df$Fly %in% query.fly
-                  # metric.df$Experimenter  %in%  query.experimenter
+                    metric.df$Fly %in% query.fly&
+                    metric.df$Experimenter  %in%  query.experimenter
+                  
                 } else{
                   ind <- metric.df$Session == session &
                     metric.df$Genotype %in% query.genotype
+                    metric.df$Fly %in% query.fly&
+                    metric.df$Experimenter  %in%  query.experimenter
                 }
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
@@ -934,7 +949,8 @@ metrics = c("Number of Laser Punishments", #1
                 data = input.y.df,
                 method = "jitter",
                 add = TRUE,
-                pch = 20,
+                pch = 15,
+                cex = 0.5,
                 col =  "grey40"
               )
               
@@ -988,137 +1004,5 @@ metrics = c("Number of Laser Punishments", #1
             
             #Also, convert "total laser exposure in seconds" into "total heat received".
             #Total heat received(THR) formula: THR = 9.125 (mW) * Total Laser Exposure in Seconds (unit: mille Joules)
-            
-            
-            ##### May 11, 2018
-            
-            random_fly_movement <- function()
-              
-              
-              
-              
-              
-              sessions <- c(
-                "E1",
-                "E1T1",
-                "E1T1E1",
-                "E1T1E1T1",
-                "E1T1E1T1E1",
-                "E1T1E1T1E1T1",
-                "E1T1E1T1E1T1E1",
-                "E1T1E1T1E1T1E1T1",
-                "E1T1E1T1E1T1E1T1E1",
-                
-                "E1T1E1T1E1T2",
-                "E1T1E1T1E1T2E1",
-                "E1T1E1T1E1T2E1T2",
-                "E1T1E1T1E1T2E1T2E1",
-                
-                "E1T2",
-                "E1T2E1",
-                "E1T2E1T2",
-                "E1T2E1T2E1",
-                "E1T2E1T2E1T1",
-                "E1T2E1T2E1T1E1",
-                "E1T2E1T2E1T1E1T1",
-                "E1T2E1T2E1T1E1T1E1",
-                
-                "E1R1",
-                "E1R1E1",
-                "E1R1E1R1",
-                "E1R1E1R1E1",
-                "E1R1E1R1E1R1",
-                "E1R1E1R1E1R1E1",
-                "E1R1E1R1E1R1E1R1",
-                "E1R1E1R1E1R1E1R1E1",
-                
-                "E1N1",
-                "E1N1E1",
-                "E1N1E1N1",
-                "E1N1E1N1E1",
-                "E1N1E1N1E1N1",
-                "E1N1E1N1E1N1E1",
-                "E1N1E1N1E1N1E1N1",
-                "E1N1E1N1E1N1E1N1E1",
-                
-                "E1T1E1R1",
-                "E1T1E1R1E1",
-                "E1T1E1R1E1R1",
-                "E1T1E1R1E1R1E1",
-                "E1T1E1R1E1R1E1R1",
-                "E1T1E1T1E1R1E1R1E1",
-                
-                "E1T1E1N1",
-                "E1T1E1N1E1",
-                "E1T1E1N1E1N1",
-                "E1T1E1N1E1N1E1",
-                "E1T1E1N1E1N1E1N1",
-                "E1T1E1T1E1N1E1N1E1"
-                
-                # "E1",
-                # "E1T1E1",
-                # "E1T1E1T1E1",
-                # "E1T1E1T1E1T1E1",
-                # "E1T1E1T1E1T1E1T1E1",
-                #
-                # "E1T1E1T1E1T2E1",
-                # "E1T1E1T1E1T2E1T2E1",
-                #
-                # "E1T2E1",
-                # "E1T2E1T2E1",
-                # "E1T2E1T2E1T1E1",
-                # "E1T2E1T2E1T1E1T1E1",
-                #
-                # "E1R1E1",
-                # "E1R1E1R1E1",
-                # "E1R1E1R1E1R1E1",
-                # "E1R1E1R1E1R1E1R1E1",
-                #
-                # "E1N1E1",
-                # "E1N1E1N1E1",
-                # "E1N1E1N1E1N1E1",
-                # "E1N1E1N1E1N1E1N1E1",
-                #
-                # "E1T1E1R1E1",
-                # "E1T1E1R1E1R1E1",
-                # "E1T1E1T1E1R1E1R1E1",
-                #
-                # "E1T1E1N1E1",
-                # "E1T1E1N1E1N1E1",
-                # "E1T1E1T1E1N1E1N1E1"
-              )
-            sessions = unique(sessions)
-            query.sessions = sessions
-            
-            count = 0
-            spec = NULL
-            fly.names = NULL
-            
-            for (ind in 1:nrow(metric.df.WT.R1)) {
-              # query.sessions = gsub("X",fly.info$Category[ind],sessions)
-              for (ind.session in 1:length(query.sessions)) {
-                input.file <- list.files(
-                  path = paste0("data/",
-                                metric.df.WT.R1$Experimenter[ind],
-                                "/CS/"),
-                  pattern = paste0(
-                    "ProcessedData_Fly",
-                    metric.df.WT.R1$Fly[ind],
-                    "_",
-                    query.sessions[ind.session],
-                    "_WT",
-                    ".csv"
-                  ),
-                  full.names = T
-                )
-                if (length(input.file) == 0) {
-                  all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]], list(NA))
-                  next
-                }
-                framerate = 50 #changed to 50 on 5/11/18
-                ofs = randomfly(input.file, framerate = framerate)
-                
-                all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]], list(ofs))
-              }
-            }
+            #For P values' multiple comparisons adjustment
             
