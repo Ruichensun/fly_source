@@ -1,16 +1,5 @@
 # source("plot_trend.R")
-
-
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "R"), ]
-
-
-##Demo
-# setwd(
-#   "D:/Behavioral_project/Behavior Experiment Data/Analysis/data/JD/CS"
-# )
-input_file = "ProcessedData_Fly226_E1T1_WT.csv"
+# Requires fly_pos_to_moving_status function from "plot_trend.R"
 
 chance_of_being_hit_by_laser = function(input_file){
   
@@ -64,95 +53,30 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
       ),
       full.names = T
     )
-    print(input.file)
-    if(length(input.file)==0){
+        if(length(input.file)==0){
      next() 
     }
-    print("abc")
-    print(chance_of_being_hit_by_laser(input.file))
     laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
-    # print(laser_chance)
-    # break
   }
+  
+  names(laser_chance) = c("Chances of being hit during walking", "Chances of being hit during pause ", "Laser ON duration percentage")
   return(laser_chance)
 }
 
-
-cumsums_total = list()
-for (i in 1:3) {
-  if (i == 1) {
-    fly.info.movement = fly.info.movement.T
-  }
-  
-  if (i == 2) {
-    fly.info.movement = fly.info.movement.R
-  }
-  
-  if (i == 3) {
-    fly.info.movement = fly.info.movement.N
-  }
-  
-  cumsums = get_cumsums_total(sessions[i], fly.info.movement)
-  cumsums_total = append(cumsums_total, list(cumsums))
-  
-}
-
-
-
-
-###Grouping flies by RTN
-
-
-
-# fly.info.movement.T = rbind(
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))$Fly%in%(metric.df.WT.T1[metric.df.WT.T1$Experimenter=="ES",]$Fly),],
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.T1[metric.df.WT.T1$Experimenter=="JD",]$Fly),]
-# )
-
+file_name_filter =
+  # "E1T1"
+  # "E1R1"
+  # "E1T1E1T1"
+  "E1R1E1R1"
 
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category ==
                                             "T"), ]
 
-
-# fly.info.movement.R = rbind(
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="ES",]$Fly),],
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="JD",]$Fly),]
-# )
-
 fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category == "R"), ]
 
-
-# fly.info.movement.N = fly.info.include[
-#   (fly.info.include$Genotype=="WT")&
-#     (fly.info.include$Category=="N")&
-#     (fly.info.include$experimenter=="ES"),
-#   ]
-#
-# fly.info.movement.N = rbind(fly.info.movement.N,
-#                             fly.info.include[
-#                               (fly.info.include$Genotype=="WT")&
-#                                 (fly.info.include$Category=="N")&
-#                                 (fly.info.include$experimenter=="JD"),
-#                               ]
-# )
-
-fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "N"), ]
-
-###Including All Relevant Sessions
-sessions <- c(# "E1T1",
-  # "E1R1",
-  # "E1N1"
-  
-  "E1T1E1T1",
-  "E1R1E1R1",
-  "E1N1E1N1")
-
-
-
+total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
 
