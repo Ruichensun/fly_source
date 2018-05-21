@@ -618,7 +618,7 @@ sessions <- c(
               width = 10
             )
             
-            
+            p_value_summary = matrix(nrow = 9, ncol = 0)
             for (metric.ind in 1:length(metrices)) {
               input.file = paste0("metrics/metric_", metric.ind, ".csv")
               if (!file.exists(input.file)) {
@@ -997,12 +997,50 @@ sessions <- c(
                       lty = 1)
               }
               
+              p_value = c(wilcox.test(input.y_1T,input.y_1N)$p.value,
+                          wilcox.test(input.y_1R,input.y_1N)$p.value,
+                          wilcox.test(input.y_1T,input.y_1R)$p.value,
+                          wilcox.test(input.y_2T,input.y_2N)$p.value,
+                          wilcox.test(input.y_2R,input.y_2N)$p.value,
+                          wilcox.test(input.y_2T,input.y_2R)$p.value,
+                          wilcox.test(input.y_3T,input.y_3N)$p.value,
+                          wilcox.test(input.y_3R,input.y_3N)$p.value,
+                          wilcox.test(input.y_3T,input.y_3R)$p.value
+              )
+              
+              p_value_summary = cbind(p_value_summary,p_value)
             }
             dev.off()
+            
+            colnames(p_value_summary) = c(1:31)
+            rownames(p_value_summary) = c("1T-1N",
+                                          "1R-1N",
+                                          "1T-1R",
+                                          "2T-2N",
+                                          "2R-2N",
+                                          "2T-2R",
+                                          "3T-3N",
+                                          "3R-3N",
+                                          "3T-3R"
+              
+            )
+            
+            write.table(
+              p_value_summary,
+              "P_VALUE_SUMMARY.csv",
+              col.names = T,
+              row.names = T,
+              quote = F,
+              sep = ","
+            )
             
             ###############################################
             
             #Also, convert "total laser exposure in seconds" into "total heat received".
             #Total heat received(THR) formula: THR = 9.125 (mW) * Total Laser Exposure in Seconds (unit: mille Joules)
             #For P values' multiple comparisons adjustment
+            p_values = c(
+              
+              
+            )
             
