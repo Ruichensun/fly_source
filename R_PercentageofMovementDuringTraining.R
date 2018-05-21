@@ -151,7 +151,7 @@ stripchart(
 
 text(
   x = (1:length(Chance_of_being_hit)) - 0.1,
-  y = 1.2,
+  y = 1.02,
   labels = c(
     length(Chance_of_being_hit[[1]]),
     length(Chance_of_being_hit[[2]]),
