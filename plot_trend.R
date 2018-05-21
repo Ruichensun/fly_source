@@ -1,7 +1,7 @@
 # Prepare data file names
 # data_dir = "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS"
 setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
-
+library(zoo)
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos 
 # Output: a vector of 0 and 1 of (length of input) - 1 
@@ -150,8 +150,8 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category ==
-                                            "T"), ]
+                                         (fly.info.include$Category =="T")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
 
 # fly.info.movement.R = rbind(
@@ -161,7 +161,8 @@ fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
 
 fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "R"), ]
+                                         (fly.info.include$Category == "R")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
 
 # fly.info.movement.N = fly.info.include[
@@ -180,16 +181,19 @@ fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
 
 fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "N"), ]
+                                         (fly.info.include$Category == "N")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
 ###Including All Relevant Sessions
-sessions <- c(# "E1T1",
-  # "E1R1",
-  # "E1N1"
+sessions <- c(
+  "E1T1",
+  "E1R1",
+  "E1N1"
   
-  "E1T1E1T1",
-  "E1R1E1R1",
-  "E1N1E1N1")
+  # "E1T1E1T1",
+  # "E1R1E1R1",
+  # "E1N1E1N1"
+  )
 
 
 
@@ -257,9 +261,6 @@ coordinates = list(
   append(cumsums_percentile_lower[[2]], rev(cumsums_percentile_higher[[2]])),
   append(cumsums_percentile_lower[[3]], rev(cumsums_percentile_higher[[3]]))
 )
-
-
-
 
 ######First Training Session Begins######
 
@@ -352,7 +353,6 @@ lines(
 
 dev.off()
 
-
 ## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
 pdf("First_Training_Session_Boxplot_CS.pdf",
     onefile = T,
@@ -395,7 +395,6 @@ stripchart(
   col =  "grey40"
 )
 
-
 text(
   x = (1:length(first_training)) - 0.1,
   y = 150,
@@ -417,9 +416,220 @@ lines(c(3.5, 3.5), c(-11, 351),
       lty = 1)
 
 dev.off()
+
+pdf("First_Training_Session_CS_allN.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "First"
+)
+
+#First: x 250, y 143
+#Second: x 350, y 200
+
+polygon(
+  index,
+  coordinates[[3]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0.5, 0.5, 0.5, 0.1)
+)
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+pdf("First_Training_Session_CS_allR.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "First"
+)
+
+#First: x 250, y 143
+#Second: x 350, y 200
+
+polygon(
+  index,
+  coordinates[[2]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0, 0, 0.8, 0.1)
+)
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+# T
+pdf("First_Training_Session_CS_allT.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "First"
+)
+
+#First: x 250, y 143
+#Second: x 350, y 200
+
+polygon(
+  index,
+  coordinates[[1]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0.8, 0, 0, 0.1)
+)
+
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+#Second training Rate Approximation
+pdf("First Training Session Learning Rate.pdf")
+cumsums_mean_diff = diff(cumsums_mean[[1]])
+cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
+cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
+lm.fit.orig <- lm(
+  cumsums_mean_diff_rm ~ forward_index,
+  data.frame(forward_index, cumsums_mean_diff_rm)
+)
+plot(
+  forward_index,
+  cumsums_mean_diff_rm,
+  type = 'l',
+  col = "red",
+  main = "First Training Session",
+  ylim = c(0, 1)
+)
+abline(
+  lm.fit.orig$coefficients[[1]],
+  lm.fit.orig$coefficients[[2]],
+  col = rgb(1, 0, 0, 0.5),
+  lty = 1,
+  lwd = 2
+)
+cumsums_mean_diff = diff(cumsums_mean[[2]])
+cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
+cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
+lm.fit.orig <- lm(
+  cumsums_mean_diff_rm ~ forward_index,
+  data.frame(forward_index, cumsums_mean_diff_rm)
+)
+lines(forward_index,
+      cumsums_mean_diff_rm,
+      type = 'l',
+      col = "blue")
+abline(
+  lm.fit.orig$coefficients[[1]],
+  lm.fit.orig$coefficients[[2]],
+  col = rgb(0, 0, 1, 0.5),
+  lty = 1,
+  lwd = 2
+)
+cumsums_mean_diff = diff(cumsums_mean[[3]])
+cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
+cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
+lm.fit.orig <- lm(
+  cumsums_mean_diff_rm ~ forward_index,
+  data.frame(forward_index, cumsums_mean_diff_rm)
+)
+lines(forward_index,
+      cumsums_mean_diff_rm,
+      type = 'l',
+      col = "black")
+abline(
+  lm.fit.orig$coefficients[[1]],
+  lm.fit.orig$coefficients[[2]],
+  col = rgb(0, 0, 0, 0.5),
+  lty = 1,
+  lwd = 2
+)
+dev.off()
 ######Second Training Session Ends######
 
-
+######First Training Session Ends######
 
 ######Second Training Session Begins######
 
@@ -510,10 +720,7 @@ lines(
   col = rgb(0.5, 0.5, 0.5, 0.5)
 )
 
-
-
 dev.off()
-
 
 ## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
 pdf(
@@ -559,7 +766,6 @@ stripchart(
   col =  "grey40"
 )
 
-
 text(
   x = (1:length(second_training)) - 0.1,
   y = 150,
@@ -581,36 +787,204 @@ lines(c(3.5, 3.5), c(-11, 351),
       lty = 1)
 
 dev.off()
-######Second Training Session Ends######
 
+pdf("Second_Training_Session_CS_allN.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "Second"
+)
 
+#First: x 250, y 143
+#Second: x 350, y 200
 
-##Smooth
-#Demo
-#Second training
-cumsums_mean_diff = diff(cumsums_mean[[3]])
+polygon(
+  index,
+  coordinates[[3]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0.5, 0.5, 0.5, 0.1)
+)
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+pdf("Second_Training_Session_CS_allR.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "Second"
+)
+
+#First: x 250, y 143
+#Second: x 350, y 200
+
+polygon(
+  index,
+  coordinates[[2]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0, 0, 0.8, 0.1)
+)
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+# T
+pdf("Second_Training_Session_CS_allT.pdf",
+    onefile = T,
+    width = 10)
+plot(
+  1,
+  type = "n",
+  xlab = "",
+  ylab = "",
+  xlim = c(0, 200),
+  ylim = c(0, 100),
+  main = "Second"
+)
+
+#First: x 250, y 143
+#Second: x 350, y 200
+
+polygon(
+  index,
+  coordinates[[1]] / framerate,
+  lty = 2,
+  lwd = 2,
+  border = NA,
+  col = rgb(0.8, 0, 0, 0.1)
+)
+
+lines(
+  forward_index,
+  cumsums_mean[[1]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.8, 0, 0, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[2]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.0, 0, 0.8, 0.5)
+)
+lines(
+  forward_index,
+  cumsums_mean[[3]] / framerate,
+  lty = 1,
+  lwd = 2,
+  col = rgb(0.5, 0.5, 0.5, 0.5)
+)
+
+dev.off()
+
+#Second training Rate Approximation
+pdf("Second Training Session Learning Rate.pdf")
+cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
-
 cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
-
-
 lm.fit.orig <- lm(
   cumsums_mean_diff_rm ~ forward_index,
   data.frame(forward_index, cumsums_mean_diff_rm)
 )
-
 plot(
   forward_index,
   cumsums_mean_diff_rm,
   type = 'l',
   col = "red",
-  ylim = c(0, 1.5)
+  main = "Second Training Session",
+  ylim = c(0, 1)
 )
-
+abline(
+  lm.fit.orig$coefficients[[1]],
+  lm.fit.orig$coefficients[[2]],
+  col = rgb(1, 0, 0, 0.5),
+  lty = 1,
+  lwd = 2
+)
+cumsums_mean_diff = diff(cumsums_mean[[2]])
+cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
+cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
+lm.fit.orig <- lm(
+  cumsums_mean_diff_rm ~ forward_index,
+  data.frame(forward_index, cumsums_mean_diff_rm)
+)
 lines(forward_index,
       cumsums_mean_diff_rm,
       type = 'l',
       col = "blue")
+abline(
+  lm.fit.orig$coefficients[[1]],
+  lm.fit.orig$coefficients[[2]],
+  col = rgb(0, 0, 1, 0.5),
+  lty = 1,
+  lwd = 2
+)
+cumsums_mean_diff = diff(cumsums_mean[[3]])
+cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
+cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
+lm.fit.orig <- lm(
+  cumsums_mean_diff_rm ~ forward_index,
+  data.frame(forward_index, cumsums_mean_diff_rm)
+)
 lines(forward_index,
       cumsums_mean_diff_rm,
       type = 'l',
@@ -618,61 +992,9 @@ lines(forward_index,
 abline(
   lm.fit.orig$coefficients[[1]],
   lm.fit.orig$coefficients[[2]],
-  col = rgb(0, 0.5, 0.5, 0.5),
+  col = rgb(0, 0, 0, 0.5),
   lty = 1,
   lwd = 2
 )
-
-
-
-
-# ## Linear fit
-lm.fit.orig <- lm(cumsums_mean[[1]] ~ forward_index,
-                  data.frame(forward_index, cumsums_mean[[1]]))
-# #lm.fit.orig = glm(value ~ age + gender + batch + session + fly, metric.df,family="gaussian")
-# lm.fit = summary(lm.fit.orig)
-# ## If the model does not fit the data well, just save the original data and continue
-#if(lm.fit$adj.r.squared < 0.6){
-# write.table(metric.df,
-#             paste0("metrics/metric_",ind,".csv"),
-#             row.names=F,quote=F,sep=",")
-# next
-# #}
-
-# coef = na.omit(lm.fit.orig$coefficients)
-#
-# model = model.matrix(value ~ genotype + experimenter + gender + session + batch + setup + fly + age, metric.df)
-# model = data.matrix(model[,names(coef)])
-#
-
-
-
-# Unused codes
-
-# file_name_filter = "E1R1"
-#"E1T1"
-#"E1T1E1T1"
-#"E1R1"
-#"E1R1E1R1"
-#"E1N1"
-#"E1N1E1N1"
-# fly.info.movement = fly.info.movement.R
-
-# plot(c(1:length(cumsums_total)),cumsums_total,)
-# cumsums_sd = apply(cumsums,1,sd)
-# cumsums_median = apply(cumsums,1,median)
-# file_name_filter = "E1T1E1T1"
-# cumsums = get_cumsums_total(file_name_filter, fly.info.movement.T)
-# cumsums_total = get_cumsums_total(file_name_filter,fly.info.movement.T)
-# # # Plot
-
-# i = 0
-# cols = c("indian red","red","blue","green","black","grey")
-
-
-# col.pool <- c("indianred3","light blue","grey",
-#               "indianred3","light blue","grey",
-#               "indianred3","light blue","grey",
-#               "indianred3","red","light blue","grey",
-#               "indianred3","red","light blue","grey")
-# lines(c(1:length(cumsums_total)),cumsums_total,col="blue")
+dev.off()
+######Second Training Session Ends######
