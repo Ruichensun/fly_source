@@ -71,7 +71,7 @@ query.sessions <- unique(query.sessions)
 ## read fly info
 ## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp
 fly.info = read.csv("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS_constant.csv",header=T,stringsAsFactors=F)
-fly.info$Age = as.Date(fly.info$Exp.date,format='%m/%d/%Y')  - as.Date(fly.info$Birth.date,format='%m/%d/%Y')
+# fly.info$Age = as.Date(fly.info$Exp.date,format='%m/%d/%Y')  - as.Date(fly.info$Birth.date,format='%m/%d/%Y')
 fly.info$Fly = as.numeric(fly.info$Fly)
 # fly.info$E1_loading_time <- sapply(strsplit(fly.info$E1_loading_time,"[:\ ]"),
 #                                    function(x) {
