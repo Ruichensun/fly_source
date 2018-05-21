@@ -200,3 +200,30 @@ for(ind in 1:nrow(fly.info)){
   }
 }
 save.image("all_ofs.Rdata")
+
+#Fly constant time controls
+all_ofs_constant = list()
+for(session in sessions){
+  all_ofs_constant = append(all_ofs_constant,list(c()))
+}
+fly.info = read.csv("data/fly_info_CS_constant_preprocessed.csv",header=T,stringsAsFactors=F)
+for(ind in 1:nrow(fly.info)){
+  query.sessions = gsub("X",fly.info$Category[ind],sessions)
+  for(ind.session in 1:length(query.sessions)){
+    input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS_constant/"),                             
+                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
+                                              "_",query.sessions[ind.session],
+                                              "_WT",
+                                              ".csv"),
+                             full.names=T
+    )
+    if(length(input.file) == 0){
+      all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(NA))
+      next
+    }   
+    framerate = fly.info$Framerate[ind]        
+    ofs = one_fly_statistics(input.file,framerate=framerate)
+    all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(ofs))
+  }
+}
+save.image("all_ofs_constant.Rdata")
