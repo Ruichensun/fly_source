@@ -145,7 +145,8 @@ stripchart(
   x = Chance_of_being_hit,
   method = "jitter",
   add = TRUE,
-  pch = 20,
+  pch = 15,
+  cex = 0.5,
   col =  "grey40"
 )
 
@@ -220,7 +221,8 @@ stripchart(
   x = yokedflybeinghit,
   method = "jitter",
   add = TRUE,
-  pch = 20,
+  pch = 15,
+  cex = 0.5,
   col =  "grey40"
 )
 
@@ -287,7 +289,8 @@ stripchart(
   x = trainedflybeinghit,
   method = "jitter",
   add = TRUE,
-  pch = 20,
+  pch = 15,
+  cex = 0.5,
   col =  "grey40"
 )
 
