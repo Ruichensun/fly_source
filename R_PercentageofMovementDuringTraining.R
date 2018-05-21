@@ -99,6 +99,90 @@ first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
 
 
+pdf("ChanceofBeingHit.pdf",
+    onefile = T,
+    width = 10)
+
+Chance_of_being_hit = list(
+  
+  first_training_session$`Chances of being hit during walking`,
+  first_yoked_session$`Chances of being hit during walking`,
+  
+  second_training_session$`Chances of being hit during walking`,
+  second_yoked_session$`Chances of being hit during walking`,
+  
+  first_training_session$`Chances of being hit during pause `,
+  first_yoked_session$`Chances of being hit during pause `,
+  
+  second_training_session$`Chances of being hit during pause `,
+  second_yoked_session$`Chances of being hit during pause `
+)
+
+col.pool <- c( "firebrick1",
+               "skyblue",
+               "firebrick1",
+               "skyblue",
+               "firebrick1",
+               "skyblue",
+               "firebrick1",
+               "skyblue"
+)
+
+boxplot(
+  Chance_of_being_hit,
+  ylim = c(0, 1),
+  outline = F,
+  notch = T,
+  lwd = 2,
+  ylab = "Chances of Being Punished",
+  xaxt = "n",
+  col = col.pool,
+  main = "Chance of being punished, during walking and pause",
+  ann = FALSE
+)
+stripchart(
+  vertical = TRUE,
+  x = Chance_of_being_hit,
+  method = "jitter",
+  add = TRUE,
+  pch = 20,
+  col =  "grey40"
+)
+
+text(
+  x = (1:length(Chance_of_being_hit)) - 0.1,
+  y = 1.2,
+  labels = c(
+    length(Chance_of_being_hit[[1]]),
+    length(Chance_of_being_hit[[2]]),
+    length(Chance_of_being_hit[[3]]),
+    length(Chance_of_being_hit[[4]]),
+    length(Chance_of_being_hit[[5]]),
+    length(Chance_of_being_hit[[6]]),
+    length(Chance_of_being_hit[[7]]),
+    length(Chance_of_being_hit[[8]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+lines(c(2.5, 2.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+lines(c(4.5, 4.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+lines(c(6.5, 6.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+
+dev.off()
+
+
+
+
+
 pdf("YokedFlyChanceOfBeingHit.pdf",
     onefile = T,
     width = 10)
