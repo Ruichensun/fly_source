@@ -14,8 +14,18 @@ chance_of_being_hit_by_laser = function(input_file){
     fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
     starting_point = 21
     fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
+
     fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
     fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
+
+    for (i in 1:length(fly.moving.status)){
+      if ((fly.position[i]<50)){
+        fly.moving.status[i] = 1
+      }
+      if ((fly.position[i]>717)){
+        fly.moving.status[i] = 1
+      }
+    }
     
     moving_status_summary = rle(fly.moving.status)
     
@@ -31,7 +41,10 @@ chance_of_being_hit_by_laser = function(input_file){
     chance_of_being_hit_by_laser_during_moving = moving_laser_ON/total_frame_moving
     chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
     laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
-    return(c(chance_of_being_hit_by_laser_during_moving,chance_of_being_hit_by_laser_during_pause,laser_on_percentage))
+  
+    return(c(chance_of_being_hit_by_laser_during_moving,
+             chance_of_being_hit_by_laser_during_pause,
+             laser_on_percentage))
   }
 }
 
