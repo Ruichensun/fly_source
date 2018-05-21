@@ -7,200 +7,152 @@ fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
 
 
 ##Demo
-setwd(
-  "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS"
-)
-input_file = "ProcessedData_Fly237_E1R1_WT.csv"
+# setwd(
+#   "D:/Behavioral_project/Behavior Experiment Data/Analysis/data/JD/CS"
+# )
+input_file = "ProcessedData_Fly226_E1T1_WT.csv"
 
-moving_status = function(input_file) {
+chance_of_being_hit_by_laser = function(input_file){
+  
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
-  
-  fly.position.raw = as.numeric(fly.file[[1]])
-  fly.laser.raw = as.numeric(fly.file[[2]])
-  
+  fly.position.raw = fly.file$fly_pos.framerate.50
+  fly.laser.raw = fly.file$laser_status
+  # If laser status not recorded, return NA
   if (is.na(fly.laser.raw[1]) == T) {
-    number_of_laser_clicks = NA
-    total_laser_ON = NA
+    return(c(NA,NA,NA))
+  }else{
+    fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
+    starting_point = 21
+    fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
+    fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
+    fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
     
-    ret = list(number_of_laser_clicks,
-               total_laser_ON #in seconds)
-               
-               names(ret) = c("Number of Laser Punishments",
-                              #1
-                              "Total Laser Exposure in Seconds" #2)
-                              
-  } else{
-    data_start = 20
+    moving_status_summary = rle(fly.moving.status)
     
-    fly_pos = fly.position.raw[data_start:length(fly.position.raw)]
-    fly_laser = fly.laser.raw[data_start:length(fly.laser.raw)]
+    total_frame_moving = sum(moving_status_summary$lengths[moving_status_summary$values!=0])
+    total_frame_pause = sum(moving_status_summary$lengths[moving_status_summary$values==0])
     
+    moving_laser_status.df = data.frame(fly.moving.status,fly.laser.status)
+    moving_status_during_laser_ON = rle(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])
     
+    moving_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==1])
+    pause_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==0])
     
-    for (i in 1:length(fly_pos)) {
-      if (fly_laser[i] != 0) {
-        
-      }
-    }
-    
-    
-    if (fly_laser[length(fly_laser)] > 0) {
-      # fly_laser[length(fly_laser)-1]=0
-      fly_laser[length(fly_laser)] = 0
-    }
-    
-    if (fly_laser[1] > 0) {
-      # fly_laser[length(fly_laser)-1]=0
-      fly_laser[1] = 0
-    }
-    for (i in 1:length(fly_laser)) {
-      if (fly_laser[i] > 0) {
-        fly_laser[i] = 1
-      }
-    }
-    laser_ON  = rle(fly_laser)$length[rle(fly_laser)$values == 1]
-    laser_OFF = rle(fly_laser)$length[rle(fly_laser)$values == 0]
-    
-    label_for_laser = rep(0, length(fly_laser))
-    for (i in 1:(length(label_for_laser) - 1)) {
-      if ((fly_laser[i] == 0) & (fly_laser[i + 1] > 0)) {
-        label_for_laser[i + 1] = 1
-      }
-      if ((fly_laser[i] > 0) & (fly_laser[i + 1] == 0)) {
-        label_for_laser[i + 1] = 2
-      }
-    }
-    
-    laser_df = data.frame()
-    
-    if (laser_OFF[1] == length(fly_laser)) {
-      laser_df = data.frame(0,
-                            0,
-                            0,
-                            (laser_OFF[1]) / framerate,
-                            (laser_OFF[1] - 0) / framerate,
-                            TRUE)
-      
-    } else{
-      laser_df = data.frame (
-        which(label_for_laser == 1),
-        which(label_for_laser == 2),
-        laser_ON / framerate,
-        (laser_OFF[2:length(laser_OFF)]) / framerate,
-        (laser_OFF[2:length(laser_OFF)] - laser_ON) / framerate,
-        laser_OFF[2:length(laser_OFF)] > 8 * 60 * framerate
-      )
-    }
-    
-    colnames(laser_df) = c(
-      "Laser_On",
-      "Laser_Off",
-      "ON_duration",
-      "OFF_duration",
-      "Difference",
-      "eight_min_OFF"
+    chance_of_being_hit_by_laser_during_moving = moving_laser_ON/total_frame_moving
+    chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
+    laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
+    return(c(chance_of_being_hit_by_laser_during_moving,chance_of_being_hit_by_laser_during_pause,laser_on_percentage))
+  }
+}
+
+###Calculating all the flies' chance of being hit by types (T/R)
+
+total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.movement) {
+  laser_chance = data.frame()
+  for (ind in 1:nrow(fly.info.movement)) {
+    input.file <- list.files(
+      path = paste0("data/",
+                    fly.info.movement$experimenter[ind],
+                    "/CS/"),
+      pattern = paste0(
+        "ProcessedData_Fly",
+        fly.info.movement$Fly[ind],
+        "_",
+        file_name_filter,
+        "_WT",
+        ".csv"
+      ),
+      full.names = T
     )
-    
-    number_of_laser_clicks = length(laser_df$Laser_On)
-    total_laser_ON = sum(laser_df$ON_duration)
-    
-    if (number_of_laser_clicks == 1) {
-      if (laser_df$ON_duration == 0) {
-        number_of_laser_clicks = 0
-      }
+    print(input.file)
+    if(length(input.file)==0){
+     next() 
     }
-    
-    
-    ## Return output
-    ret = list(number_of_laser_clicks,
-               total_laser_ON #in seconds)
-               
-               
-               
-               names(ret) = c("Number of Laser Punishments",
-                              #1
-                              "Total Laser Exposure in Seconds" #2)
-                              return(ret)
-                              
+    print("abc")
+    print(chance_of_being_hit_by_laser(input.file))
+    laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
+    # print(laser_chance)
+    # break
+  }
+  return(laser_chance)
+}
+
+
+cumsums_total = list()
+for (i in 1:3) {
+  if (i == 1) {
+    fly.info.movement = fly.info.movement.T
   }
   
-  speed_threshold = 28 # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% corresponds to 28.6
-  framerate = 50
-  ##Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than a speed threshold
-  fly_pos = a$fly_pos.framerate.50
-  starting_point = 21
-  fly_pos = fly_pos[starting_point:length(fly_pos)]
-  fly_moving_status = c(diff(c(a$fly_pos.framerate.50[starting_point - 1], fly_pos)))
-  fly_moving_status_discretized = replace(fly_moving_status, fly_moving_status >
-                                            28, 0)
-  fly_moving_status_discretized = replace(fly_moving_status_discretized,
-                                          fly_moving_status_discretized != 0,
-                                          1)
+  if (i == 2) {
+    fly.info.movement = fly.info.movement.R
+  }
   
-  # for (i in 2:(length(fly_moving_status_discretized)-1)){
-  #   if ((fly_moving_status_discretized[i-1]==0)&(fly_moving_status_discretized[i+1]==0)){
-  #     fly_moving_status_discretized[i]=0
-  #     }
-  #   if ((fly_moving_status_discretized[i-1]==1)&(fly_moving_status_discretized[i+1]==1)){
-  #   fly_moving_status_discretized[i]=1
-  #     }
-  #   }
-  # for troubleshooting
-  # a = replace(fly_moving_status_discretized,fly_moving_status_discretized==1,fly_moving_status)
-  # a = replace(a,a==0,100)
+  if (i == 3) {
+    fly.info.movement = fly.info.movement.N
+  }
   
-  ###Labeling the No-Move and Move moments
+  cumsums = get_cumsums_total(sessions[i], fly.info.movement)
+  cumsums_total = append(cumsums_total, list(cumsums))
   
-  # label_for_pause = rep(0, length(fly_moving_status_discretized))
-  #
-  # for (i in 2:length(label_for_pause)){
-  #   if ((fly_moving_status_discretized[i]==0)&(fly_moving_status_discretized[i-1]>0)){
-  #     label_for_pause[i] = 1
-  #   }
-  #   else if ((fly_moving_status_discretized[i]>0)&(fly_moving_status_discretized[i-1]==0)){
-  #     label_for_pause[i] = 2
-  #   }
-  #   # else if ((fly_moving_status_discretized[i]<0)&(fly_moving_status_discretized[i-1]==0)){
-  #   #   label_for_pause[i] = 3
-  #   # }
-  #   # else if ((fly_moving_status_discretized[i]==0)&(fly_moving_status_discretized[i-1]<0)){
-  #   #   label_for_pause[i] = 4
-  #   # }
-  # }
-  
-  # run_length_movement = rle(fly_moving_status_discretized)
-  # Moving = run_length_movement$lengths[run_length_movement$values==1]
-  # Pause = run_length_movement$lengths[run_length_movement$values==0]
-  # Movement_Difference = c()
-  #
-  ## length(rle(fly_moving_status_discretized)$length[rle(fly_moving_status_discretized)$values==0])
-  # run_length_movement$values[length(run_length_movement$values)]
-  #
-  # if ((run_length_movement$values[1]==0)&(run_length_movement$values[length(run_length_movement$values)]==1)){
-  #   Moving = c(0,Moving)
-  #   Pause = c(Pause,0)
-  #   Movement_Difference = Pause - Moving
-  # }
-  #
-  # if ((run_length_movement$values[1]==0)&(run_length_movement$values[length(run_length_movement$values)]==0)){
-  #   Moving = c(0,Moving)
-  #   Movement_Difference = Pause - Moving
-  # }
-  #
-  # if ((run_length_movement$values[1]==1)&(run_length_movement$values[length(run_length_movement$values)]==0)){
-  #   Movement_Difference = Pause - Moving
-  # }
-  #
-  # if ((run_length_movement$values[1]==1)&(run_length_movement$values[length(run_length_movement$values)]==1)){
-  #   Pause = c(Pause,0)
-  #   Movement_Difference = Pause - Moving
-  # }
-  #
-  # Movement_Difference = Movement_Difference/framerate
-  # normalized_x = (1:length(Movement_Difference))/length(Movement_Difference)
-  #
-  # Movement_Difference = list(normalized_x,Movement_Difference)
-  # names(Movement_Difference) = c("Pairs", "Duration")
-  # return(Movement_Difference)
-  return(cumsum(fly_moving_status_discretized))
 }
+
+
+
+
+###Grouping flies by RTN
+
+
+
+# fly.info.movement.T = rbind(
+#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))$Fly%in%(metric.df.WT.T1[metric.df.WT.T1$Experimenter=="ES",]$Fly),],
+#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.T1[metric.df.WT.T1$Experimenter=="JD",]$Fly),]
+# )
+
+
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category ==
+                                            "T"), ]
+
+
+# fly.info.movement.R = rbind(
+#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="ES",]$Fly),],
+#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="JD",]$Fly),]
+# )
+
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category == "R"), ]
+
+
+# fly.info.movement.N = fly.info.include[
+#   (fly.info.include$Genotype=="WT")&
+#     (fly.info.include$Category=="N")&
+#     (fly.info.include$experimenter=="ES"),
+#   ]
+#
+# fly.info.movement.N = rbind(fly.info.movement.N,
+#                             fly.info.include[
+#                               (fly.info.include$Genotype=="WT")&
+#                                 (fly.info.include$Category=="N")&
+#                                 (fly.info.include$experimenter=="JD"),
+#                               ]
+# )
+
+fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category == "N"), ]
+
+###Including All Relevant Sessions
+sessions <- c(# "E1T1",
+  # "E1R1",
+  # "E1N1"
+  
+  "E1T1E1T1",
+  "E1R1E1R1",
+  "E1N1E1N1")
+
+
+
+
