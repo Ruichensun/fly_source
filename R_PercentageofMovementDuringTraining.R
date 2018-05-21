@@ -1,5 +1,6 @@
 # source("plot_trend.R")
 # Requires fly_pos_to_moving_status function from "plot_trend.R"
+setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
 chance_of_being_hit_by_laser = function(input_file){
   
@@ -63,20 +64,158 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
   return(laser_chance)
 }
 
-file_name_filter =
+# file_name_filter =
   # "E1T1"
   # "E1R1"
   # "E1T1E1T1"
-  "E1R1E1R1"
+  # "E1R1E1R1"
 
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category ==
-                                            "T"), ]
+                                         (fly.info.include$Category =="T")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
 fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "R"), ]
+                                         (fly.info.include$Category == "R")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
-total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
+first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
+second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", fly.info.movement.R)
+first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1",fly.info.movement.T)
+second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
+
+
+pdf("YokedFlyChanceOfBeingHit.pdf",
+    onefile = T,
+    width = 10)
+yokedflybeinghit= list(
+  first_yoked_session$`Laser ON duration percentage`,
+  second_yoked_session$`Laser ON duration percentage`,
+  first_yoked_session$`Chances of being hit during walking`,
+  second_yoked_session$`Chances of being hit during walking`,
+  first_yoked_session$`Chances of being hit during pause `,
+  second_yoked_session$`Chances of being hit during pause `
+)
+
+col.pool <- c("dodgerblue1",
+              "dodgerblue1",
+              "light blue",
+              "light blue",
+              "skyblue",
+              "skyblue"
+              )
+
+boxplot(
+  yokedflybeinghit,
+  ylim = c(0, 1),
+  outline = F,
+  notch = T,
+  lwd = 2,
+  ylab = "Chances of Being Punished",
+  xaxt = "n",
+  col = col.pool,
+  main = "Yoked's total chance of being punished, during walking and pause",
+  ann = FALSE
+)
+stripchart(
+  vertical = TRUE,
+  x = yokedflybeinghit,
+  method = "jitter",
+  add = TRUE,
+  pch = 20,
+  col =  "grey40"
+)
+
+text(
+  x = (1:length(yokedflybeinghit)) - 0.1,
+  y = 1,
+  labels = c(
+    length(yokedflybeinghit[[1]]),
+    length(yokedflybeinghit[[2]]),
+    length(yokedflybeinghit[[3]]),
+    length(yokedflybeinghit[[4]]),
+    length(yokedflybeinghit[[5]]),
+    length(yokedflybeinghit[[6]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+lines(c(2.5, 2.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+lines(c(4.5, 4.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+
+dev.off()
+
+
+pdf("TrainedFlyChanceOfBeingHit.pdf",
+    onefile = T,
+    width = 10)
+trainedflybeinghit= list(
+  first_training_session$`Laser ON duration percentage`,
+  second_training_session$`Laser ON duration percentage`,
+  first_training_session$`Chances of being hit during walking`,
+  second_training_session$`Chances of being hit during walking`,
+  first_training_session$`Chances of being hit during pause `,
+  second_training_session$`Chances of being hit during pause `
+)
+
+col.pool <- c("brown1",
+              "brown1",
+              "firebrick1",
+              "firebrick1",
+              "indianred1",
+              "indianred"
+)
+
+boxplot(
+  trainedflybeinghit,
+  ylim = c(0, 1),
+  outline = F,
+  notch = T,
+  lwd = 2,
+  ylab = "Chances of Being Punished",
+  xaxt = "n",
+  col = col.pool,
+  main = "Trained's total chance of being punished, during walking and pause",
+  ann = FALSE
+)
+stripchart(
+  vertical = TRUE,
+  x = trainedflybeinghit,
+  method = "jitter",
+  add = TRUE,
+  pch = 20,
+  col =  "grey40"
+)
+
+text(
+  x = (1:length(trainedflybeinghit)) - 0.1,
+  y = 1,
+  labels = c(
+    length(trainedflybeinghit[[1]]),
+    length(trainedflybeinghit[[2]]),
+    length(trainedflybeinghit[[3]]),
+    length(trainedflybeinghit[[4]]),
+    length(trainedflybeinghit[[5]]),
+    length(trainedflybeinghit[[6]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+lines(c(2.5, 2.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+lines(c(4.5, 4.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+
+dev.off()
 
