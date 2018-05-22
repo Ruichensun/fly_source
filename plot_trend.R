@@ -997,3 +997,12 @@ abline(
 )
 dev.off()
 ######Second Training Session Ends######
+###P value###
+pvalue_during_training =  c(
+  wilcox.test(first_training[[4]],first_training[[5]])$p.value,
+  wilcox.test(first_training[[4]],first_training[[6]])$p.value,
+  wilcox.test(first_training[[5]],first_training[[6]])$p.value,
+  wilcox.test(second_training[[4]],second_training[[5]])$p.value,
+  wilcox.test(second_training[[4]],second_training[[6]])$p.value,
+  wilcox.test(second_training[[5]],second_training[[6]])$p.value
+)

@@ -118,31 +118,27 @@ Chance_of_being_hit = list(
   second_yoked_session$`Chances of being hit during pause `
 )
 
-col.pool <- c( "firebrick1",
-               "skyblue",
-               "firebrick1",
-               "skyblue",
-               "firebrick1",
-               "skyblue",
-               "firebrick1",
-               "skyblue"
-)
+col.pool <- c( "indianred3",
+               "light blue",
+               "indianred3",
+               "light blue"
+               )
 
 boxplot(
-  Chance_of_being_hit,
+  Chance_of_being_hit[1:4],
   ylim = c(0, 1),
   outline = F,
   notch = T,
   lwd = 2,
-  ylab = "Chances of Being Punished",
+  ylab = "Percentage",
   xaxt = "n",
   col = col.pool,
-  main = "Chance of being punished, during walking and pause",
+  main = "Chance of being punished during walking",
   ann = FALSE
 )
 stripchart(
   vertical = TRUE,
-  x = Chance_of_being_hit,
+  x = Chance_of_being_hit[1:4],
   method = "jitter",
   add = TRUE,
   pch = 15,
@@ -151,13 +147,63 @@ stripchart(
 )
 
 text(
-  x = (1:length(Chance_of_being_hit)) - 0.1,
+  x = (1:length(Chance_of_being_hit[1:4])) - 0.1,
   y = 1.02,
   labels = c(
     length(Chance_of_being_hit[[1]]),
     length(Chance_of_being_hit[[2]]),
     length(Chance_of_being_hit[[3]]),
-    length(Chance_of_being_hit[[4]]),
+    length(Chance_of_being_hit[[4]])
+    # length(Chance_of_being_hit[[5]]),
+    # length(Chance_of_being_hit[[6]]),
+    # length(Chance_of_being_hit[[7]]),
+    # length(Chance_of_being_hit[[8]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+lines(c(2.5, 2.5), c(-1, 1.2),
+      col = "light grey",
+      lty = 1)
+# lines(c(4.5, 4.5), c(-1, 1.2),
+#       col = "light grey",
+#       lty = 1)
+# lines(c(6.5, 6.5), c(-1, 1.2),
+#       col = "light grey",
+#       lty = 1)
+
+boxplot(
+  Chance_of_being_hit[5:8],
+  ylim = c(0, 1),
+  outline = F,
+  notch = T,
+  lwd = 2,
+  ylab = "Percentage",
+  xaxt = "n",
+  col = col.pool,
+  main = "Chance of being punished during pause",
+  ann = FALSE
+)
+stripchart(
+  vertical = TRUE,
+  x = Chance_of_being_hit[5:8],
+  method = "jitter",
+  add = TRUE,
+  pch = 15,
+  cex = 0.5,
+  col =  "grey40"
+)
+
+text(
+  x = (1:length(Chance_of_being_hit[5:8])) - 0.1,
+  y = 1.02,
+  labels = c(
+    # length(Chance_of_being_hit[[1]]),
+    # length(Chance_of_being_hit[[2]]),
+    # length(Chance_of_being_hit[[3]]),
+    # length(Chance_of_being_hit[[4]])
     length(Chance_of_being_hit[[5]]),
     length(Chance_of_being_hit[[6]]),
     length(Chance_of_being_hit[[7]]),
@@ -171,12 +217,13 @@ text(
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
-lines(c(4.5, 4.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
-lines(c(6.5, 6.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
+# lines(c(4.5, 4.5), c(-1, 1.2),
+#       col = "light grey",
+#       lty = 1)
+# lines(c(6.5, 6.5), c(-1, 1.2),
+#       col = "light grey",
+#       lty = 1)
+
 
 dev.off()
 
@@ -196,12 +243,12 @@ yokedflybeinghit= list(
   second_yoked_session$`Chances of being hit during pause `
 )
 
-col.pool <- c("dodgerblue1",
-              "dodgerblue1",
+col.pool <- c("light blue",
               "light blue",
               "light blue",
-              "skyblue",
-              "skyblue"
+              "light blue",
+              "light blue",
+              "light blue"
               )
 
 boxplot(
@@ -264,12 +311,12 @@ trainedflybeinghit= list(
   second_training_session$`Chances of being hit during pause `
 )
 
-col.pool <- c("brown1",
-              "brown1",
-              "firebrick1",
-              "firebrick1",
-              "indianred1",
-              "indianred"
+col.pool <- c("indianred3",
+              "indianred3",
+              "indianred3",
+              "indianred3",
+              "indianred3",
+              "indianred3"
 )
 
 boxplot(
