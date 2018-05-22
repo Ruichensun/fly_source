@@ -186,13 +186,13 @@ fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
 
 ###Including All Relevant Sessions
 sessions <- c(
-  "E1T1",
-  "E1R1",
-  "E1N1"
+  # "E1T1",
+  # "E1R1",
+  # "E1N1"
   
-  # "E1T1E1T1",
-  # "E1R1E1R1",
-  # "E1N1E1N1"
+  "E1T1E1T1",
+  "E1R1E1R1",
+  "E1N1E1N1"
   )
 
 
@@ -627,7 +627,6 @@ abline(
   lwd = 2
 )
 dev.off()
-######Second Training Session Ends######
 
 ######First Training Session Ends######
 
