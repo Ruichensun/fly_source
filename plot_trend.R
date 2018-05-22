@@ -103,13 +103,15 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
     input.file <- list.files(
       path = paste0("data/",
                     fly.info.movement$experimenter[ind],
-                    "/CS/"),
+                    # "/CS/"),
+                    "/Mutants/"),
       pattern = paste0(
         "ProcessedData_Fly",
         fly.info.movement$Fly[ind],
         "_",
         file_name_filter,
-        "_WT",
+        # "_WT",
+        "_",fly.info.movement$Genotype,
         ".csv"
       ),
       full.names = T
@@ -147,52 +149,41 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 #   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.T1[metric.df.WT.T1$Experimenter=="JD",]$Fly),]
 # )
 
+# 
+# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
+#                                           (fly.info.include$Genotype == "CS")) &
+#                                          (fly.info.include$Category =="T")&
+#                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category =="T")&
-                                         (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+                                         (fly.info.include$Category =="T"), ]
 
+# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
+#                                           (fly.info.include$Genotype == "CS")) &
+#                                          (fly.info.include$Category == "R")&
+#                                          (fly.info.include$experimenter!="SW"), ]
 
-# fly.info.movement.R = rbind(
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="ES"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="ES",]$Fly),],
-#   subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))[subset(fly.info.include,(fly.info.include$Genotype=="WT")&(fly.info.include$experimenter=="JD"))$Fly%in%(metric.df.WT.R1[metric.df.WT.R1$Experimenter=="JD",]$Fly),]
-# )
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+                                         (fly.info.include$Category == "R"), ]
 
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "R")&
-                                         (fly.info.include$experimenter!="SW"), ]
+# 
+# fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
+#                                           (fly.info.include$Genotype == "CS")) &
+#                                          (fly.info.include$Category == "N")&
+#                                          (fly.info.include$experimenter!="SW"), ]
 
-
-# fly.info.movement.N = fly.info.include[
-#   (fly.info.include$Genotype=="WT")&
-#     (fly.info.include$Category=="N")&
-#     (fly.info.include$experimenter=="ES"),
-#   ]
-#
-# fly.info.movement.N = rbind(fly.info.movement.N,
-#                             fly.info.include[
-#                               (fly.info.include$Genotype=="WT")&
-#                                 (fly.info.include$Category=="N")&
-#                                 (fly.info.include$experimenter=="JD"),
-#                               ]
-# )
-
-fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "N")&
-                                         (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+                                         (fly.info.include$Category == "N"), ]
 
 ###Including All Relevant Sessions
 sessions <- c(
-  # "E1T1",
-  # "E1R1",
-  # "E1N1"
-  
-  "E1T1E1T1",
-  "E1R1E1R1",
-  "E1N1E1N1"
+  "E1T1",
+  "E1R1",
+  "E1N1"
+
+  # "E1T1E1T1",
+  # "E1R1E1R1",
+  # "E1N1E1N1"
   )
 
 
@@ -266,7 +257,7 @@ coordinates = list(
 
 ##Plot learning trends
 
-pdf("First_Training_Session_CS_allTRN.pdf",
+pdf("First_Training_Session_R60D05_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -274,8 +265,8 @@ plot(
   type = "n",
   xlab = "",
   ylab = "",
-  xlim = c(0, 200),
-  ylim = c(0, 100),
+  xlim = c(0, 250),
+  ylim = c(0, 150),
   main = "First"
 )
 
@@ -354,7 +345,7 @@ lines(
 dev.off()
 
 ## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
-pdf("First_Training_Session_Boxplot_CS.pdf",
+pdf("First_Training_Session_Boxplot_R60D05.pdf",
     onefile = T,
     width = 10)
 first_training = list(
@@ -417,7 +408,7 @@ lines(c(3.5, 3.5), c(-11, 351),
 
 dev.off()
 
-pdf("First_Training_Session_CS_allN.pdf",
+pdf("First_Training_Session_R60D05_allN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -466,7 +457,7 @@ lines(
 
 dev.off()
 
-pdf("First_Training_Session_CS_allR.pdf",
+pdf("First_Training_Session_R60D05_allR.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -516,7 +507,7 @@ lines(
 dev.off()
 
 # T
-pdf("First_Training_Session_CS_allT.pdf",
+pdf("First_Training_Session_R60D05_allT.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -567,7 +558,7 @@ lines(
 dev.off()
 
 #Second training Rate Approximation
-pdf("First Training Session Learning Rate.pdf")
+pdf("First Training Session Learning RateR60D05.pdf")
 cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
 cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
@@ -634,7 +625,7 @@ dev.off()
 
 ##Plot learning trends
 
-pdf("Second_Training_Session_CS_allTRN.pdf",
+pdf("Second_Training_Session_R60D05_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -642,8 +633,8 @@ plot(
   type = "n",
   xlab = "",
   ylab = "",
-  xlim = c(0, 200),
-  ylim = c(0, 100),
+  xlim = c(0, 250),
+  ylim = c(0, 150),
   main = "Second"
 )
 
@@ -723,7 +714,7 @@ dev.off()
 
 ## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
 pdf(
-  "Second_Training_Session_Boxplot_CS_allTRN.pdf",
+  "Second_Training_Session_Boxplot_SUN2_allTRN.pdf",
   onefile = T,
   width = 10
 )
@@ -787,7 +778,7 @@ lines(c(3.5, 3.5), c(-11, 351),
 
 dev.off()
 
-pdf("Second_Training_Session_CS_allN.pdf",
+pdf("Second_Training_Session_SUN2_allN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -836,7 +827,7 @@ lines(
 
 dev.off()
 
-pdf("Second_Training_Session_CS_allR.pdf",
+pdf("Second_Training_Session_SUN2_allR.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -886,7 +877,7 @@ lines(
 dev.off()
 
 # T
-pdf("Second_Training_Session_CS_allT.pdf",
+pdf("Second_Training_Session_SUN2_allT.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -936,7 +927,7 @@ lines(
 dev.off()
 
 #Second training Rate Approximation
-pdf("Second Training Session Learning Rate.pdf")
+pdf("Second Training Session Learning RateR60D05.pdf")
 cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
 cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
