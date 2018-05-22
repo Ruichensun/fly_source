@@ -83,15 +83,23 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
   # "E1T1E1T1"
   # "E1R1E1R1"
 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
+# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
+#                                           (fly.info.include$Genotype == "CS")) &
+#                                          (fly.info.include$Category =="T")&
+#                                          (fly.info.include$experimenter!="SW"), ]
+# 
+# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
+#                                           (fly.info.include$Genotype == "CS")) &
+#                                          (fly.info.include$Category == "R")&
+#                                          (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
                                          (fly.info.include$Category =="T")&
                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
                                          (fly.info.include$Category == "R")&
                                          (fly.info.include$experimenter!="SW"), ]
+
 
 first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
 second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", fly.info.movement.R)
@@ -99,7 +107,7 @@ first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
 
 
-pdf("ChanceofBeingHit.pdf",
+pdf("ChanceofBeingHitSUN2.pdf",
     onefile = T,
     width = 10)
 
@@ -231,7 +239,7 @@ dev.off()
 
 
 
-pdf("YokedFlyChanceOfBeingHit.pdf",
+pdf("YokedFlyChanceOfBeingHitSUN2.pdf",
     onefile = T,
     width = 10)
 yokedflybeinghit= list(
@@ -299,7 +307,7 @@ lines(c(4.5, 4.5), c(-1, 1.2),
 dev.off()
 
 
-pdf("TrainedFlyChanceOfBeingHit.pdf",
+pdf("TrainedFlyChanceOfBeingHitSUN2.pdf",
     onefile = T,
     width = 10)
 trainedflybeinghit= list(

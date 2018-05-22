@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 # source("get_fly_speed_and_position.R")
+setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
 load("all_ofs.Rdata")
 
@@ -563,6 +564,7 @@ write.csv(
   row.names = F
 )
 
+fly.info.include = fly.info[ind.include,]
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
