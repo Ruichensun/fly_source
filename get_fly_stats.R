@@ -145,7 +145,7 @@ for(session in sessions){
 ## read fly info
 ## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp,Framerate
 fly.info = read.csv("data/fly_info_CS_preprocessed.csv",header=T,stringsAsFactors=F)
-fly.info.trained = fly.info[fly.info$Category=="T",]
+# fly.info.trained = fly.info[fly.info$Category=="T",]
 
 for(ind in 1:nrow(fly.info)){
     # query.sessions = gsub("X",fly.info$Category[ind],sessions)
