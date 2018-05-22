@@ -509,8 +509,105 @@ sessions <- c(
             metric.df.WT.R1 = subset(metric.df.WT.R1, metric.df.WT.R1$Experimenter !=
                                        "RS")
             
-            ################################################
+            #WT flies
             query.genotype <- c("WT","CS")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                                      (fly.info.include$Genotype == "CS")) &
+                                                     (fly.info.include$experimenter!="SW"), ]$Fly
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                            (fly.info.include$Genotype == "CS")) &
+                                           (fly.info.include$experimenter!="SW"), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "WT") |
+                                  (fly.info.include$Genotype == "CS")) &
+                                 (fly.info.include$experimenter!="SW"), ],
+              "fly_info_include_WT.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #SUN1 flies
+            query.genotype <- c("SUN1")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                                           (fly.info.include$experimenter!="SW"), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                                                    (fly.info.include$experimenter!="SW"), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                                 (fly.info.include$experimenter!="SW"), ],
+              "fly_info_include_SUN1.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #SUN2 flies
+            query.genotype <- c("SUN2")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+                                           (fly.info.include$experimenter!="SW"), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+                                                    (fly.info.include$experimenter!="SW"), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+                                 (fly.info.include$experimenter!="SW"), ],
+              "fly_info_include_SUN2.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #SUN3 flies
+            query.genotype <- c("SUN2")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "SUN3")) &
+                                           (fly.info.include$experimenter!="SW"), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "SUN3")) &
+                                                    (fly.info.include$experimenter!="SW"), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "SUN3")) &
+                                 (fly.info.include$experimenter!="SW"), ],
+              "fly_info_include_SUN3.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            
+            #R60D05 flies
+            query.genotype <- c("R60 D05 x JU30","R60D05 X JU30","R60D05 X JU30")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")),]$Fly
+                                           # (fly.info.include$experimenter!="SW"), ]
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")),]$experimenter
+                                                    # (fly.info.include$experimenter!="SW"), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")),],
+              "fly_info_include_R60D05.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #JG17
+            query.genotype <- c("JG17 x JU30")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "JG17 x JU30")),]$Fly
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "JG17 x JU30")),]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "JG17 x JU30")),],
+              "fly_info_include_JG17.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
             
             # query.fly = c(metric.df.WT.AllT1$Fly)
             # query.experimenter = c(metric.df.WT.AllT1$Experimenter)
@@ -524,26 +621,6 @@ sessions <- c(
             # query.experimenter <- c(as.character(shorter_heat_allT1$Experimenter), as.character(shorter_heat_allR1$Experimenter))
             # query.fly <- c(metric.df.WT.T1$Fly,metric.df.WT.R1$Fly)
             # query.experimenter<-c(as.character(metric.df.WT.T1$Experimenter), as.character(metric.df.WT.R1$Experimenter))
-            query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                                      (fly.info.include$Genotype == "CS")) &
-                                                     (fly.info.include$experimenter!="SW"), ]$Fly
-            
-            
-            query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                            (fly.info.include$Genotype == "CS")) &
-                                           (fly.info.include$experimenter!="SW"), ]$experimenter
-            
-            
-            write.table(
-              fly.info.include[((fly.info.include$Genotype == "WT") |
-                                  (fly.info.include$Genotype == "CS")) &
-                                 (fly.info.include$experimenter!="SW"), ],
-              "fly_info_include_WT.csv",
-              col.names = T,
-              row.names = F,
-              quote = F,
-              sep = ","
-            )
 
             ## Read metric names
             metrices <- read.table("metrics/list_metrices.csv",
@@ -613,7 +690,7 @@ sessions <- c(
             #
             
             pdf(
-              "fly_metric_allmetricdf_CS_allflies_Filter1_052118.pdf",
+              "fly_metric_allmetricdf_SUN3_allflies_Filter1_052118.pdf",
               onefile = T,
               width = 10
             )
@@ -940,8 +1017,10 @@ sessions <- c(
                 notch = T,
                 lwd = 2,
                 ylab = metrices[metric.ind],
-                col = col.pool,
-                main = paste0(query.genotype, "-", metrices[metric.ind], "\n")
+                xlab = "",
+                xaxt = "n",
+                col = col.pool
+                # main = paste0(query.genotype, "-", metrices[metric.ind], "\n")
               )
               stripchart(
                 Value ~ Sessions,
@@ -1027,7 +1106,7 @@ sessions <- c(
             
             write.table(
               p_value_summary,
-              "P_VALUE_SUMMARY.csv",
+              "P_VALUE_SUMMARY_SUN3.csv",
               col.names = T,
               row.names = T,
               quote = F,
@@ -1038,9 +1117,4 @@ sessions <- c(
             
             #Also, convert "total laser exposure in seconds" into "total heat received".
             #Total heat received(THR) formula: THR = 9.125 (mW) * Total Laser Exposure in Seconds (unit: mille Joules)
-            #For P values' multiple comparisons adjustment
-            p_values = c(
-              
-              
-            )
             
