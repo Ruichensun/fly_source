@@ -563,7 +563,7 @@ sessions <- c(
             )
             
             #SUN3 flies
-            query.genotype <- c("SUN2")
+            query.genotype <- c("SUN3")
             query.fly = fly.info.include[((fly.info.include$Genotype == "SUN3")) &
                                            (fly.info.include$experimenter!="SW"), ]$Fly
             
@@ -573,6 +573,48 @@ sessions <- c(
               fly.info.include[((fly.info.include$Genotype == "SUN3")) &
                                  (fly.info.include$experimenter!="SW"), ],
               "fly_info_include_SUN3.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #"MB607B x JU30" flies
+            query.genotype <- c("MB607B x JU30")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "MB607B x JU30")), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB607B x JU30")), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "MB607B x JU30")), ],
+              "fly_info_include_607B.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #"MB009B x JU30" flies
+            query.genotype <- c("MB009B x JU30")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "MB009B x JU30")), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB009B x JU30")), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "MB009B x JU30")), ],
+              "fly_info_include_009B.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #"MB131B x JU30" flies
+            query.genotype <- c("MB131B x JU30")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "MB131B x JU30")), ]$Fly
+            
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB131B x JU30")), ]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "MB131B x JU30")), ],
+              "fly_info_include_131B.csv",
               col.names = T,
               row.names = F,
               quote = F,
@@ -690,7 +732,7 @@ sessions <- c(
             #
             
             pdf(
-              "fly_metric_allmetricdf_SUN3_allflies_Filter1_052118.pdf",
+              "fly_metric_allmetricdf_MB131B_allflies_Filter1_052118.pdf",
               onefile = T,
               width = 10
             )
@@ -1106,7 +1148,7 @@ sessions <- c(
             
             write.table(
               p_value_summary,
-              "P_VALUE_SUMMARY_SUN3.csv",
+              "P_VALUE_SUMMARY_MB131B.csv",
               col.names = T,
               row.names = T,
               quote = F,

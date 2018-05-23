@@ -155,7 +155,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 #                                          (fly.info.include$Category =="T")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
                                          (fly.info.include$Category =="T"), ]
 
 # fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
@@ -163,7 +163,7 @@ fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "R60 D05 x
 #                                          (fly.info.include$Category == "R")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
                                          (fly.info.include$Category == "R"), ]
 
 # 
@@ -172,7 +172,7 @@ fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "R60 D05 x
 #                                          (fly.info.include$Category == "N")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "R60 D05 x JU30")|(fly.info.include$Genotype == "R60D05 X JU30")|(fly.info.include$Genotype =="R60D05 X JU30")) &
+fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
                                          (fly.info.include$Category == "N"), ]
 
 ###Including All Relevant Sessions
@@ -185,9 +185,6 @@ sessions <- c(
   # "E1R1E1R1",
   # "E1N1E1N1"
   )
-
-
-
 
 cumsums_total = list()
 for (i in 1:3) {
@@ -257,7 +254,7 @@ coordinates = list(
 
 ##Plot learning trends
 
-pdf("First_Training_Session_R60D05_allTRN.pdf",
+pdf("First_Training_Session_MB131B_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -558,7 +555,7 @@ lines(
 dev.off()
 
 #Second training Rate Approximation
-pdf("First Training Session Learning RateR60D05.pdf")
+pdf("First Training Session Learning RateMB131B.pdf")
 cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
 cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
@@ -625,7 +622,7 @@ dev.off()
 
 ##Plot learning trends
 
-pdf("Second_Training_Session_R60D05_allTRN.pdf",
+pdf("Second_Training_Session_MB131B_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -927,7 +924,7 @@ lines(
 dev.off()
 
 #Second training Rate Approximation
-pdf("Second Training Session Learning RateR60D05.pdf")
+pdf("Second Training Session Learning RateMB131B.pdf")
 cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
 cumsums_mean_diff_rm = rollmean(cumsums_mean_diff, 50, fill = NA)
