@@ -1,23 +1,101 @@
 ## Parameters
 
-setwd("E:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter")
-input_files <- c(list.files()[1],
-                 list.files()[2],
-                 list.files()[3],
-                 list.files()[4],
-                 list.files()[5]);
+setwd("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter")
+# input_files <- c(list.files()[1],
+#                  list.files()[2],
+#                  list.files()[3],
+#                  list.files()[4],
+#                  list.files()[5]);
+# 
+# experimenter <- c("JE",
+#                 "Jenny",
+#                 "JG",
+#                 "LM",
+#                 "Ruichen"
+#                 );
 
-experimenter <- c("JE",
-                "Jenny",
-                "JG",
-                "LM",
-                "Ruichen"
+########################Mutants
+
+input_files <- c("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/Mutants/CSV/Behavioral Experiments - Mutants_JD.csv",
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/SW/Mutants/CSV/Behavioral Experiments - Mutants_SW.csv",
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JG/Mutants/CSV/Behavioral Experiments - Mutants_JG.csv",
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/ES/Mutants/CSV/Behavioral Experiments - Mutants_ES.csv")
+
+experimenter <- c("JD",
+                  "SW",
+                  "JG",
+                  "ES"
+          );
+
+output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_mutants.csv"
+
+############################CS
+
+input_files<-c(
+              # "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JG/CS/CSV/Behavioral Experiments - CS_JG.csv",
+              "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/ES/CS/CSV/Behavioral Experiments - CS_ES.csv",
+              "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/RS/CS/CSV/Behavioral Experiments - CS_RS.csv",
+              "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/CS/CSV/Behavioral Experiments - CS_JD.csv",
+              "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/SW/CS/CSV/Behavioral Experiments - CS_SW.csv"
+              )
+experimenter <- c(
+  # "JG",
+  "ES",
+  "RS",
+  "JD",
+  "SW"
                 );
+output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS.csv"
 
-output_file = "CS_validation_combined.csv"
+###############################CS - Controls
 
 
-## End of parameters
+input_files <- c("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/CS_controls/CSV/Behavioral Experiments - CS_controls1_JD.csv",
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/CS_controls/CSV/Behavioral Experiments - CS_controls2_JD.csv"
+                 )
+
+experimenter <- c("JD",
+                  "JD"
+                  # "SW",
+                  # "JG",
+                  # "ES"
+);
+
+output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS_controls.csv"
+
+
+
+#########################Response
+
+input_files<-c(
+  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/Response/CSV/Behavioral Experiments - Response_JD.csv",
+  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/ES/Response/CSV/Behavioral Experiments - Response_ES.csv"
+)
+experimenter <- c(
+  "JD",
+  "ES"
+);
+output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_response.csv"
+
+
+#########################Constant_time
+
+input_files<-c(
+  # "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/Response/CSV/Behavioral Experiments - Response_JD.csv",
+  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/CS_constant/CSV/Behavioral Experiments - CS_constant_JD.csv"
+)
+experimenter <- c(
+  # "JD",
+  "JD"
+);
+output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS_constant.csv"
+
+
+
+
+
+
+#########################End of parameters
 
 all_info = NULL;
 for(i in 1:length(input_files)){
