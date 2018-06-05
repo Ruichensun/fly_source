@@ -155,7 +155,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 #                                          (fly.info.include$Category =="T")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
+fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "SUN2") &
                                          (fly.info.include$Category =="T"), ]
 
 # fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
@@ -163,7 +163,7 @@ fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "MB131B x J
 #                                          (fly.info.include$Category == "R")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
+fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "SUN2") &
                                          (fly.info.include$Category == "R"), ]
 
 # 
@@ -172,18 +172,18 @@ fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "MB131B x J
 #                                          (fly.info.include$Category == "N")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "MB131B x JU30") &
+fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "SUN2") &
                                          (fly.info.include$Category == "N"), ]
 
 ###Including All Relevant Sessions
 sessions <- c(
-  "E1T1",
-  "E1R1",
-  "E1N1"
+  # "E1T1",
+  # "E1R1",
+  # "E1N1"
 
-  # "E1T1E1T1",
-  # "E1R1E1R1",
-  # "E1N1E1N1"
+  "E1T1E1T1",
+  "E1R1E1R1",
+  "E1N1E1N1"
   )
 
 cumsums_total = list()
