@@ -651,6 +651,33 @@ sessions <- c(
               sep = ","
             )
             
+            
+            #R60 D05 x PKCi 
+            query.genotype <- c("R60 D05 x PKCi")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "R60 D05 x PKCi")),]$Fly
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "R60 D05 x PKCi")),]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "R60 D05 x PKCi")),],
+              "fly_info_include_R60D05xPKCi.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
+            #JG17 x PKCi
+            query.genotype <- c("JG17 x PKCi")
+            query.fly = fly.info.include[((fly.info.include$Genotype == "JG17 x PKCi")),]$Fly
+            query.experimenter = fly.info.include[((fly.info.include$Genotype == "JG17 x PKCi")),]$experimenter
+            write.table(
+              fly.info.include[((fly.info.include$Genotype == "JG17 x PKCi")),],
+              "fly_info_include_JG17xPKCi.csv",
+              col.names = T,
+              row.names = F,
+              quote = F,
+              sep = ","
+            )
+            
             # query.fly = c(metric.df.WT.AllT1$Fly)
             # query.experimenter = c(metric.df.WT.AllT1$Experimenter)
             # query.fly <- c(longer_heat_1stT1$Fly,longer_heat_1stR1$Fly)
@@ -732,7 +759,7 @@ sessions <- c(
             #
             
             pdf(
-              "fly_metric_allmetricdf_MB131B_allflies_Filter1_052118.pdf",
+              "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_061518.pdf",
               onefile = T,
               width = 10
             )
@@ -1148,7 +1175,7 @@ sessions <- c(
             
             write.table(
               p_value_summary,
-              "P_VALUE_SUMMARY_MB131B.csv",
+              "P_VALUE_SUMMARY_JG17xPKCi.csv",
               col.names = T,
               row.names = T,
               quote = F,

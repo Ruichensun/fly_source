@@ -155,7 +155,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 #                                          (fly.info.include$Category =="T")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "SUN2") &
+fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
                                          (fly.info.include$Category =="T"), ]
 
 # fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
@@ -163,7 +163,7 @@ fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "SUN2") &
 #                                          (fly.info.include$Category == "R")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "SUN2") &
+fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
                                          (fly.info.include$Category == "R"), ]
 
 # 
@@ -172,7 +172,7 @@ fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "SUN2") &
 #                                          (fly.info.include$Category == "N")&
 #                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "SUN2") &
+fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
                                          (fly.info.include$Category == "N"), ]
 
 ###Including All Relevant Sessions
@@ -254,7 +254,7 @@ coordinates = list(
 
 ##Plot learning trends
 
-pdf("First_Training_Session_MB131B_allTRN.pdf",
+pdf("First_Training_Session_R60D05XPKCi_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -554,7 +554,7 @@ lines(
 
 dev.off()
 
-#Second training Rate Approximation
+#First training Rate Approximation
 pdf("First Training Session Learning RateMB131B.pdf")
 cumsums_mean_diff = diff(cumsums_mean[[1]])
 cumsums_mean_diff = c(cumsums_mean_diff, cumsums_mean_diff[length(cumsums_mean_diff)])
@@ -622,7 +622,7 @@ dev.off()
 
 ##Plot learning trends
 
-pdf("Second_Training_Session_MB131B_allTRN.pdf",
+pdf("Second_Training_Session_R60D05_allTRN.pdf",
     onefile = T,
     width = 10)
 plot(
