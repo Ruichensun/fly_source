@@ -83,22 +83,22 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
   # "E1T1E1T1"
   # "E1R1E1R1"
 
-# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
-#                                           (fly.info.include$Genotype == "CS")) &
-#                                          (fly.info.include$Category =="T")&
-#                                          (fly.info.include$experimenter!="SW"), ]
-# 
-# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-#                                           (fly.info.include$Genotype == "CS")) &
-#                                          (fly.info.include$Category == "R")&
-#                                          (fly.info.include$experimenter!="SW"), ]
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category =="T")&
                                          (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category == "R")&
                                          (fly.info.include$experimenter!="SW"), ]
+# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+#                                          (fly.info.include$Category =="T")&
+#                                          (fly.info.include$experimenter!="SW"), ]
+# 
+# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
+#                                          (fly.info.include$Category == "R")&
+#                                          (fly.info.include$experimenter!="SW"), ]
 
 
 first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
@@ -107,28 +107,31 @@ first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
 
 
-pdf("ChanceofBeingHitSUN2.pdf",
+pdf("ChanceofBeingHitCS_063018.pdf",
     onefile = T,
     width = 10)
 
 Chance_of_being_hit = list(
   
   first_training_session$`Chances of being hit during walking`,
-  first_yoked_session$`Chances of being hit during walking`,
-  
-  second_training_session$`Chances of being hit during walking`,
-  second_yoked_session$`Chances of being hit during walking`,
-  
   first_training_session$`Chances of being hit during pause `,
+  
+  first_yoked_session$`Chances of being hit during walking`,
   first_yoked_session$`Chances of being hit during pause `,
   
+  second_training_session$`Chances of being hit during walking`,
   second_training_session$`Chances of being hit during pause `,
+  
+  second_yoked_session$`Chances of being hit during walking`,
   second_yoked_session$`Chances of being hit during pause `
 )
 
+
+
+
 col.pool <- c( "indianred3",
-               "light blue",
                "indianred3",
+               "light blue",
                "light blue"
                )
 
@@ -141,7 +144,7 @@ boxplot(
   ylab = "Percentage",
   xaxt = "n",
   col = col.pool,
-  main = "Chance of being punished during walking",
+  main = "Chance of being punished in first session",
   ann = FALSE
 )
 stripchart(
@@ -172,6 +175,24 @@ text(
   adj = 0
 )
 
+text(
+  x = (1:length(Chance_of_being_hit[1:4])) - 0.3,
+  y = -0.1,
+  labels = c(
+    "T - Walking",
+    "T - Pause",
+    "R - Walking",
+    "R - Pause"
+    # length(Chance_of_being_hit[[5]]),
+    # length(Chance_of_being_hit[[6]]),
+    # length(Chance_of_being_hit[[7]]),
+    # length(Chance_of_being_hit[[8]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
@@ -191,7 +212,7 @@ boxplot(
   ylab = "Percentage",
   xaxt = "n",
   col = col.pool,
-  main = "Chance of being punished during pause",
+  main = "Chance of being punished in second session",
   ann = FALSE
 )
 stripchart(
@@ -222,6 +243,24 @@ text(
   adj = 0
 )
 
+text(
+  x = (1:length(Chance_of_being_hit[5:8])) - 0.3,
+  y = -0.1,
+  labels = c(
+    "T - Walking",
+    "T - Pause",
+    "R - Walking",
+    "R - Pause"
+    # length(Chance_of_being_hit[[5]]),
+    # length(Chance_of_being_hit[[6]]),
+    # length(Chance_of_being_hit[[7]]),
+    # length(Chance_of_being_hit[[8]])
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
@@ -235,7 +274,11 @@ lines(c(2.5, 2.5), c(-1, 1.2),
 
 dev.off()
 
-
+p_being_hit = c(wilcox.test(Chance_of_being_hit[[1]],Chance_of_being_hit[[2]])$p.value,
+                wilcox.test(Chance_of_being_hit[[3]],Chance_of_being_hit[[4]])$p.value,
+                wilcox.test(Chance_of_being_hit[[5]],Chance_of_being_hit[[6]])$p.value,
+                wilcox.test(Chance_of_being_hit[[7]],Chance_of_being_hit[[8]])$p.value
+)
 
 
 

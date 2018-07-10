@@ -103,15 +103,15 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
     input.file <- list.files(
       path = paste0("data/",
                     fly.info.movement$experimenter[ind],
-                    # "/CS/"),
-                    "/Mutants/"),
+                    "/CS/"),
+                    # "/Mutants/"),
       pattern = paste0(
         "ProcessedData_Fly",
         fly.info.movement$Fly[ind],
         "_",
         file_name_filter,
-        # "_WT",
-        "_",fly.info.movement$Genotype,
+        "_WT",
+        # "_",fly.info.movement$Genotype,
         ".csv"
       ),
       full.names = T
@@ -150,30 +150,30 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 # )
 
 # 
-# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
-#                                           (fly.info.include$Genotype == "CS")) &
-#                                          (fly.info.include$Category =="T")&
-#                                          (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category =="T")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
-                                         (fly.info.include$Category =="T"), ]
+# fly.info.movement.T = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
+#                                          (fly.info.include$Category =="T"), ]
 
-# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-#                                           (fly.info.include$Genotype == "CS")) &
-#                                          (fly.info.include$Category == "R")&
-#                                          (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category == "R")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
-                                         (fly.info.include$Category == "R"), ]
+# fly.info.movement.R = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
+#                                          (fly.info.include$Category == "R"), ]
 
 # 
-# fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
-#                                           (fly.info.include$Genotype == "CS")) &
-#                                          (fly.info.include$Category == "N")&
-#                                          (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                          (fly.info.include$Genotype == "CS")) &
+                                         (fly.info.include$Category == "N")&
+                                         (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
-                                         (fly.info.include$Category == "N"), ]
+# fly.info.movement.N = fly.info.include[(fly.info.include$Genotype == "R60 D05 x PKCi") &
+#                                          (fly.info.include$Category == "N"), ]
 
 ###Including All Relevant Sessions
 sessions <- c(
@@ -225,15 +225,15 @@ cumsums_median = list(
 
 
 cumsums_percentile_lower = list(
-  apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.16)),
-  apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.16)),
-  apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.16))
+  apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
+  apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
+  apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.25))#0.16
 )
 
 cumsums_percentile_higher = list(
-  apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.84)),
-  apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.84)),
-  apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.84))
+  apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
+  apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
+  apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.75))#0.84
 )
 
 
@@ -254,7 +254,7 @@ coordinates = list(
 
 ##Plot learning trends
 
-pdf("First_Training_Session_R60D05XPKCi_allTRN.pdf",
+pdf("Second_Training_Session_CS_070118.pdf",
     onefile = T,
     width = 10)
 plot(
@@ -262,9 +262,9 @@ plot(
   type = "n",
   xlab = "",
   ylab = "",
-  xlim = c(0, 250),
-  ylim = c(0, 150),
-  main = "First"
+  xlim = c(0, 200),
+  ylim = c(0, 100)
+  # main = "First"
 )
 
 #First: x 250, y 143
@@ -317,41 +317,52 @@ lines(
   col = rgb(0.5, 0.5, 0.5, 0.5)
 )
 
-lines(
-  forward_index,
-  cumsums_median[[1]] / framerate,
-  lty = 1,
-  lwd = 2,
-  col = rgb(0.8, 0, 0, 0.5)
-)
-lines(
-  forward_index,
-  cumsums_median[[2]] / framerate,
-  lty = 1,
-  lwd = 2,
-  col = rgb(0.0, 0, 0.8, 0.5)
-)
-lines(
-  forward_index,
-  cumsums_median[[3]] / framerate,
-  lty = 1,
-  lwd = 2,
-  col = rgb(0.5, 0.5, 0.5, 0.5)
-)
+# lines(
+#   forward_index,
+#   cumsums_median[[1]] / framerate,
+#   lty = 1,
+#   lwd = 2,
+#   col = rgb(0.8, 0, 0, 0.5)
+# )
+# lines(
+#   forward_index,
+#   cumsums_median[[2]] / framerate,
+#   lty = 1,
+#   lwd = 2,
+#   col = rgb(0.0, 0, 0.8, 0.5)
+# )
+# lines(
+#   forward_index,
+#   cumsums_median[[3]] / framerate,
+#   lty = 1,
+#   lwd = 2,
+#   col = rgb(0.5, 0.5, 0.5, 0.5)
+# )
 
 dev.off()
 
+trained_2 = cumsums_total[[1]][min_sequence_length, ] / framerate #this needs to be iteratively changed
+yoked_2   = cumsums_total[[2]][min_sequence_length, ] / framerate #this needs to be iteratively changed
+blank_2   = cumsums_total[[3]][min_sequence_length, ] / framerate #this needs to be iteratively changed
+
+
 ## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
-pdf("First_Training_Session_Boxplot_R60D05.pdf",
+pdf("Training_Sessions_Boxplot_CS_070118.pdf",
     onefile = T,
     width = 10)
 first_training = list(
-  cumsums_total[[1]][1, ] / framerate,
-  cumsums_total[[2]][1, ] / framerate,
-  cumsums_total[[3]][1, ] / framerate,
-  cumsums_total[[1]][min_sequence_length, ] / framerate,
-  cumsums_total[[2]][min_sequence_length, ] / framerate,
-  cumsums_total[[3]][min_sequence_length, ] / framerate
+  # cumsums_total[[1]][1, ] / framerate,
+  # cumsums_total[[2]][1, ] / framerate,
+  # cumsums_total[[3]][1, ] / framerate,
+  # cumsums_total[[1]][min_sequence_length, ] / framerate,
+  # cumsums_total[[2]][min_sequence_length, ] / framerate,
+  # cumsums_total[[3]][min_sequence_length, ] / framerate
+  trained_1,
+  yoked_1,
+  blank_1,
+  trained_2,
+  yoked_2,
+  blank_2
 )
 
 col.pool <- c("indianred3",
@@ -371,7 +382,7 @@ boxplot(
   ylab = "Cumulated Activity",
   xaxt = "n",
   col = col.pool,
-  main = "First Training",
+  # main = "First Training",
   ann = FALSE
 )
 stripchart(
@@ -404,6 +415,16 @@ lines(c(3.5, 3.5), c(-11, 351),
       lty = 1)
 
 dev.off()
+
+p_movement_at_the_end = c(wilcox.test(trained_1,yoked_1)$p.value,
+                          wilcox.test(trained_1,blank_1)$p.value,
+                          wilcox.test(yoked_1,blank_1)$p.value,
+                          wilcox.test(trained_2,yoked_2)$p.value,
+                          wilcox.test(trained_2,blank_2)$p.value,
+                          wilcox.test(yoked_2,blank_2)$p.value
+)
+
+
 
 pdf("First_Training_Session_R60D05_allN.pdf",
     onefile = T,
