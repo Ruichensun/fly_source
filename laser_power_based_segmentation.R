@@ -760,19 +760,20 @@ sessions <- c(
             
             pdf(
               # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-              # "fly_metric_allmetricdf_CS_allflies_Filter1_063018.pdf",
+              "fly_metric_allmetricdf_CS_allflies_Filter1_070218.pdf",
               # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_063018.pdf",
               # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_063018.pdf",
               # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_063018.pdf",
               # "fly_metric_allmetricdf_MB131BxJU30_allflies_Filter1_063018.pdf",
               # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_063018.pdf",
               # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
-              "fly_metric_allmetricdf_SUN3_allflies_Filter1_063018.pdf",
+              # "fly_metric_allmetricdf_SUN3_allflies_Filter1_063018.pdf",
               onefile = T,
               width = 10
             )
             
             p_value_summary = matrix(nrow = 9, ncol = 0)
+            
             for (metric.ind in 1:length(metrices)) {
               input.file = paste0("metrics/metric_", metric.ind, ".csv")
               if (!file.exists(input.file)) {
@@ -787,21 +788,23 @@ sessions <- c(
               }
               ## covariates of interest: genotype, session
               y = list()
+              
               ## E1 data
               session = "E1"
               for (category in c("T", "R")) {
                 query.session = gsub("X", category, session)
+                
                 ind <- metric.df$Session == query.session &
-                  metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category &
-                  metric.df$Fly %in% query.fly&
-                metric.df$Experimenter  %in%  query.experimenter
+                       metric.df$Genotype %in% query.genotype &
+                       metric.df$Category == category &
+                       metric.df$Fly %in% query.fly &
+                       metric.df$Experimenter  %in%  query.experimenter
                 
                 ind.E1 <- metric.df$Session == "E1" &
-                  metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category &
-                  metric.df$Fly %in% query.fly&
-                  metric.df$Experimenter  %in%  query.experimenter
+                          metric.df$Genotype %in% query.genotype &
+                          metric.df$Category == category &
+                          metric.df$Fly %in% query.fly &
+                          metric.df$Experimenter  %in%  query.experimenter
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
                 z = metric.df[ind, "Value"]
@@ -812,16 +815,16 @@ sessions <- c(
               for (category in c("N")) {
                 query.session = gsub("X", category, session)
                 ind <- metric.df$Session == query.session &
-                  metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category &
-                  metric.df$Fly %in% query.fly&
-                  metric.df$Experimenter  %in%  query.experimenter
+                       metric.df$Genotype %in% query.genotype &
+                       metric.df$Category == category &
+                       metric.df$Fly %in% query.fly &
+                       metric.df$Experimenter  %in%  query.experimenter
                 
                 ind.E1 <- metric.df$Session == "E1" &
-                  metric.df$Genotype %in% query.genotype &
-                  metric.df$Category == category &
-                  metric.df$Fly %in% query.fly&
-                  metric.df$Experimenter  %in%  query.experimenter
+                          metric.df$Genotype %in% query.genotype &
+                          metric.df$Category == category &
+                          metric.df$Fly %in% query.fly&
+                          metric.df$Experimenter  %in%  query.experimenter
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
                 z = metric.df[ind, "Value"]
@@ -833,18 +836,19 @@ sessions <- c(
               ## input sessions data
               
               for (session in sessions) {
-                if (grepl("N", session) == F) {
+                # if (grepl("N", session) == F) {
                   ind <- metric.df$Session == session &
                     metric.df$Genotype %in% query.genotype &
                     metric.df$Fly %in% query.fly&
                     metric.df$Experimenter  %in%  query.experimenter
-                  
-                } else{
-                  ind <- metric.df$Session == session &
-                    metric.df$Genotype %in% query.genotype
-                    metric.df$Fly %in% query.fly&
-                    metric.df$Experimenter  %in%  query.experimenter
-                }
+                  # print(ind)
+                # } else{
+                #   ind <- metric.df$Session == session &
+                #     metric.df$Genotype %in% query.genotype
+                #     metric.df$Fly %in% query.fly&
+                #     metric.df$Experimenter  %in%  query.experimenter
+                #   print(paste0(ind,"else"))
+                #     }
                 
                 # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
                 z = metric.df[ind, "Value"]
@@ -972,7 +976,7 @@ sessions <- c(
               }
               
               if (metric.ind == 23) {
-                yrange = c(0, 1)
+                yrange = c(0, 0.5)
                 y_text = 1
               }
               
@@ -1183,7 +1187,7 @@ sessions <- c(
             
             write.table(
               p_value_summary,
-              # "P_VALUE_SUMMARY_CS.csv",
+              "P_VALUE_SUMMARY_CS_070218.csv",
               # "P_VALUE_SUMMARY_R60D05xJU30.csv",
               # "P_VALUE_SUMMARY_JG17xJU30.csv",
               # "P_VALUE_SUMMARY_MB009BxJU30.csv",
@@ -1191,7 +1195,7 @@ sessions <- c(
               # "P_VALUE_SUMMARY_MB607BxJU30.csv",
               # "P_VALUE_SUMMARY_R60D05xPKCi.csv",
               # "P_VALUE_SUMMARY_JG17xPKCi.csv",
-              "P_VALUE_SUMMARY_SUN3.csv",
+              # "P_VALUE_SUMMARY_SUN3.csv",
               col.names = T,
               row.names = T,
               quote = F,
