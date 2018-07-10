@@ -355,7 +355,7 @@ input.y.df = data.frame()
           pdf(
             "LearningIndexComparison_070318.pdf",
             onefile = T,
-            width = 10
+            width = 25
           )
           
           
@@ -383,12 +383,12 @@ input.y.df = data.frame()
             col =  "grey40"
           )
           
-          
-          if (any(is.na(yrange)) |
-              any(is.infinite(yrange)) | any(is.nan(yrange))) {
-            yrange = c(-1, 1)
-            ylim = c(-1, 1)
-          }
+          # 
+          # if (any(is.na(yrange)) |
+          #     any(is.infinite(yrange)) | any(is.nan(yrange))) {
+          #   yrange = c(-1, 1)
+          #   ylim = c(-1, 1)
+          # }
           
           # boxplot(input.y,outline=F,notch=T,
           #         main=paste0(query.genotype, "-", metrices[metric.ind],"\n"
@@ -399,15 +399,15 @@ input.y.df = data.frame()
           #         ylab=metrices[metric.ind],
           #         xaxt='n'
           # )
-          text((1:length(input.y.df)) - 0.1,
-               18,
-               paste0(sapply(input.y.df, length)),
-               xpd = T,
-               srt = 0,
-               adj = 0
-          )
-          
-          n = length(input.y) / length(sessions)
+          # text((1:length(input.y.df)) - 0.1,
+          #      18,
+          #      paste0(sapply(input.y.df, length)),
+          #      xpd = T,
+          #      srt = 0,
+          #      adj = 0
+          # )
+          # 
+          # n = length(input.y) / length(sessions)
           
           # for(i in c(3,6,9,13)){
           # for(i in c(3,6,9,12)){
@@ -426,17 +426,17 @@ input.y.df = data.frame()
                   lty = 1)
           }
           
-          p_value = c(
-            # wilcox.test(input.y_1T,input.y_1N)$p.value,
-            # wilcox.test(input.y_1R,input.y_1N)$p.value,
-            # wilcox.test(input.y_1T,input.y_1R)$p.value,
-            wilcox.test(input.y_2T,input.y_2N)$p.value,
-            wilcox.test(input.y_2R,input.y_2N)$p.value,
-            wilcox.test(input.y_2T,input.y_2R)$p.value,
-            wilcox.test(input.y_3T,input.y_3N)$p.value,
-            wilcox.test(input.y_3R,input.y_3N)$p.value,
-            wilcox.test(input.y_3T,input.y_3R)$p.value
-          )
+          # p_value = c(
+          #   # wilcox.test(input.y_1T,input.y_1N)$p.value,
+          #   # wilcox.test(input.y_1R,input.y_1N)$p.value,
+          #   # wilcox.test(input.y_1T,input.y_1R)$p.value,
+          #   wilcox.test(input.y_2T,input.y_2N)$p.value,
+          #   wilcox.test(input.y_2R,input.y_2N)$p.value,
+          #   wilcox.test(input.y_2T,input.y_2R)$p.value,
+          #   wilcox.test(input.y_3T,input.y_3N)$p.value,
+          #   wilcox.test(input.y_3R,input.y_3N)$p.value,
+          #   wilcox.test(input.y_3T,input.y_3R)$p.value
+          # )
           # text((1:length(input.y)) - 0.1,
           #      15,
           #      paste0(sapply(input.y, length)),
