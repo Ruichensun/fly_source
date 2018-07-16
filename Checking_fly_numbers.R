@@ -13,4 +13,4 @@ mutant_info = data.frame(names_of_mutants,number_of_mutants)
 
 colnames(mutant_info) = c("Mutant Genotype", "Number of Flies")
 
-write.csv(mutant_info, file = "Mutant_headcount_052218.csv", row.names = FALSE)
+write.csv(mutant_info, file = "Mutant_headcount_071618.csv", row.names = FALSE)
