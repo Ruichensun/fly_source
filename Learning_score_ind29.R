@@ -2,6 +2,8 @@
 #This script follows the laser_power_based_segmentation.R, and cannot be run prior to running laser_power_based_segmentation.R
 
     input.y.df = data.frame()
+    p_value_sum = matrix(nrow = 0, ncol = 9)
+    
     sessions <- c(                     
       "E1T1",                   #4
       "E1T1E1",                 #5 
@@ -535,13 +537,10 @@
           
           
 pdf(
-  # "fly_metric_ind29_CS_allflies_Filter1_063018.pdf",
-  paste0("fly_metric_ind29_",fly_genotype,"allflies_Filter1_070218.pdf"  ),
+  # "fly_metric_ind29_CS_allflies_Filter1_063018.pdf",092818.pdf"  ),
   onefile = T,
   width = 10
 )
-
-p_value_summary = matrix(nrow = 9, ncol = 0)
 
 metric.ind = 29
   
@@ -761,3 +760,43 @@ if (sum(colnames(metric.df) %in% "value.w") == 0) {
   )
 
 dev.off()
+
+
+p_value_sum = rbind(p_value_sum, p_value)
+
+
+
+
+
+rownames(p_value_sum) = c("WT",
+                          "SUN1",
+                          "SUN2",
+                          "SUN3",
+                          "MB009BxJU30",
+                          "MB131BxJU30",  
+                          "MB419BxJU30",
+                          "MB607BxJU30",
+                          "R60D05xJU30",
+                          "JG17xJU30"
+                          )
+
+colnames(p_value_sum) = c(
+                          "1TN",
+                          "1RN",
+                          "1TR",
+                          "2TN",
+                          "2RN",
+                          "2TR",
+                          "3TN",
+                          "3RN",
+                          "3TR"
+)
+
+write.table(
+              p_value_sum,
+              "P_VALUE_LearningIndex29_092818.csv",
+              col.names = T,
+              row.names = T,
+              quote = F,
+              sep = ","
+            )
