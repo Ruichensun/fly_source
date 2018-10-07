@@ -434,33 +434,7 @@ one_fly_statistics <- function(input_file,
   fly_pos_lag = burstiness_inter_event[2:length(burstiness_inter_event)]
   
   fly_pos_sum = (fly_pos_original) * 1 + 2 * fly_pos_lag
-  #
-  # p_to_p<-sum(fly_pos_sum==0)
-  # p_to_w<-sum(fly_pos_sum==2)
-  # w_to_w<-sum(fly_pos_sum==3)
-  # w_to_p<-sum(fly_pos_sum==1)
-  #
-  # state_transition<-c(p_to_p, p_to_w, w_to_w, w_to_p)
-  # p_p2p<-c()
-  # p_p2w<-c()
-  # p_w2p<-c()
-  # p_w2w<-c()
-  # if (p_to_p+p_to_w == 0){
-  #   p_p2p = NA
-  #   p_p2w = NA
-  # }else{
-  # p_p2p = p_to_p/(p_to_p+p_to_w)
-  # p_p2w = p_to_w/(p_to_p+p_to_w)
-  # }
-  #
-  # if(w_to_p+w_to_w == 0){
-  #   p_w2p = NA
-  #   p_w2w = NA
-  # }else{
-  # p_w2p = w_to_p/(w_to_p+w_to_w)
-  # p_w2w = w_to_w/(w_to_p+w_to_w)
-  # }
-  #
+
   ###### Get Behavioral State (all) -- Using the new metric (Jan 31, 2018) #####
   
   p_to_p = sum(pause_df$Pause_Duration - 1)
@@ -479,7 +453,6 @@ one_fly_statistics <- function(input_file,
   
   # print(w_to_w) ##debug
   
-  
   p_to_w = length(pause_df$Start_Index)
   w_to_p = length(pause_df$End_Index)
   
@@ -495,12 +468,6 @@ one_fly_statistics <- function(input_file,
     p_p2w = p_to_w / (p_to_p + p_to_w)
   }
   
-  # print(paste0("before ",(w_to_p) + (w_to_w)))
-  
-  # print(is.na(w_to_p))
-  # print(is.na(w_to_w))
-  # print(is.na((w_to_p)+(w_to_w)))
-  
   if ((w_to_p) + (w_to_w) == 0) {
     p_w2p = NA
     p_w2w = NA
@@ -512,40 +479,12 @@ one_fly_statistics <- function(input_file,
     p_w2w = w_to_w / (w_to_p + w_to_w)
   }
   
-  # print(paste0("after",(w_to_p) + (w_to_w), ",",p_w2p))
-  
   ########Get behavioral states for pauses not in the middle#######
   
   fly_pos_sum_middle = (is_pause_middle[2:(length(is_pause_middle) - 1)]) *
     1 + 2 * (is_pause_middle[3:length(is_pause_middle)]) + 4 * (is_pause_middle[1:(length(is_pause_middle) -
                                                                                      2)])
-  #
-  # w_to_w_middle<-sum(fly_pos_sum_middle==0)+sum(fly_pos_sum_middle==2)
-  # w_to_p_middle<-sum(fly_pos_sum_middle==3)
-  # p_to_p_middle<-sum(fly_pos_sum_middle==7)+sum(fly_pos_sum_middle==5)
-  # p_to_w_middle<-sum(fly_pos_sum_middle==4)
-  #
-  # state_transition_middle<-c(p_to_p_middle, p_to_w_middle, w_to_w_middle, w_to_p_middle)
-  # p_p2p_middle<-c()
-  # p_p2w_middle<-c()
-  # p_w2p_middle<-c()
-  # p_w2w_middle<-c()
-  # if (p_to_p_middle+p_to_w_middle == 0){
-  #   p_p2p_middle = NA
-  #   p_p2w_middle = NA
-  # }else{
-  #   p_p2p_middle = p_to_p_middle/(p_to_p_middle+p_to_w_middle)
-  #   p_p2w_middle = p_to_w_middle/(p_to_p_middle+p_to_w_middle)
-  # }
-  #
-  # if(w_to_p_middle+w_to_w_middle == 0){
-  #   p_w2p_middle = NA
-  #   p_w2w_middle = NA
-  # }else{
-  #   p_w2p_middle = w_to_p_middle/(w_to_p_middle+w_to_w_middle)
-  #   p_w2w_middle = w_to_w_middle/(w_to_p_middle+w_to_w_middle)
-  # }
-  
+
   #########Get behavioral states for pauses not at the end & not bumping to the wall (Jan 31, 2018)######
   pause_middle_nobump_df = subset(pause_df,
                                   (Start_Position >= 50)

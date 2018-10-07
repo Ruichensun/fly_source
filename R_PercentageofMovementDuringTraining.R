@@ -14,15 +14,37 @@ Delay_of_Laser_On_Off = function(input_file){
     fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
     starting_point = 21
     fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
-    
+    fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
+    fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)] 
   }
+  for (i in 1:length(fly.moving.status)){
+    if ((fly.position[i]<50)){
+      fly.moving.status[i] = 1
+    }
+    if ((fly.position[i]>717)){
+      fly.moving.status[i] = 1
+    }
+  }
+  moving_status_summary = rle(fly.moving.status)
+  
+  total_frame_moving = sum(moving_status_summary$lengths[moving_status_summary$values!=0])
+  total_frame_pause = sum(moving_status_summary$lengths[moving_status_summary$values==0])
+  
+  moving_laser_status.df = data.frame(fly.moving.status,fly.laser.status)
+  
+  fly.laser.status.ONSET = replace(fly.laser.status, fly.laser.status > 0, 1)
+  laser.moving.status = fly.laser.status.ONSET - fly.moving.status
+  
+  laser.moving.status_summary = rle(laser.moving.status)
+  Laser_On_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==-1]
+  Laser_Off_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==1]
+  
+  Laser_On_Delay = mean(Laser_On_Delay_by_event)
+  Laser_Off_Delay = mean(Laser_Off_Delay_by_event)
   
   return(c(Laser_On_Delay,
            Laser_Off_Delay))
 }
-
-
-
 
 chance_of_being_hit_by_laser = function(input_file){
   
