@@ -38,13 +38,38 @@ Delay_of_Laser_On_Off = function(input_file){
   laser.moving.status_summary = rle(laser.moving.status)
   Laser_On_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==-1]
   Laser_Off_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==1]
-  
   Laser_On_Delay = mean(Laser_On_Delay_by_event)
   Laser_Off_Delay = mean(Laser_Off_Delay_by_event)
-  
   return(c(Laser_On_Delay,
            Laser_Off_Delay))
 }
+
+Laser_Delay <- function(file_name_filter, fly.info.movement) {
+  laser_delays = data.frame()
+  for (ind in 1:nrow(fly.info.movement)) {
+    input.file <- list.files(
+      path = paste0("data/",
+                    fly.info.movement$experimenter[ind],
+                    "/CS/"),
+      pattern = paste0(
+        "ProcessedData_Fly",
+        fly.info.movement$Fly[ind],
+        "_",
+        file_name_filter,
+        "_WT",
+        ".csv"
+      ),
+      full.names = T
+    )
+    if(length(input.file)==0){
+      next() 
+    }
+    laser_delays = rbind(laser_delays, Delay_of_Laser_On_Off(input.file))
+  }
+  names(laser_delays) = c("Delays of Laser On", "Delays of Laser Off")
+  return(laser_delays)
+}
+
 
 chance_of_being_hit_by_laser = function(input_file){
   
@@ -119,6 +144,11 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
   names(laser_chance) = c("Chances of being hit during walking", "Chances of being hit during pause ", "Laser ON duration percentage")
   return(laser_chance)
 }
+
+
+
+
+
 
 # file_name_filter =
   # "E1T1"
