@@ -2,6 +2,28 @@
 # Requires fly_pos_to_moving_status function from "plot_trend.R"
 setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
+Delay_of_Laser_On_Off = function(input_file){
+  
+  fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
+  fly.position.raw = fly.file$fly_pos.framerate.50
+  fly.laser.raw = fly.file$laser_status
+  # If laser status not recorded, return NA
+  if (is.na(fly.laser.raw[1]) == T) {
+    return(c(NA,NA,NA))
+  }else{
+    fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
+    starting_point = 21
+    fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
+    
+  }
+  
+  return(c(Laser_On_Delay,
+           Laser_Off_Delay))
+}
+
+
+
+
 chance_of_being_hit_by_laser = function(input_file){
   
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
@@ -14,7 +36,6 @@ chance_of_being_hit_by_laser = function(input_file){
     fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
     starting_point = 21
     fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
-
     fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
     fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
 
@@ -105,6 +126,11 @@ first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R
 second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", fly.info.movement.R)
 first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1",fly.info.movement.T)
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
+
+
+
+
+
 
 
 pdf("ChanceofBeingHitCS_063018.pdf",
