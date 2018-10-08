@@ -55,7 +55,7 @@ write.table(
 )
 fly_genotype = "CS"
 
-metric.ind = 3
+metric.ind = 13
 
 input.file = paste0("metrics/metric_", metric.ind, ".csv")
 if (!file.exists(input.file)) {
@@ -110,7 +110,7 @@ for (session in sessions) {
       metric.df$Category == "T" &
       metric.df$Fly %in% query.fly&
       metric.df$Experimenter  %in%  query.experimenter
-    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+    z = metric.df[ind,"Value"] 
     
   }
   if (grepl("R", session) == T) {
@@ -124,7 +124,7 @@ for (session in sessions) {
       metric.df$Category == "R" &
       metric.df$Fly %in% query.fly&
       metric.df$Experimenter  %in%  query.experimenter
-    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+    z = metric.df[ind,"Value"]
   }
   if (grepl("N", session) == T) {
     ind.E1 <- metric.df$Session == "E1" &
@@ -137,7 +137,7 @@ for (session in sessions) {
       metric.df$Category == "N" &
       metric.df$Fly %in% query.fly&
       metric.df$Experimenter  %in%  query.experimenter
-    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+    z = metric.df[ind,"Value"]
   }
   y = append(y, list(na.omit(z)))
 }
@@ -146,4 +146,5 @@ y.1 = y
 ## special cases
 y_text = c()
 input.y = list(y.1[[1]], y.1[[2]], y.1[[3]], y.1[[7]], y.1[[15]], y.1[[23]]) # input.y = y.1[7:9]
+
 
