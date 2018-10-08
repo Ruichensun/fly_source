@@ -2,6 +2,7 @@
 # Requires fly_pos_to_moving_status function from "plot_trend.R"
 setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
+#Quantify the mean of delay onset/off of laser of one file
 Delay_of_Laser_On_Off = function(input_file){
   
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
@@ -9,7 +10,7 @@ Delay_of_Laser_On_Off = function(input_file){
   fly.laser.raw = fly.file$laser_status
   # If laser status not recorded, return NA
   if (is.na(fly.laser.raw[1]) == T) {
-    return(c(NA,NA,NA))
+    return(c(NA,NA))
   }else{
     fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
     starting_point = 21
@@ -40,10 +41,12 @@ Delay_of_Laser_On_Off = function(input_file){
   Laser_Off_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==1]
   Laser_On_Delay = mean(Laser_On_Delay_by_event)
   Laser_Off_Delay = mean(Laser_Off_Delay_by_event)
-  return(c(Laser_On_Delay,
-           Laser_Off_Delay))
+  return(c(Laser_On_Delay/50, #Framerate is 50
+           Laser_Off_Delay/50 #Framerate is 50
+           ))
 }
 
+#Quantify the delay on/off of laser of all flies
 Laser_Delay <- function(file_name_filter, fly.info.movement) {
   laser_delays = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
@@ -70,7 +73,7 @@ Laser_Delay <- function(file_name_filter, fly.info.movement) {
   return(laser_delays)
 }
 
-
+#Quantify percentage of time being hit by laser both during walking and during pause
 chance_of_being_hit_by_laser = function(input_file){
   
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
@@ -116,8 +119,7 @@ chance_of_being_hit_by_laser = function(input_file){
   }
 }
 
-###Calculating all the flies' chance of being hit by types (T/R)
-
+#Calculating all the flies' chance of being hit by types (T/R)
 total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
@@ -179,12 +181,6 @@ second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1
 first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1",fly.info.movement.T)
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
 
-
-
-
-
-
-
 pdf("ChanceofBeingHitCS_063018.pdf",
     onefile = T,
     width = 10)
@@ -203,9 +199,6 @@ Chance_of_being_hit = list(
   second_yoked_session$`Chances of being hit during walking`,
   second_yoked_session$`Chances of being hit during pause `
 )
-
-
-
 
 col.pool <- c( "indianred3",
                "indianred3",
