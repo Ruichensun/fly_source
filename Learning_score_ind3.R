@@ -1,0 +1,149 @@
+#We define learning index as (3rd E1's performance - 1st E1's performance)/(1st E1's performance), calculated at an individual level.
+#This script follows the laser_power_based_segmentation.R, and cannot be run prior to running laser_power_based_segmentation.R
+
+input.y.df = data.frame()
+p_value_sum = matrix(nrow = 0, ncol = 9)
+
+sessions <- c(                     
+  "E1T1",                   #4
+  "E1T1E1",                 #5 
+  "E1T1E1T1",               #6
+  "E1T1E1T1E1",             #7
+  "E1T1E1T1E1T1",           #8
+  "E1T1E1T1E1T1E1",         #9
+  "E1T1E1T1E1T1E1T1",       #10
+  "E1T1E1T1E1T1E1T1E1",     #11
+  
+  "E1R1",                   #12
+  "E1R1E1",                 #13
+  "E1R1E1R1",               #14
+  "E1R1E1R1E1",             #15
+  "E1R1E1R1E1R1",           #16
+  "E1R1E1R1E1R1E1",         #17
+  "E1R1E1R1E1R1E1R1",       #18
+  "E1R1E1R1E1R1E1R1E1",     #19
+  
+  "E1N1",                   #20
+  "E1N1E1",                 #21
+  "E1N1E1N1",               #22
+  "E1N1E1N1E1",             #23
+  "E1N1E1N1E1N1",           #24
+  "E1N1E1N1E1N1E1",         #25
+  "E1N1E1N1E1N1E1N1",       #26
+  "E1N1E1N1E1N1E1N1E1"      #27
+)
+
+
+
+#WT flies
+query.genotype <- c("WT","CS")
+query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                (fly.info.include$Genotype == "CS")) &
+                               (fly.info.include$experimenter!="SW"), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                         (fly.info.include$Genotype == "CS")) &
+                                        (fly.info.include$experimenter!="SW"), ]$experimenter
+write.table(
+  fly.info.include[((fly.info.include$Genotype == "WT") |
+                      (fly.info.include$Genotype == "CS")) &
+                     (fly.info.include$experimenter!="SW"), ],
+  "fly_info_include_WT.csv",
+  col.names = T,
+  row.names = F,
+  quote = F,
+  sep = ","
+)
+fly_genotype = "CS"
+
+metric.ind = 3
+
+input.file = paste0("metrics/metric_", metric.ind, ".csv")
+if (!file.exists(input.file)) {
+  next
+}
+metric.df = read.csv(input.file)
+## covariates of interest: genotype, session
+y = list()
+## E1 data
+session = "E1"
+for (category in c("T", "R")) {
+  query.session = gsub("X", category, session)
+  ind <- metric.df$Session == query.session &
+    metric.df$Genotype %in% query.genotype &
+    metric.df$Category == category &
+    metric.df$Fly %in% query.fly&
+    metric.df$Experimenter  %in%  query.experimenter
+  ind.E1 <- metric.df$Session == "E1" &
+    metric.df$Genotype %in% query.genotype &
+    metric.df$Category == category &
+    metric.df$Fly %in% query.fly&
+    metric.df$Experimenter  %in%  query.experimenter
+  z = metric.df[ind,"Value"]
+  y = append(y, list(na.omit(z)))
+}
+for (category in c("N")) {
+  query.session = gsub("X", category, session)
+  ind <- metric.df$Session == query.session &
+    metric.df$Genotype %in% query.genotype &
+    metric.df$Category == category &
+    metric.df$Fly %in% query.fly&
+    metric.df$Experimenter  %in%  query.experimenter
+  ind.E1 <- metric.df$Session == "E1" &
+    metric.df$Genotype %in% query.genotype &
+    metric.df$Category == category &
+    metric.df$Fly %in% query.fly&
+    metric.df$Experimenter  %in%  query.experimenter
+  z = metric.df[ind,"Value"]
+  y = append(y, list(na.omit(z)))
+}
+## input sessions data
+for (session in sessions) {
+  print(session)
+  if (grepl("T", session) == T) {
+    ind.E1 <- metric.df$Session == "E1" &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "T" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    ind <- metric.df$Session == session &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "T" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+    
+  }
+  if (grepl("R", session) == T) {
+    ind.E1 <- metric.df$Session == "E1" &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "R" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    ind <- metric.df$Session == session &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "R" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+  }
+  if (grepl("N", session) == T) {
+    ind.E1 <- metric.df$Session == "E1" &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "N" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    ind <- metric.df$Session == session &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == "N" &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+  }
+  y = append(y, list(na.omit(z)))
+}
+y.1 = y
+# yrange = c(min(sapply(y,min)),max(sapply(y,max)))
+## special cases
+y_text = c()
+input.y = list(y.1[[1]], y.1[[2]], y.1[[3]], y.1[[7]], y.1[[15]], y.1[[23]]) # input.y = y.1[7:9]
+
