@@ -90,7 +90,7 @@ write.table(
 )
 fly_genotype = "CS"
 
-metric.ind = 13
+metric.ind = 23
 
 input.file = paste0("metrics/metric_", metric.ind, ".csv")
 if (!file.exists(input.file)) {
@@ -182,4 +182,11 @@ y.1 = y
 y_text = c()
 input.y = list(y.1[[1]], y.1[[2]], y.1[[3]], y.1[[7]], y.1[[15]], y.1[[23]]) # input.y = y.1[7:9]
 
+median(input.y[[1]])
+median(input.y[[2]])
+median(input.y[[3]])
+median(input.y[[4]])
+median(input.y[[5]])
+median(input.y[[6]])
 
+median(append(input.y[[1]], input.y[[2]], input.y[[3]]))
