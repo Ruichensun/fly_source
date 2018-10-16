@@ -661,8 +661,6 @@ one_fly_statistics <- function(input_file,
   
   ## For Jan 31, I am focusing on the middle-nobump pauses
   
-  
-  
   ## Calculating output
   # num_pause = length(pause_start)
   num_pause = length(pause_middle_nobump_df$Start_Index)
@@ -711,10 +709,8 @@ one_fly_statistics <- function(input_file,
   ## Return output
   ret = list(
     num_pause,
-    frac_pause,
-    #unit: percentage
-    avg_pause_dur / (framerate),
-    # max(pause_end - pause_start) / framerate,
+    1-frac_pause, #unit: percentage
+    avg_pause_dur / (framerate), # max(pause_end - pause_start) / framerate,
     max(pause_middle_nobump_df$Pause_Duration) / framerate,
     (avg_fly_speed * (48.7 - 1) / 768) / (1 / framerate),
     (avg_fly_speed_not_in_pause * (48.7 - 1) / 768) / (1 / framerate),
@@ -722,106 +718,63 @@ one_fly_statistics <- function(input_file,
     (avg_fly_speed_exit * (48.7 - 1) / 768) / (1 / framerate),
     (((tot_moving_dist) * (48.7 - 1) / 768) / experiment_time) *
       framerate * 60,
-    num_turn,
-    #NU
-    num_mid_turns,
-    #NU
-    frac_mid_turns,
-    #NU
+    num_turn,#NU
+    num_mid_turns,#NU
+    frac_mid_turns,#NU
     burstiness_pause,
-    Burst_inter_event,
-    #NU
-    Burst_inter_event_scrambled,
-    #NU
-    burstiness_pause_inverted,
-    #NU
-    Burst_inter_event_inverted,
-    #NU
-    first_pause_duration / (framerate),
-    #NU
-    first_pause_duration_all / (framerate),
-    #NU
+    Burst_inter_event,#NU
+    Burst_inter_event_scrambled,#NU
+    burstiness_pause_inverted, #NU
+    Burst_inter_event_inverted, #NU
+    first_pause_duration / (framerate),#NU
+    first_pause_duration_all / (framerate), #NU
     # state_transition_middle,#Removed Jan31, 2018
     p_p2p_middle,
     p_p2w_middle,
     p_w2w_middle,
     p_w2p_middle,
-    memory,
-    #NU
-    memory_inverted,
-    #NU
-    Burst_start_walking_middle,
-    #NU
-    Burst_start_pause_middle,
-    #NU
+    memory,#NU
+    memory_inverted,#NU
+    Burst_start_walking_middle,#NU
+    Burst_start_pause_middle,#NU
     avg_pause_middle_dur,
-    frac_pause_middle,
+    1-frac_pause_middle,
     max_pause_middle,
     first_pause_middle
   )
   
   names(ret) = c(
-    "Number of Pause Starts",
-    #1
-    "Fraction Time in Pause",
-    #2
-    "Average Pause Duration",
-    #3
-    "Max Pause Duration",
-    #4
-    "Average Moving Speed ",
-    #5
-    "Average Moving Speed (excluding pause)",
-    #6
-    "Average Speed When Enter Pause",
-    #7
-    "Average Speed When Exit Pause",
-    #8
-    "Moving Distance Per Minute",
-    #9
-    "Number of Turns",
-    #10
-    "Number of Middle Turns",
-    #11
-    "Fration of Middle Turns Out of Total Turns",
-    #12
-    "Burstiness (Pause)",
-    #13
-    "Burstiness (Inter Event Time)",
-    #14
-    "Burstiness (Scrambled)",
-    #15
-    "Burstiness (Walking bouts-thresholding)",
-    #16
-    "Burstiness (Walking events-thresholding)",
-    #17
-    "Beginning Pause Duration",
-    #18
-    "First Pause Duration",
-    #19
+    "Number of Pause Starts",#1
+    "Percentage Time Active",#2
+    "Average Pause Duration",#3
+    "Max Pause Duration",#4
+    "Average Moving Speed ",#5
+    "Average Moving Speed (excluding pause)",#6
+    "Average Speed When Enter Pause",#7
+    "Average Speed When Exit Pause",#8
+    "Moving Distance Per Minute",#9
+    "Number of Turns",#10
+    "Number of Middle Turns",#11
+    "Fration of Middle Turns Out of Total Turns",#12
+    "Burstiness (Pause)",#13
+    "Burstiness (Inter Event Time)",#14
+    "Burstiness (Scrambled)",#15
+    "Burstiness (Walking bouts-thresholding)",#16
+    "Burstiness (Walking events-thresholding)",#17
+    "Beginning Pause Duration",#18
+    "First Pause Duration",#19
     # "State_transitions (Pause not at the end): pp, pw, ww, wp",#20
-    "Transition Probability (Pause not at the end): Pause to Pause",
-    #20
-    "Transition Probability (Pause not at the end): Pause to Walking",
-    #21
-    "Transition Probability (Pause not at the end): Walking to Walking",
-    #22
-    "Transition Probability (Pause not at the end): Walking to Pause",
-    #23
-    "Memory",
-    #24
-    "Memory (inverted)",
-    #25
-    "Burstiness of Start of Walking (Pause not at the end)",
-    #26 *
-    "Burstiness of Start of Pause (Pause not at the end)",
-    #27 *
-    "Average Pause Duration (Pause not at the End)",
-    #28
-    "Fraction Time in Pause (Pause not at the End)",
-    #29
-    "Max Pause Duration (Pause not at the End)",
-    #30
+    "Transition Probability (Pause not at the end): Pause to Pause", #20
+    "Transition Probability (Pause not at the end): Pause to Walking", #21
+    "Transition Probability (Pause not at the end): Walking to Walking", #22
+    "Transition Probability (Pause not at the end): Walking to Pause", #23
+    "Memory", #24
+    "Memory (inverted)", #25
+    "Burstiness of Start of Walking (Pause not at the end)", #26 *
+    "Burstiness of Start of Pause (Pause not at the end)", #27 *
+    "Average Pause Duration (Pause not at the End)",#28
+    "Percentage Time Active (Pause not at the End)",#29
+    "Max Pause Duration (Pause not at the End)", #30
     "First Pause Duration (Pause not at the End)" #31
   )
   return(ret)
