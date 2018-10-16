@@ -28,8 +28,6 @@ pass_fly_QC <- function(input_file,
       "\n\n"
     ))
   })
-  
-  
   if (nrow(x) < 10) {
     stop(paste0(
       "Input file is empty!:\n",
@@ -38,26 +36,13 @@ pass_fly_QC <- function(input_file,
       "\n\n"
     ))
   }
-  
-  
-  ## To deal with the old data
-  # x = as.numeric(x$fly.position)
-  # x = as.numeric(x$fly_pos.framerate.10)
   x = as.numeric(x[, 1])
   fly_num = sapply(strsplit(input_file, "_"), function(x)
     return(gsub("Fly", "", x[2])))
-  # if(as.numeric(fly_num) <= 32){
-  #   x = x[seq(1,length(x),by=2)]
-  # }
-  
-  #x = as.numeric(x)
   data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   
-  
   experiment_time = length(fly_pos)
-  
-  #plot(fly_pos,type='l',main=input_file)
   
   ##Get the transient speed
   if (data_start > 1) {
@@ -65,14 +50,6 @@ pass_fly_QC <- function(input_file,
   } else {
     fly_speed = diff(c(NA, fly_pos))
   }
-  print(input_file)
-  # for (i in 1:experiment_time){
-  #   if (abs(fly_speed[i])>=speed_max_thres){
-  #     fly_speed[i]=0
-  #   }
-  # }
-  # print(paste0("Error here ",input_file))
-  
   ## Get the time spans when fly paused
   ## A pause is a time span with greater than 10 continous frames at speed 0
   pause_start = NULL
@@ -112,12 +89,6 @@ pass_fly_QC <- function(input_file,
     is_pause[potential_pause_start:experiment_time] = 1
   }
   num_pause = length(pause_start)
-  
-  ##if(num_pause == 0){
-  ##    return(NA)
-  ##}
-  ##return(max(pause_end-pause_start+1))
-  
   if (max(pause_end - pause_start + 1) >= (20 * framerate)) {
     return(FALSE)
   }
@@ -127,66 +98,36 @@ pass_fly_QC <- function(input_file,
 }
 
 metrices = c(
-  "Number of Pause Starts",
-  #1
-  "Fraction Time in Pause",
-  #2
-  "Average Pause Duration",
-  #3
-  "Max Pause Duration",
-  #4
-  "Average Moving Speed ",
-  #5
-  "Average Moving Speed (excluding pause)",
-  #6
-  "Average Speed When Enter Pause",
-  #7
-  "Average Speed When Exit Pause",
-  #8
-  "Moving Distance Per Minute",
-  #9
-  "Number of Turns",
-  #10
-  "Number of Middle Turns",
-  #11
-  "Fration of Middle Turns Out of Total Turns",
-  #12
-  "Burstiness (Pause)",
-  #13
-  "Burstiness (Inter Event Time)",
-  #14
-  "Burstiness (Scrambled)",
-  #15
-  "Burstiness (Walking bouts-thresholding)",
-  #16
-  "Burstiness (Walking events-thresholding)",
-  #17
-  "Beginning Pause Duration",
-  #18
-  "First Pause Duration",
-  #19
-  "Transition Probability (Pause not at the end): Pause to Pause",
-  #20
-  "Transition Probability (Pause not at the end): Pause to Walking",
-  #21
-  "Transition Probability (Pasue not at the end): Walking to Walking",
-  #22
-  "Transition Probability (Pause not at the end): Walking to Pause",
-  #23
-  "Memory",
-  #24
-  "Memory (inverted)",
-  #25
-  "Burstiness of Start of Walking (Pause not at the end)",
-  #26
-  "Burstiness of Start of Pause (Pause not at the end)",
-  #27 *
-  "Average Pause Duration (Pause not at the End)",
-  #28
-  "Fraction Time in Pause (Pause not at the End)",
-  #29
-  "Max Pause Duration (Pause not at the End)",
-  #30
+  "Number of Pause Starts",#1
+  "Percentage Time Active",#2
+  "Average Pause Duration",#3
+  "Max Pause Duration",#4
+  "Average Moving Speed ",#5
+  "Average Moving Speed (excluding pause)",#6
+  "Average Speed When Enter Pause",#7
+  "Average Speed When Exit Pause",#8
+  "Moving Distance Per Minute",#9
+  "Number of Turns",#10
+  "Number of Middle Turns",#11
+  "Fration of Middle Turns Out of Total Turns",#12
+  "Burstiness (Pause)",#13
+  "Burstiness (Inter Event Time)",#14
+  "Burstiness (Scrambled)",#15
+  "Burstiness (Walking bouts-thresholding)",#16
+  "Burstiness (Walking events-thresholding)",#17
+  "Beginning Pause Duration",#18
+  "First Pause Duration",#19
+  "Transition Probability (Pause not at the end): Pause to Pause",#20
+  "Transition Probability (Pause not at the end): Pause to Walking",#21
+  "Transition Probability (Pasue not at the end): Walking to Walking",#22
+  "Transition Probability (Pause not at the end): Walking to Pause",#23
+  "Memory",#24
+  "Memory (inverted)",#25
+  "Burstiness of Start of Walking (Pause not at the end)",#26
+  "Burstiness of Start of Pause (Pause not at the end)",#27 *
+  "Average Pause Duration (Pause not at the End)",#28
+  "Percentage Time Active (Pause not at the End)",#29
+  "Max Pause Duration (Pause not at the End)",#30
   "First Pause Duration (Pause not at the End)" #31
 )
 
@@ -277,7 +218,6 @@ fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
 # CS,234,ES
 # CS,249,ES
 # CS,253,ES
-
 #For WT data collected after Mar 20, 2017
 # excl.fly = cbind(c(rep("WT",856)),
 #                  c("JG","RS","JD",rep("ES",12), rep("ES",400),rep("JG",120),rep("JE",221),rep("RS",100)),
@@ -375,14 +315,6 @@ for (ind in 1:nrow(excl.fly)) {
   
   
   #Mutant data
-  
-  print(excl.fly[ind, ])
-  print(fly.info[which(
-    fly.info$Genotype == excl.fly[ind, 3] &
-      fly.info$experimenter == excl.fly[ind, 2] &
-      fly.info$Fly == excl.fly[ind, 1]
-  ), ])
-  
   ind.excl = c(
     ind.excl,
     which(
@@ -419,11 +351,8 @@ for (genotype in unique(fly.info$Genotype)) {
 }
 
 
-
-
 ##Filter2
 ind.include = NULL
-
 session = "E1"
 for (ind in 1:nrow(fly.info)) {
   if (fly.info$Genotype[ind] == "WT") {
@@ -464,8 +393,6 @@ for (ind in 1:nrow(fly.info)) {
 
 #Need to run this line for filter2
 # ind.include = ind.include[!(ind.include %in% ind.excl)]
-
-
 
 # write.csv(fly.info,
 write.csv(
