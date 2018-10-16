@@ -191,94 +191,6 @@ metrices = c(
 )
 
 sessions <- c(
-  # "E1",
-  # "E1T1",
-  # "E1T1E1",
-  # "E1T1E1T1",
-  # "E1T1E1T1E1",
-  # "E1T1E1T1E1T1",
-  # "E1T1E1T1E1T1E1",
-  # "E1T1E1T1E1T1E1T1",
-  # "E1T1E1T1E1T1E1T1E1",
-  #
-  # "E1T1E1T1E1T2",
-  # "E1T1E1T1E1T2E1",
-  # "E1T1E1T1E1T2E1T2",
-  # "E1T1E1T1E1T2E1T2E1",
-  #
-  # "E1T2",
-  # "E1T2E1",
-  # "E1T2E1T2",
-  # "E1T2E1T2E1",
-  # "E1T2E1T2E1T1",
-  # "E1T2E1T2E1T1E1",
-  # "E1T2E1T2E1T1E1T1",
-  # "E1T2E1T2E1T1E1T1E1",
-  #
-  # "E1R1",
-  # "E1R1E1",
-  # "E1R1E1R1",
-  # "E1R1E1R1E1",
-  # "E1R1E1R1E1R1",
-  # "E1R1E1R1E1R1E1",
-  # "E1R1E1R1E1R1E1R1",
-  # "E1R1E1R1E1R1E1R1E1",
-  #
-  # "E1N1",
-  # "E1N1E1",
-  # "E1N1E1N1",
-  # "E1N1E1N1E1",
-  # "E1N1E1N1E1N1",
-  # "E1N1E1N1E1N1E1",
-  # "E1N1E1N1E1N1E1N1",
-  # "E1N1E1N1E1N1E1N1E1",
-  #
-  # "E1T1E1R1",
-  # "E1T1E1R1E1",
-  # "E1T1E1R1E1R1",
-  # "E1T1E1R1E1R1E1",
-  # "E1T1E1R1E1R1E1R1",
-  # "E1T1E1T1E1R1E1R1E1",
-  #
-  # "E1T1E1N1",
-  # "E1T1E1N1E1",
-  # "E1T1E1N1E1N1",
-  # "E1T1E1N1E1N1E1",
-  # "E1T1E1N1E1N1E1N1",
-  # "E1T1E1T1E1N1E1N1E1",
-  #
-  # "E1",
-  # "E1T1E1",
-  # "E1T1E1T1E1",
-  # "E1T1E1T1E1T1E1",
-  # "E1T1E1T1E1T1E1T1E1",
-  #
-  # "E1T1E1T1E1T2E1",
-  # "E1T1E1T1E1T2E1T2E1",
-  #
-  # "E1T2E1",
-  # "E1T2E1T2E1",
-  # "E1T2E1T2E1T1E1",
-  # "E1T2E1T2E1T1E1T1E1",
-  #
-  # "E1R1E1",
-  # "E1R1E1R1E1",
-  # "E1R1E1R1E1R1E1",
-  # "E1R1E1R1E1R1E1R1E1",
-  #
-  # "E1N1E1",
-  # "E1N1E1N1E1",
-  # "E1N1E1N1E1N1E1",
-  # "E1N1E1N1E1N1E1N1E1",
-  #
-  # "E1T1E1R1E1",
-  # "E1T1E1R1E1R1E1",
-  # "E1T1E1T1E1R1E1R1E1",
-  #
-  # "E1T1E1N1E1",
-  # "E1T1E1N1E1N1E1",
-  # "E1T1E1T1E1N1E1N1E1"
-  
   "E1",
   "E1T1E1",
   "E1T1E1T1E1",
@@ -370,7 +282,6 @@ fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
 # excl.fly = cbind(c(rep("WT",856)),
 #                  c("JG","RS","JD",rep("ES",12), rep("ES",400),rep("JG",120),rep("JE",221),rep("RS",100)),
 #                  c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,1:400,1:120,1:221,1:100)
-#
 #                  )
 
 #For Mutant data collected after Mar 20, 2017
