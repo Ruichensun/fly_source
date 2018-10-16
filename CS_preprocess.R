@@ -90,7 +90,6 @@ fly.info$Fly = as.numeric(fly.info$Fly)
 #                                   )
 
 
-
 fly.moving.speed = NULL
 fly.info.framerate = NULL
 fly.info.out = NULL
@@ -98,7 +97,6 @@ laser.status = NULL
 count = 0
 
 for (ind in 1:nrow(fly.info)) {
-  # query.sessions = gsub("X",fly.info$Category[ind],sessions)
   for (session in query.sessions) {
     input.file <-
       list.files(
@@ -139,10 +137,7 @@ for (ind in 1:nrow(fly.info)) {
     framerate = 50
     
     ## Read data
-    #fly.pos <- scan(input.file,
-    #                skip=1,quiet=T)
     fly.pos <- read.csv(input.file, stringsAsFactors = F)[, 1]
-    
     
     if (dim(read.csv(input.file, stringsAsFactors = F))[2] == 1) {
       laser.status <- rep(NA, length(fly.pos))#
@@ -155,7 +150,6 @@ for (ind in 1:nrow(fly.info)) {
     }#
     
     exp.time = length(fly.pos)
-    
     ## Processing for some special cases
     if (((fly.info$experimenter[ind] == "JG") &
          (fly.info$Fly[ind] <= 72))
@@ -187,13 +181,7 @@ for (ind in 1:nrow(fly.info)) {
       count = count + 1
       fly.moving.speed = c(fly.moving.speed,
                            get_fly_moving_speed(fly.pos, framerate))
-      cat(fly.info$Fly[ind],
-          fly.info$Category[ind],
-          input.file,
-          "\n",
-          sep = "\t")
     }
-    
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
     
@@ -214,7 +202,6 @@ for (ind in 1:nrow(fly.info)) {
       "_WT",
       ".csv"
     )
-    
     write.table(
       fly.pos.dat,
       output.file,
@@ -222,8 +209,6 @@ for (ind in 1:nrow(fly.info)) {
       quote = F,
       sep = ','
     )
-    
-    
     if (session == "E1") {
       fly.info.framerate = c(fly.info.framerate, framerate)
       fly.info.out = rbind(fly.info.out, fly.info[ind, ])
@@ -237,10 +222,8 @@ for (ind in 1:nrow(fly.info)) {
 colnames(fly.info.out) = colnames(fly.info)
 
 ###Potential variable for QC###
-
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
-
 write.table(
   fly.info.out,
   "data/fly_info_CS_preprocessed.csv",
@@ -248,6 +231,4 @@ write.table(
   quote = F,
   sep = ","
 )
-
-
 ## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp

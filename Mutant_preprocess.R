@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
 
-
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
@@ -9,8 +8,6 @@ get_fly_moving_speed <- function(x, framerate) {
   tot_moving_dist = sum(abs(diff(fly_pos)))
   return(tot_moving_dist / experiment_time)
 }
-
-
 
 query.sessions <- c(
   "E1",
@@ -71,7 +68,6 @@ query.sessions <- c(
 )
 query.sessions <- unique(query.sessions)
 
-
 ## read fly info
 ## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp
 fly.info = read.csv(
@@ -82,17 +78,6 @@ fly.info = read.csv(
 fly.info$Age = as.Date(fly.info$Exp.date, format = '%m/%d/%Y')  - as.Date(fly.info$Birth.date, format =
                                                                             '%m/%d/%Y')
 fly.info$Fly = as.numeric(fly.info$Fly)
-# fly.info$E1_loading_time <- sapply(strsplit(fly.info$E1_loading_time,"[:\ ]"),
-#                                    function(x) {
-#                                        if(x[3] == "PM" & x[1] >= 2){
-#                                            return("late")
-#                                        }else{
-#                                            return("early")
-#                                        }
-#                                    }
-#                                   )
-
-
 
 fly.moving.speed = NULL
 fly.info.framerate = NULL
@@ -100,7 +85,6 @@ fly.info.out = NULL
 count = 0
 
 for (ind in 1:nrow(fly.info)) {
-  # query.sessions = gsub("X",fly.info$Category[ind],sessions)
   for (session in query.sessions) {
     input.file <-
       list.files(
@@ -109,7 +93,6 @@ for (ind in 1:nrow(fly.info)) {
           fly.info$experimenter[ind],
           "/Mutants/CSV/"
         ),
-        
         pattern = paste0(
           "ProcessedData_Fly",
           fly.info$Fly[ind],
@@ -137,39 +120,28 @@ for (ind in 1:nrow(fly.info)) {
     if (length(input.file) == 0) {
       next
     }
-    
     framerate = 50
     
     ## Read data
-    #fly.pos <- scan(input.file,
-    #                skip=1,quiet=T)
     fly.pos <- read.csv(input.file, stringsAsFactors = F)[, 1]
     
     
     laser.status <- rep(NA, length(fly.pos))#
     if (dim(read.csv(input.file, stringsAsFactors = F))[2] == 2) {
-      #
       laser.status <-
         read.csv(input.file, stringsAsFactors = F)[, 2]#
-    }#
+    }
     
     exp.time = length(fly.pos)
     
     if ((fly.info$Fly[ind] <= 113) &
-        (fly.info$experimenter[ind] == "JG"))
-      # |(fly.info$experimenter[ind]=="LM")
-    {
+        (fly.info$experimenter[ind] == "JG")){
       fly.pos <- fly.pos[seq(1, exp.time, by = 2)]
-      
       laser.status <- rep(NA, length(fly.pos))#
-      
       if (dim(read.csv(input.file, stringsAsFactors = F))[2] == 2) {
-        #
         laser.status <-
           read.csv(input.file, stringsAsFactors = F)[, 2]#
-      }#
-      
-      
+      }
       framerate = 10
       print(framerate)
     }
@@ -178,19 +150,12 @@ for (ind in 1:nrow(fly.info)) {
       count = count + 1
       fly.moving.speed = c(fly.moving.speed,
                            get_fly_moving_speed(fly.pos, framerate))
-      cat(fly.info$Fly[ind],
-          fly.info$Category[ind],
-          input.file,
-          "\n",
-          sep = "\t")
     }
-    
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
     
     # fly.pos.dat = data.frame(fly.pos)
     # colnames(fly.pos.dat) = paste0("fly_pos;framerate=",framerate)
-    
     dir.create(
       paste0("data/", fly.info$experimenter[ind], "/mutants/"),
       showWarnings = FALSE,
@@ -209,8 +174,6 @@ for (ind in 1:nrow(fly.info)) {
       fly.info$Genotype[ind],
       ".csv"
     )
-    
-    
     write.table(
       fly.pos.dat,
       output.file,
@@ -218,8 +181,6 @@ for (ind in 1:nrow(fly.info)) {
       quote = F,
       sep = ','
     )
-    
-    
     if (session == "E1") {
       fly.info.framerate = c(fly.info.framerate, framerate)
       fly.info.out = rbind(fly.info.out, fly.info[ind, ])
@@ -233,8 +194,6 @@ colnames(fly.info.out) = colnames(fly.info)
 
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
-
-
 write.table(
   fly.info.out,
   "data/fly_info_mutants_preprocessed.csv",
