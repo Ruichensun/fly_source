@@ -324,7 +324,7 @@
         metric.df$Category == category &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       y = append(y, list(na.omit(z)))
     }
     for (category in c("N")) {
@@ -339,7 +339,7 @@
         metric.df$Category == category &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       y = append(y, list(na.omit(z)))
     }
     ## input sessions data
@@ -356,7 +356,7 @@
           metric.df$Category == "T" &
           metric.df$Fly %in% query.fly&
           metric.df$Experimenter  %in%  query.experimenter
-        z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+        z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
 
       }
       if (grepl("R", session) == T) {
@@ -370,7 +370,7 @@
           metric.df$Category == "R" &
           metric.df$Fly %in% query.fly&
           metric.df$Experimenter  %in%  query.experimenter
-        z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+        z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       }
       if (grepl("N", session) == T) {
         ind.E1 <- metric.df$Session == "E1" &
@@ -383,7 +383,7 @@
           metric.df$Category == "N" &
           metric.df$Fly %in% query.fly&
           metric.df$Experimenter  %in%  query.experimenter
-        z = (metric.df[ind,"Value"] - metric.df[ind.E1,"Value"])/metric.df[ind.E1,"Value"]
+        z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       }
       y = append(y, list(na.omit(z)))
     }
@@ -448,7 +448,7 @@
                   )
     
     pdf(
-      "LearningIndexComparison_DopR_MB_CX_only_092818.pdf",
+      "LearningIndexComparison_DopR_MB_CX_only_101718.pdf",
       onefile = T,
       width = 20
     )
@@ -456,7 +456,7 @@
     boxplot(
       Value ~ Genotype_Sessions,
       data = input.y.df,
-      ylim = c(-2,20), #Value set for metric #29
+      ylim = c(-2,2), #Value set for metric #29
       outline = F,
       notch = T,
       lwd = 2,
@@ -484,7 +484,7 @@
     }
     
     text(x = (1:length(levels(input.y.df$Genotype_Sessions))) - 0.1,
-         y = 18,
+         y = 1.5,
          labels = number_of_data,
          xpd = T,
          srt = 0,
@@ -507,7 +507,7 @@
                 )) {
     # for (i in c(3)) {
       lines(c(i, i) + 0.5,
-            c(0 - 1e3, 20 + 1e3),
+            c(0 - 1e3, 5 + 1e3),
             col = "light grey",
             lty = 1)
     }

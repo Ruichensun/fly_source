@@ -549,7 +549,6 @@ for (ind in 1:length(metrices)) {
   ##print(metrices[ind])
 }
 
-
 write.table(
   metrices,
   "metrics/list_metrices.csv",
