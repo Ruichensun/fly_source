@@ -1,9 +1,12 @@
-#We define learning index as (3rd E1's performance - 1st E1's performance)/(1st E1's performance), calculated at an individual level.
+#We define learning index as (1st E1's performance - 3rd E1's performance)/(1st E1's performance), calculated at an individual level.
 #This script follows the laser_power_based_segmentation.R, and cannot be run prior to running laser_power_based_segmentation.R
 
     input.y.df = data.frame()
     p_value_sum = matrix(nrow = 0, ncol = 9)
-    
+    input.y.T = list()
+    input.y.R = list()
+    input.y.N = list()
+      
     sessions <- c(                     
       "E1T1",                   #4
       "E1T1E1",                 #5 
@@ -412,6 +415,9 @@
     input.y.df.pre = data.frame(input.yy, yy.label)
     
     input.y.df = rbind(input.y.df, input.y.df.pre)
+    input.y.T = append(input.y.T, list(input.y_3T))
+    input.y.R = append(input.y.R, list(input.y_3R))
+    input.y.N = append(input.y.N, list(input.y_3N))
     
     colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     

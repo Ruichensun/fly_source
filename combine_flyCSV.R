@@ -7,12 +7,15 @@ setwd("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter")
 input_files <- c("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JD/Mutants/CSV/Behavioral Experiments - Mutants_JD.csv",
                  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/SW/Mutants/CSV/Behavioral Experiments - Mutants_SW.csv",
                  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/JG/Mutants/CSV/Behavioral Experiments - Mutants_JG.csv",
-                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/ES/Mutants/CSV/Behavioral Experiments - Mutants_ES.csv")
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/ES/Mutants/CSV/Behavioral Experiments - Mutants_ES.csv",
+                 "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/XC/Mutants/CSV/Behavioral Experiments - Mutants_XC.csv"
+                 )
 
 experimenter <- c("JD",
                   "SW",
                   "JG",
-                  "ES"
+                  "ES",
+                  "XC"
           );
 
 output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_mutants.csv"

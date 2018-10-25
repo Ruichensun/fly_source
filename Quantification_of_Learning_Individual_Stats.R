@@ -90,7 +90,7 @@ write.table(
 )
 fly_genotype = "CS"
 
-metric.ind = 23
+metric.ind = 29
 
 input.file = paste0("metrics/metric_", metric.ind, ".csv")
 if (!file.exists(input.file)) {

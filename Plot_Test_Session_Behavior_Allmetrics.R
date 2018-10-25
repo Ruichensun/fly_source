@@ -107,9 +107,21 @@ write.table(
   sep = ","
 )
 
+#"MB419B x JU30" flies
+query.genotype <- c("MB419B x JU30")
+query.fly = fly.info.include[((fly.info.include$Genotype == "MB419B x JU30")), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB419B x JU30")), ]$experimenter
+write.table(
+  fly.info.include[((fly.info.include$Genotype == "MB419B x JU30")), ],
+  "fly_info_include_419B.csv",
+  col.names = T,
+  row.names = F,
+  quote = F,
+  sep = ","
+)
 
 #R60D05 x JU30 flies
-query.genotype <- c("R60 D05 x JU30","R60D05 X JU30","R60D05 X JU30")
+query.genotype <- c("R60D05 x JU30")
 query.fly = fly.info.include[(fly.info.include$Genotype == "R60D05 x JU30"),]$Fly
 query.experimenter = fly.info.include[(fly.info.include$Genotype == "R60D05 x JU30"),]$experimenter
 write.table(
@@ -246,14 +258,15 @@ sessions <- c(
 
 pdf(
   # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-  "fly_metric_allmetricdf_CS_allflies_Filter1_101618.pdf",
-  # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_063018.pdf",
+  # "fly_metric_allmetricdf_CS_allflies_Filter1_101618.pdf",
+  # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_101718.pdf",
+  "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_101718.pdf",
   # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_063018.pdf",
   # "fly_metric_allmetricdf_MB131BxJU30_allflies_Filter1_063018.pdf",
+  # "fly_metric_allmetricdf_MB419BxJU30_allflies_Filter1_063018.pdf",
   # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_063018.pdf",
   # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_SUN3_allflies_Filter1_063018.pdf",
+  # "fly_metric_allmetricdf_SUN3_allflies_Filter1_101718.pdf",
   onefile = T,
   width = 10
 )
@@ -623,11 +636,12 @@ rownames(p_value_summary) = c("1T-1N",
 
 write.table(
   p_value_summary,
-  "P_VALUE_SUMMARY_CS_101618.csv",
+  # "P_VALUE_SUMMARY_CS_101618.csv",
   # "P_VALUE_SUMMARY_R60D05xJU30.csv",
-  # "P_VALUE_SUMMARY_JG17xJU30.csv",
+  "P_VALUE_SUMMARY_JG17xJU30.csv",
   # "P_VALUE_SUMMARY_MB009BxJU30.csv",
   # "P_VALUE_SUMMARY_MB131BxJU30.csv",
+  # "P_VALUE_SUMMARY_MB419BxJU30.csv",
   # "P_VALUE_SUMMARY_MB607BxJU30.csv",
   # "P_VALUE_SUMMARY_R60D05xPKCi.csv",
   # "P_VALUE_SUMMARY_JG17xPKCi.csv",
