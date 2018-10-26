@@ -258,15 +258,15 @@ sessions <- c(
 
 pdf(
   # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_CS_allflies_Filter1_101618.pdf",
-  # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_101718.pdf",
-  "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_101718.pdf",
-  # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_MB131BxJU30_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_MB419BxJU30_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_063018.pdf",
+  "fly_metric_allmetricdf_CS_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_MB131BxJU30_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_MB419BxJU30_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_SUN3_allflies_Filter1_101718.pdf",
+  # "fly_metric_allmetricdf_SUN3_allflies_Filter1_102518.pdf",
   onefile = T,
   width = 10
 )
@@ -636,9 +636,9 @@ rownames(p_value_summary) = c("1T-1N",
 
 write.table(
   p_value_summary,
-  # "P_VALUE_SUMMARY_CS_101618.csv",
+  # "P_VALUE_SUMMARY_CS_102518.csv",
   # "P_VALUE_SUMMARY_R60D05xJU30.csv",
-  "P_VALUE_SUMMARY_JG17xJU30.csv",
+  # "P_VALUE_SUMMARY_JG17xJU30.csv",
   # "P_VALUE_SUMMARY_MB009BxJU30.csv",
   # "P_VALUE_SUMMARY_MB131BxJU30.csv",
   # "P_VALUE_SUMMARY_MB419BxJU30.csv",
