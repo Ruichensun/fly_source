@@ -79,16 +79,6 @@ fly.info = read.csv(
 fly.info$Age = as.Date(fly.info$Exp.date, format = '%m/%d/%Y')  - as.Date(fly.info$Birth.date, format =
                                                                             '%m/%d/%Y')
 fly.info$Fly = as.numeric(fly.info$Fly)
-# fly.info$E1_loading_time <- sapply(strsplit(fly.info$E1_loading_time,"[:\ ]"),
-#                                    function(x) {
-#                                        if(x[3] == "PM" & x[1] >= 2){
-#                                            return("late")
-#                                        }else{
-#                                            return("early")
-#                                        }
-#                                    }
-#                                   )
-
 
 fly.moving.speed = NULL
 fly.info.framerate = NULL
@@ -105,7 +95,6 @@ for (ind in 1:nrow(fly.info)) {
           fly.info$experimenter[ind],
           "/CS/CSV/"
         ),
-        
         pattern = paste0(
           "ProcessedData_Fly",
           fly.info$Fly[ind],
@@ -133,7 +122,6 @@ for (ind in 1:nrow(fly.info)) {
     if (length(input.file) == 0) {
       next
     }
-    
     framerate = 50
     
     ## Read data
