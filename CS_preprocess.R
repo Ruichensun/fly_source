@@ -1,5 +1,5 @@
-#!/usr/bin/env Rscript
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/combine_flyCSV.R")
 
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
@@ -8,7 +8,6 @@ get_fly_moving_speed <- function(x, framerate) {
   tot_moving_dist = sum(abs(diff(fly_pos)))
   return(tot_moving_dist / experiment_time)
 }
-
 
 query.sessions <- c(
   "E1",
@@ -72,7 +71,7 @@ query.sessions <- unique(query.sessions)
 ## read fly info
 ## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp
 fly.info = read.csv(
-  "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS.csv",
+  "D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/fly_info_CS.csv",
   header = T,
   stringsAsFactors = F
 )
@@ -91,7 +90,7 @@ for (ind in 1:nrow(fly.info)) {
     input.file <-
       list.files(
         path = paste0(
-          "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/",
+          "D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/",
           fly.info$experimenter[ind],
           "/CS/CSV/"
         ),

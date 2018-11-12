@@ -1,6 +1,7 @@
-#!/usr/bin/env Rscript
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
-source("fly_source/get_fly_speed_and_position.R")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/prepoccess.R")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/get_fly_speed_and_position.R")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
 
 metrices = c(
   "Number of Pause Starts", #1
@@ -37,35 +38,35 @@ metrices = c(
 )
 
 sessions <- c(
- 
+  
   "E1",
   "E1T1E1",
   "E1T1E1T1E1",
   "E1T1E1T1E1T1E1",
   "E1T1E1T1E1T1E1T1E1",
-
+  
   "E1T1E1T1E1T2E1",
   "E1T1E1T1E1T2E1T2E1",
-
+  
   "E1T2E1",
   "E1T2E1T2E1",
   "E1T2E1T2E1T1E1",
   "E1T2E1T2E1T1E1T1E1",
-
+  
   "E1R1E1",
   "E1R1E1R1E1",
   "E1R1E1R1E1R1E1",
   "E1R1E1R1E1R1E1R1E1",
-
+  
   "E1N1E1",
   "E1N1E1N1E1",
   "E1N1E1N1E1N1E1",
   "E1N1E1N1E1N1E1N1E1",
-
+  
   "E1T1E1R1E1",
   "E1T1E1R1E1R1E1",
   "E1T1E1T1E1R1E1R1E1",
-
+  
   "E1T1E1N1E1",
   "E1T1E1N1E1N1E1",
   "E1T1E1T1E1N1E1N1E1"
@@ -78,37 +79,32 @@ spec = NULL
 fly.names = NULL
 
 ## WT
-## ofs - one fly statistics
 all_ofs_WT = list()
 for(session in sessions){
   all_ofs_WT = append(all_ofs_WT,list(c()))
 }
-## read fly info
-## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp,Framerate
 fly.info = read.csv("data/fly_info_CS_preprocessed.csv",header=T,stringsAsFactors=F)
-# fly.info.trained = fly.info[fly.info$Category=="T",]
 
 for(ind in 1:nrow(fly.info)){
-    # query.sessions = gsub("X",fly.info$Category[ind],sessions)
-    for(ind.session in 1:length(query.sessions)){
-        input.file <- list.files(path = paste0("data/",
-                                     fly.info$experimenter[ind],
-                                     "/CS/"),                             
-                                 pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
-                                     "_",query.sessions[ind.session],
-                                     "_WT",
-                                     ".csv"),
-                                 full.names=T
-                                 )
-        if(length(input.file) == 0){
-            all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(NA))
-            next
-        }   
-        framerate = fly.info$Framerate[ind]        
-        ofs = one_fly_statistics(input.file,framerate=framerate)
-        
-        all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(ofs))
-    }
+  for(ind.session in 1:length(query.sessions)){
+    input.file <- list.files(path = paste0("data/",
+                                           fly.info$experimenter[ind],
+                                           "/CS/"),                             
+                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
+                                              "_",query.sessions[ind.session],
+                                              "_WT",
+                                              ".csv"),
+                             full.names=T
+    )
+    if(length(input.file) == 0){
+      all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(NA))
+      next
+    }   
+    framerate = fly.info$Framerate[ind]        
+    ofs = one_fly_statistics(input.file,framerate=framerate)
+    
+    all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(ofs))
+  }
 }
 
 ## Mutants
@@ -116,17 +112,14 @@ all_ofs_mutants = list()
 for(session in sessions){
   all_ofs_mutants = append(all_ofs_mutants,list(c()))
 }
-
-## read fly info
-## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp,Framerate
-fly.info = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
-for(ind in 1:nrow(fly.info)){
-  query.sessions = gsub("X",fly.info$Category[ind],sessions)
+fly.info.mutant = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
+for(ind in 1:nrow(fly.info.mutant)){
+  query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
+    input.file <- list.files(path = paste0("data/", fly.info.mutant$experimenter[ind], "/mutants/"),                             
+                             pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
                                               "_",query.sessions[ind.session],
-                                              "_",fly.info$Genotype[ind],
+                                              "_",fly.info.mutant$Genotype[ind],
                                               ".csv"),
                              full.names=T
     )
@@ -134,7 +127,7 @@ for(ind in 1:nrow(fly.info)){
       all_ofs_mutants[[sessions[ind.session]]] = append(all_ofs_mutants[[sessions[ind.session]]],list(NA))
       next
     }   
-    framerate = fly.info$Framerate[ind]        
+    framerate = fly.info.mutant$Framerate[ind]        
     ofs = one_fly_statistics(input.file,framerate=framerate)
     
     all_ofs_mutants[[sessions[ind.session]]] = append(all_ofs_mutants[[sessions[ind.session]]],list(ofs))
@@ -142,17 +135,17 @@ for(ind in 1:nrow(fly.info)){
 }
 save.image("all_ofs.Rdata")
 
-#Fly constant time controls
+#CS_constant
 all_ofs_constant = list()
 for(session in sessions){
   all_ofs_constant = append(all_ofs_constant,list(c()))
 }
-fly.info = read.csv("data/fly_info_CS_constant_preprocessed.csv",header=T,stringsAsFactors=F)
-for(ind in 1:nrow(fly.info)){
-  query.sessions = gsub("X",fly.info$Category[ind],sessions)
+fly.info.constant = read.csv("data/fly_info_CS_constant_preprocessed.csv",header=T,stringsAsFactors=F)
+for(ind in 1:nrow(fly.info.constant)){
+  query.sessions = gsub("X",fly.info.constant$Category[ind],sessions)
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS_constant/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
+    input.file <- list.files(path = paste0("data/", fly.info.constant$experimenter[ind], "/CS_constant/"),                             
+                             pattern = paste0("ProcessedData_Fly",fly.info.constant$Fly[ind],
                                               "_",query.sessions[ind.session],
                                               "_WT",
                                               ".csv"),
@@ -162,7 +155,7 @@ for(ind in 1:nrow(fly.info)){
       all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(NA))
       next
     }   
-    framerate = fly.info$Framerate[ind]        
+    framerate = fly.info.constant$Framerate[ind]        
     ofs = one_fly_statistics(input.file,framerate=framerate)
     all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(ofs))
   }
