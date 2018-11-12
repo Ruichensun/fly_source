@@ -1,5 +1,5 @@
 # setwd("C:/Users/Ruichen/Desktop/data/csvdata")  ##Import the function for obtaining statistics of each experiment
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 library(Hmisc)
 library(ggplot2)

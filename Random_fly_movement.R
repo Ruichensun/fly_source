@@ -1,9 +1,6 @@
 # To run this file, one needs to first obtain "metric.df.WT.R1" information from the "laser_power_based_segmentation.R" file.
 
 ####Testing a few samples####
-setwd(
-  "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS/"
-)
 
 # moving_status = function(input_file){
 #

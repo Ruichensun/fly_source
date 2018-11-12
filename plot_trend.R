@@ -1,6 +1,6 @@
 # Prepare data file names
 # data_dir = "D:/Behavioral_project/Behavior Experiment Data/Analysis/YP_051617/analysis/data/JD/CS"
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 library(zoo)
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos 

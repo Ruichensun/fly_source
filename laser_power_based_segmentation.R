@@ -118,7 +118,7 @@ one_fly_laser_statistics <- function(input_file,
 
 #Step 2: Run the function from Step 1 on all files.
 
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 sessions <- c(
   "E1",
   "E1T1",

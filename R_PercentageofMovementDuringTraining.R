@@ -1,6 +1,6 @@
 # source("plot_trend.R")
 # Requires fly_pos_to_moving_status function from "plot_trend.R"
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
 Delay_of_Laser_On_Off = function(input_file){
