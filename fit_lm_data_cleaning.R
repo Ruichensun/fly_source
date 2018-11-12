@@ -1,13 +1,12 @@
-#!/usr/bin/env Rscript
-# source("get_fly_speed_and_position.R")
-setwd("D:/Behavioral_project/Behavior Experiment Data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/get_fly_stats.R")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/Checking_fly_numbers.R")
 
 load("all_ofs.Rdata")
 
 pass_fly_QC <- function(input_file,
                         framerate = 50,
                         speed_max_thres = 50,
-                        #changed to 50 on April 2018
                         speed_zero_thres = 1e-2,
                         pause_frame_thres = 25,
                         chamber_end_thres = 50) {
@@ -19,7 +18,6 @@ pass_fly_QC <- function(input_file,
       sep = ",",
       stringsAsFactors = F
     )
-    # x=input_file
   }, error = function(e) {
     stop(paste0(
       "Input file is empty!:\n",
@@ -39,19 +37,15 @@ pass_fly_QC <- function(input_file,
   x = as.numeric(x[, 1])
   fly_num = sapply(strsplit(input_file, "_"), function(x)
     return(gsub("Fly", "", x[2])))
-  data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
+  data_start = 21 
   fly_pos = x[data_start:min(600 * framerate, length(x))]
-  
   experiment_time = length(fly_pos)
-  
   ##Get the transient speed
   if (data_start > 1) {
     fly_speed = diff(c(x[data_start - 1], fly_pos))
   } else {
     fly_speed = diff(c(NA, fly_pos))
   }
-  ## Get the time spans when fly paused
-  ## A pause is a time span with greater than 10 continous frames at speed 0
   pause_start = NULL
   pause_end = NULL
   potential_pause_start = 1
@@ -63,27 +57,21 @@ pass_fly_QC <- function(input_file,
   for (t in 2:experiment_time) {
     if (fly_speed[t] == 0) {
       if (current_zero_length == 0) {
-        ## Start new counting
         potential_pause_start = t
         current_zero_length = current_zero_length + 1
       } else{
-        ## Continue counting
         current_zero_length = current_zero_length + 1
       }
     } else{
       if (current_zero_length >= pause_frame_thres) {
-        ## Counting is long enough to be a pause
         pause_start = c(pause_start, potential_pause_start)
         pause_end = c(pause_end, t - 1)
         is_pause[potential_pause_start:(t - 1)] = 1
       }
-      ## Reset counting
       current_zero_length = 0
     }
   }
-  ## The speed at last time point is zero otherwise current_zero_length will 0
   if (current_zero_length >= pause_frame_thres) {
-    ## Record the time span as a pause
     pause_start = c(pause_start, potential_pause_start)
     pause_end = c(pause_end, experiment_time)
     is_pause[potential_pause_start:experiment_time] = 1
@@ -95,6 +83,66 @@ pass_fly_QC <- function(input_file,
   else {
     return(TRUE)
   }
+}
+
+data_filter <- function(filter, fly.info){
+  if (filter == 1) {
+    ind.include = NULL
+    for (genotype in unique(fly.info$Genotype)) {
+      if (genotype == "CS") {
+        next
+      }
+      if (genotype == "WT") {
+        ind = fly.info$Genotype %in% c("WT", "CS") &
+          !(1:nrow(fly.info) %in% ind.excl)
+      }
+      else{
+        ind = fly.info$Genotype == genotype &
+          !(1:nrow(fly.info) %in% ind.excl)
+      }
+      fms <- fly.info$Fly.moving.speed[ind]
+      rank_fms = rank(fms)
+      ind.filter =  rank_fms <= length(fms) * 1 & rank_fms >= length(fms) * 0.3
+      ind.include = c(ind.include, which(ind)[ind.filter])
+    }
+  }
+  if (filter == 2) {
+    ind.include = NULL
+    session = "E1"
+    for (ind in 1:nrow(fly.info)) {
+      if (fly.info$Genotype[ind] == "WT") {
+        input.file <- paste0(
+          "data/",
+          fly.info$experimenter[ind],
+          "/CS/",
+          "ProcessedData_Fly",
+          fly.info$Fly[ind],
+          "_",
+          session,
+          "_WT",
+          ".csv"
+        )
+      } else{
+        input.file <- paste0(
+          "data/",
+          fly.info$experimenter[ind],
+          "/Mutants/",
+          "ProcessedData_Fly",
+          fly.info$Fly[ind],
+          "_",
+          session,
+          "_",
+          fly.info$Genotype[ind],
+          ".csv"
+        )
+      }
+      framerate =	fly.info$Framerate[ind]
+      if (pass_fly_QC(input.file, framerate)) {
+        ind.include = c(ind.include, ind)
+      }
+    }
+  }
+  return(ind.include)
 }
 
 metrices = c(
@@ -200,120 +248,28 @@ shared.info = c(
 
 fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
 
-
-
-## Further filtering
-# JG-CS-30
-# RS-CS-58
-# JD-CS-48
-# CS,69,ES
-# CS,86,ES
-# CS,89,ES
-# CS,113,ES
-# CS,163,ES
-# CS,164,ES
-# CS,165,ES
-# CS,202,ES
-# CS,213,ES
-# CS,234,ES
-# CS,249,ES
-# CS,253,ES
-#For WT data collected after Mar 20, 2017
-# excl.fly = cbind(c(rep("WT",856)),
-#                  c("JG","RS","JD",rep("ES",12), rep("ES",400),rep("JG",120),rep("JE",221),rep("RS",100)),
-#                  c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,1:400,1:120,1:221,1:100)
-#                  )
-
-#For Mutant data collected after Mar 20, 2017
-# excl.fly = cbind(c(rep("WT",713),rep("R3",4),"R5",rep("R3",2)),
-#
-#                  c(rep("ES",308),rep("JG",313),rep("JE",88),rep("RS",4),rep("SW",7)),
-#                  c(1:308,
-#                    1:313,
-#                    1:88,
-#                    61:64,
-#                    25:28,49:51
-#                    )
-# )
 #For Mutant data collected after Mar 20, 2017
 excl.fly.Mutant = na.omit(read.csv(
   "excl_fly_mutant.csv",
   header = T,
   stringsAsFactors = F
-)[, 1:3]) #Added June 12, 2017
+)[, 1:3])
 
 excl.fly.WT = data.frame(cbind(
   
-  # c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,277:400,1:120,1:221,1:100), 
   #Batch 1 ES-WT: 1-276; 
   #Batch 2 ES-WT: 276-400; 
   #Batch 3 ES-WT: 400-present (as of June 28, 2017)
-  
-  c(58, 48, 1:400, 1:100, 1:40,118,122),
-  # c("JG","RS","JD",rep("ES",12), rep("ES",124),rep("JG",120),rep("JE",221),rep("RS",100)),
-  c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
-  #added JD's 40 flies on 5/19/18, maybe removed later
-  
-  c(rep("WT", 544))
+   c(58, 48, 1:400, 1:100, 1:40,118,122),
+   c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
+   c(rep("WT", 544))
 ))
 colnames(excl.fly.WT) = colnames(excl.fly.Mutant)
 excl.fly = rbind(excl.fly.Mutant,
                  excl.fly.WT)
 
-# #For WT data collected between Jan,2017 - Mar. 2017
-# excl.fly = cbind(c(rep("WT",831)),
-#                  c("JG","RS","JD",
-#                    rep("ES",12),
-#                    rep("ES",276),rep("ES",102),
-#                    rep("JG",72),rep("JG",4),
-#                    rep("JE",181),
-#                    rep("RS",72),rep("RS",4),
-#                    rep("JD",72),
-#                    rep("SW",33)
-#                    ),
-#                  c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,
-#                    1:276,401:502,
-#                    1:72,117:120,
-#                    1:181,
-#                    1:72,101:104,
-#                    1:72,
-#                    1:33
-#                    )
-# )
-
-#For WT data collected between July, 2016 - Dec. 2016
-# excl.fly = cbind(c(rep("WT",791)),
-#                  c("JG","RS","JD",
-#                    rep("ES",12),
-#                    rep("ES",226),
-#                    rep("JG",120),
-#                    rep("JE",221),
-#                    rep("RS",104),
-#                    rep("JD",72),
-#                    rep("SW",33)
-#                  ),
-#                  c(30,58,48,69,86,89,113,163:165,202,213,234,249,253,
-#                    277:502,
-#                    1:120,
-#                    1:221,
-#                    1:104,
-#                    1:72,
-#                    1:33
-#                  )
-# )
-
 ind.excl = NULL
 for (ind in 1:nrow(excl.fly)) {
-  # for(ind in 1:100){
-  # ##CS data
-  #  ind.excl = c(ind.excl,
-  #               which(fly.info$Genotype == excl.fly[ind,1] &
-  #                       fly.info$experimenter == excl.fly[ind,2] &
-  #                       fly.info$Fly == excl.fly[ind,3]
-  #               )
-  #  )
-  
-  
   #Mutant data
   ind.excl = c(
     ind.excl,
@@ -325,76 +281,13 @@ for (ind in 1:nrow(excl.fly)) {
   )
 }
 
-## Filter1
-# Filter 1, ensemble filtering
-ind.include = NULL
-for (genotype in unique(fly.info$Genotype)) {
-  if (genotype == "CS") {
-    next
-  }
-  if (genotype == "WT") {
-    ind = fly.info$Genotype %in% c("WT", "CS") &
-      !(1:nrow(fly.info) %in% ind.excl)
-  }
-  else{
-    ind = fly.info$Genotype == genotype &
-      !(1:nrow(fly.info) %in% ind.excl)
-  }
-  fms <- fly.info$Fly.moving.speed[ind]
-  rank_fms = rank(fms)
-  # ind.filter =  rank_fms <= length(fms) * 0.95 &
-  #   rank_fms >= length(fms) * 0.2
-  ind.filter =  rank_fms <= length(fms) * 1 &
-    #changed from 1 to 0.95 on Apr 13, 2018; Back to 1 on Apr 23, 2018
-    rank_fms >= length(fms) * 0.3
-  ind.include = c(ind.include, which(ind)[ind.filter])
-}
+ind.include = data_filter(1, fly.info)
 
-
-##Filter2
-ind.include = NULL
-session = "E1"
-for (ind in 1:nrow(fly.info)) {
-  if (fly.info$Genotype[ind] == "WT") {
-    input.file <- paste0(
-      "data/",
-      fly.info$experimenter[ind],
-      "/CS/",
-      "ProcessedData_Fly",
-      fly.info$Fly[ind],
-      "_",
-      session,
-      "_WT",
-      ".csv"
-    )
-  } else{
-    input.file <- paste0(
-      "data/",
-      fly.info$experimenter[ind],
-      "/Mutants/",
-      "ProcessedData_Fly",
-      fly.info$Fly[ind],
-      "_",
-      session,
-      "_",
-      fly.info$Genotype[ind],
-      ".csv"
-    )
-  }
-  framerate =	fly.info$Framerate[ind]
-  # fly.pos <- read.csv(input.file,stringsAsFactors = F)[,1]
-  if (pass_fly_QC(input.file, framerate)) {
-    ind.include = c(ind.include, ind)
-  }
-}
-
-## Exclude all WT
+# Exclude all WT
 # ind.excl = unique(c(ind.excl,which(fly.info$Genotype=="WT")))
-
-#Need to run this line for filter2
+# Need to run this line for filter2
 # ind.include = ind.include[!(ind.include %in% ind.excl)]
 
-# write.csv(fly.info,
 write.csv(
   fly.info[ind.include, ],
   "data/fly_info.csv",
@@ -403,20 +296,14 @@ write.csv(
 )
 
 fly.info.include = fly.info[ind.include,]
+checking_fly_numbers(fly.info.include, filename="Mutants_headcount_111118.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
-  # if(ind == 20 | metrices[ind] == "State_transitions (Pause not at the end): pp, pw, ww, wp"){
-  #     next
-  # }
-  
   metric.df = NULL
-  
   for (session in sessions) {
-    # print(session)
     metric <- sapply(all_ofs[[session]],
                      function(x) {
-                       ##if((length(x) == 1) & (is.na(x))){
                        if (length(x) == 1) {
                          return(NA)
                        } else{
@@ -429,26 +316,19 @@ for (ind in 1:length(metrices)) {
       array.session[i] = gsub("X", fly.info$Category[i], array.session[i])
     }
     
-    array.age = fly.info$Age
-    array.age[array.age > 5] = 5
-    #array.age[array.age < 3] = 3
-    
     metric.df <- rbind(
       metric.df,
       cbind(
         metric,
-        
         fly.info$Fly,
         fly.info$Category,
         fly.info$Gender,
         fly.info$Genotype,
         fly.info$experimenter,
-        # array.age, #changed to fly.info$Age on Apr 23
         fly.info$Age,
         fly.info$Setup,
         array.session
       )[ind.include, ]
-      # ) #Need to change depending whether there is a need to segment the fly population, in other words, the value of ind.include
     )
   }
   colnames(metric.df) = c(
@@ -468,15 +348,12 @@ for (ind in 1:length(metrices)) {
   for (i in 1:ncol(metric.df)) {
     metric.df[, i] = unlist(metric.df[, i])
   }
-  
   metric.df$Setup <- factor(metric.df$Setup,
                             levels = levels(metric.df$Setup)[c(2, 1, 3, 4)])
-  metric.df$Age <-
-    factor(metric.df$Age, levels = levels(metric.df$Age)[c(3, 1, 2, 4)])
-  
+  metric.df$Age <- factor(metric.df$Age, levels = levels(metric.df$Age)[c(3, 1, 2, 4)])
   metric.df$Value = as.numeric(as.character(metric.df$Value))
   
-  ###Need to update batch info!!####
+  # Need to update batch info
   # metric.df$batch = as.numeric(as.character(metric.df$fly))
   #
   # metric.df$batch[metric.df$batch <= 276] = 1
@@ -488,8 +365,6 @@ for (ind in 1:length(metrices)) {
   
   #metric.df = na.omit(metric.df)
   #metric.df = metric.df[complete.cases(metric.df),]
-  
-  
   # ## NO LM FIT
   # write.table(metric.df,
   #             paste0("metrics/metric_",ind,".csv"),
@@ -544,9 +419,6 @@ for (ind in 1:length(metrices)) {
     quote = F,
     sep = ","
   )
-  
-  # print(paste("Finished metric", ind))
-  ##print(metrices[ind])
 }
 
 write.table(
