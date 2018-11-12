@@ -1,6 +1,20 @@
-## Parameters
-
 setwd("D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter")
+
+
+combine_flyCSV <- function(input_files, output_file){
+  all_info = NULL;
+  for(i in 1:length(input_files)){
+    info = read.csv(input_files[i],header=T,stringsAsFactors=F)
+    info$experimenter = experimenter[i]
+    info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
+    all_info = rbind(all_info,info)
+  }
+  
+  write.table(all_info,
+              output_file,
+              quote=F,row.names=F,col.names=T,sep=",")  
+}
+
 
 #Mutants
 
@@ -70,14 +84,5 @@ experimenter <- c(
 output_file = "D:/Behavioral_project/Behavior Experiment Data/Sorted_data_experimenter/fly_info_CS_constant.csv"
 
 #Add unique identifier to the master chart
-all_info = NULL;
-for(i in 1:length(input_files)){
-    info = read.csv(input_files[i],header=T,stringsAsFactors=F)
-    info$experimenter = experimenter[i]
-    info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
-    all_info = rbind(all_info,info)
-}
 
-write.table(all_info,
-            output_file,
-            quote=F,row.names=F,col.names=T,sep=",")
+
