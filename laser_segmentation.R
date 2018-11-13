@@ -18,14 +18,13 @@ mean_of_Training_session = c(mean(metric.df.WT[metric.df.WT$Session == "E1T1", ]
 median_of_Training_session = c(median(metric.df.WT[metric.df.WT$Session == "E1T1", ]$Value, na.rm = T),
                                median(metric.df.WT[metric.df.WT$Session == "E1T1E1T1", ]$Value, na.rm = T),
                                median(metric.df.WT[metric.df.WT$Session == "E1T1E1T1E1T1", ]$Value, na.rm = T),
-                               median(metric.df.WT[metric.df.WT$Session == "E1T1E1T1E1T1E1T1", ]$Value, na.rm = T)
-                              )
+                               median(metric.df.WT[metric.df.WT$Session == "E1T1E1T1E1T1E1T1", ]$Value, na.rm = T))
+
 #Number of flies in each session (with valid heat exposure duration recorded)
 counts_of_Training_session = c(sum(!is.na(metric.df.WT[metric.df.WT$Session == "E1T1", ]$Value)),
                                sum(!is.na(metric.df.WT[metric.df.WT$Session == "E1T1E1T1", ]$Value)),
                                sum(!is.na(metric.df.WT[metric.df.WT$Session == "E1T1E1T1E1T1", ]$Value)),
                                sum(!is.na(metric.df.WT[metric.df.WT$Session == "E1T1E1T1E1T1E1T1", ]$Value)))
-
 
 metric.df.WT.E1T1 = metric.df.WT[(metric.df.WT$Session == "E1T1") & (!is.na(metric.df.WT$Value)), ]
 longer_heat_1stT1 = metric.df.WT.E1T1[metric.df.WT.E1T1$Value >= median(metric.df.WT.E1T1$Value), ]

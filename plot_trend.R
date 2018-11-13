@@ -4,10 +4,12 @@ library(zoo)
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos; Output: a vector of 0 and 1 of (length of input) - 1 
 fly_pos_to_moving_status = function(fly_pos){ 
-  # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% corresponds to 28.6
+  # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% 
+  # corresponds to 28.6
   speed_threshold = 28 
   fly_moving_status = diff(fly_pos)
-  # Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than a speed threshold
+  # Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than 
+  # a speed threshold
   fly_moving_status_discretized = replace(fly_moving_status, fly_moving_status >
                                             speed_threshold, 0)
   fly_moving_status_discretized = replace(fly_moving_status_discretized,
@@ -60,9 +62,18 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
   return(cumsums)
 }
 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") | (fly.info.include$Genotype == "CS")) & (fly.info.include$Category =="T") & (fly.info.include$experimenter!="SW"), ]
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") | (fly.info.include$Genotype == "CS")) & (fly.info.include$Category == "R") & (fly.info.include$experimenter!="SW"), ]
-fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") | (fly.info.include$Genotype == "CS")) & (fly.info.include$Category == "N") & (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") | 
+                                        (fly.info.include$Genotype == "CS")) & 
+                                        (fly.info.include$Category =="T") & 
+                                        (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") | 
+                                        (fly.info.include$Genotype == "CS")) & 
+                                        (fly.info.include$Category == "R") & 
+                                        (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") | 
+                                        (fly.info.include$Genotype == "CS")) & 
+                                        (fly.info.include$Category == "N") & 
+                                        (fly.info.include$experimenter!="SW"), ]
 
 ###Including All Relevant Sessions
 sessions <- c(
@@ -186,7 +197,7 @@ pdf("Training_Session_CS.pdf",onefile = T,width = 10)
       lwd = 2,
       col = rgb(0.5, 0.5, 0.5, 0.5)
     )
-
+    # Second training session
     plot(
       1,
       type = "n",
@@ -252,7 +263,8 @@ trained_2 = cumsums_total[[1]][min_sequence_length, ] / framerate
 yoked_2   = cumsums_total[[2]][min_sequence_length, ] / framerate 
 blank_2   = cumsums_total[[3]][min_sequence_length, ] / framerate 
 
-## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
+# Plot learning effect at two timepoint: at the beginning of each training session, 
+# and at the end of each traning session
 pdf("Training_Sessions_Boxplot_CS_070118.pdf",onefile = T, width = 10)
 first_training = list(
   # cumsums_total[[1]][1, ] / framerate,
@@ -633,7 +645,8 @@ lines(
 
 dev.off()
 
-## Plot learning effect at two timepoint: at the beginning of each training session, and at the end of each traning session
+# Plot learning effect at two timepoint: at the beginning of each training session, 
+# and at the end of each traning session
 pdf(
   "Second_Training_Session_Boxplot_SUN2_allTRN.pdf",
   onefile = T,

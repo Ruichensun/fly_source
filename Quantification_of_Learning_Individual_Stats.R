@@ -1,10 +1,10 @@
 #We define learning index as (3rd E1's performance - 1st E1's performance)/(1st E1's performance), calculated at an individual level.
-#This script follows the laser_power_based_segmentation.R, and cannot be run prior to running laser_power_based_segmentation.R
+#This script is for getting the numbers to be mentioned in the research paper
 
 input.y.df = data.frame()
 p_value_sum = matrix(nrow = 0, ncol = 9)
 
-#Reference for metric index
+# Reference for metric index
  
 #   "Number of Pause Starts", #1
 #   "Fraction Time in Pause", #2
@@ -72,12 +72,8 @@ sessions <- c(
 
 #WT flies
 query.genotype <- c("WT","CS")
-query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                (fly.info.include$Genotype == "CS")) &
-                               (fly.info.include$experimenter!="SW"), ]$Fly
-query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                         (fly.info.include$Genotype == "CS")) &
-                                        (fly.info.include$experimenter!="SW"), ]$experimenter
+query.fly = fly.info.include[((fly.info.include$Genotype == "WT") | (fly.info.include$Genotype == "CS")) & (fly.info.include$experimenter!="SW"), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |(fly.info.include$Genotype == "CS")) & (fly.info.include$experimenter!="SW"), ]$experimenter
 write.table(
   fly.info.include[((fly.info.include$Genotype == "WT") |
                       (fly.info.include$Genotype == "CS")) &
@@ -97,11 +93,10 @@ if (!file.exists(input.file)) {
   next
 }
 metric.df = read.csv(input.file)
-## covariates of interest: genotype, session
 y = list()
 ## E1 data
 session = "E1"
-for (category in c("T", "R")) {
+for (category in c("T", "R","N")) {
   query.session = gsub("X", category, session)
   ind <- metric.df$Session == query.session &
     metric.df$Genotype %in% query.genotype &
@@ -116,21 +111,7 @@ for (category in c("T", "R")) {
   z = metric.df[ind,"Value"]
   y = append(y, list(na.omit(z)))
 }
-for (category in c("N")) {
-  query.session = gsub("X", category, session)
-  ind <- metric.df$Session == query.session &
-    metric.df$Genotype %in% query.genotype &
-    metric.df$Category == category &
-    metric.df$Fly %in% query.fly&
-    metric.df$Experimenter  %in%  query.experimenter
-  ind.E1 <- metric.df$Session == "E1" &
-    metric.df$Genotype %in% query.genotype &
-    metric.df$Category == category &
-    metric.df$Fly %in% query.fly&
-    metric.df$Experimenter  %in%  query.experimenter
-  z = metric.df[ind,"Value"]
-  y = append(y, list(na.omit(z)))
-}
+
 ## input sessions data
 for (session in sessions) {
   print(session)
@@ -146,7 +127,6 @@ for (session in sessions) {
       metric.df$Fly %in% query.fly&
       metric.df$Experimenter  %in%  query.experimenter
     z = metric.df[ind,"Value"] 
-    
   }
   if (grepl("R", session) == T) {
     ind.E1 <- metric.df$Session == "E1" &
@@ -177,8 +157,7 @@ for (session in sessions) {
   y = append(y, list(na.omit(z)))
 }
 y.1 = y
-# yrange = c(min(sapply(y,min)),max(sapply(y,max)))
-## special cases
+
 y_text = c()
 input.y = list(y.1[[1]], y.1[[2]], y.1[[3]], y.1[[7]], y.1[[15]], y.1[[23]]) # input.y = y.1[7:9]
 
