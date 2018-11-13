@@ -1,4 +1,6 @@
 
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/laser_info.R")
 # Segmenting flies into long-exposure group and short-exposure group by the duration of heat they received -- Using the "Total laser exposure in Seconds" Metric
 # CS only
 
