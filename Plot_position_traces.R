@@ -7,17 +7,14 @@ library(rafalib)
 
 # fly.info = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
 
-pdf("WT_full_traces_051918.pdf")
-for (ind in 1:nrow(fly.info.include[fly.info.include$Genotype == "WT", ])) {
+pdf("DopR1-IR-51635_traces_111418.pdf")
+for (ind in 1:nrow(fly.info.include[fly.info.include$Genotype == "UAS-DopR1-IR x 51635", ])) {
   path = paste0("data/",
-                fly.info.include[fly.info.include$Genotype == "WT", ]$experimenter[ind],
-                "/CS/")
-  input.file = list.files(path = paste0("data/",
-                                        fly.info.include[fly.info.include$Genotype ==
-                                                           "WT", ]$experimenter[ind],
-                                        "/CS/"))
+                fly.info.include[fly.info.include$Genotype == "UAS-DopR1-IR x 51635", ]$experimenter[ind],
+                "/mutants/CSV")
+  input.file = list.files(path)
   dbf.files <- input.file[grep(paste0("Fly", fly.info.include[fly.info.include$Genotype ==
-                                                                "WT", ]$Fly[ind], "_"),
+                                                                "UAS-DopR1-IR x 51635", ]$Fly[ind], "_"),
                                input.file,
                                fixed = T)]
   print(dbf.files)
@@ -120,7 +117,6 @@ plot((c(1:length(fly_pos)) / (framerate * 60)),
      yaxt = "n"
      # xaxt =
 )
-# lines(t,pos_fly_position_info,col="blue")
 axis(2, c(0, 767), labels = c("0", "767"))
 dev.off()
 
