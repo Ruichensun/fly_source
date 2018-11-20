@@ -1,5 +1,4 @@
 setwd("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
-
 combine_flyCSV <- function(experimenter, type){
   all_info = NULL;
   input_files = c()
@@ -25,7 +24,7 @@ combine_flyCSV <- function(experimenter, type){
 type = c("Mutants","Mutants", "mutants")
 experimenter <- c("JD", "SW", "JG", "ES", "XC")
 combine_flyCSV(experimenter, type)
-
+print("FlyMutantsREADY")
 #CS
 type = rep("CS", 3)
 experimenter <- c("ES", "RS", "JD","SW")

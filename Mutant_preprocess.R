@@ -1,5 +1,5 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/combine_flyCSV.R")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
 
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
