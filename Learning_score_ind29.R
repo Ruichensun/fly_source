@@ -1,47 +1,10 @@
 
-input.y.df = data.frame()
-p_value_sum = matrix(nrow = 0, ncol = 9)
-input.y.T = list()
-input.y.R = list()
-input.y.N = list()
-  
-sessions <- c(                     
-  "E1T1",                   #4
-  "E1T1E1",                 #5 
-  "E1T1E1T1",               #6
-  "E1T1E1T1E1",             #7
-  "E1T1E1T1E1T1",           #8
-  "E1T1E1T1E1T1E1",         #9
-  "E1T1E1T1E1T1E1T1",       #10
-  "E1T1E1T1E1T1E1T1E1",     #11
-  
-  "E1R1",                   #12
-  "E1R1E1",                 #13
-  "E1R1E1R1",               #14
-  "E1R1E1R1E1",             #15
-  "E1R1E1R1E1R1",           #16
-  "E1R1E1R1E1R1E1",         #17
-  "E1R1E1R1E1R1E1R1",       #18
-  "E1R1E1R1E1R1E1R1E1",     #19
-  
-  "E1N1",                   #20
-  "E1N1E1",                 #21
-  "E1N1E1N1",               #22
-  "E1N1E1N1E1",             #23
-  "E1N1E1N1E1N1",           #24
-  "E1N1E1N1E1N1E1",         #25
-  "E1N1E1N1E1N1E1N1",       #26
-  "E1N1E1N1E1N1E1N1E1"      #27
-)
-
-metric.ind = 29  
-    
 learning_score <- function(metric.ind, query.genotype, query.fly, query.experimenter){
-    
-    if (query.genotype == c("WT","CS")){
-      fly_genotype = "CS"
-    }else{
-      fly_genotype = query.genotype}
+
+    fly_genotype = query.genotype
+    if (query.genotype == c("CS")){
+      query.genotype = c("WT", "CS")
+    }
     
     input.file = paste0("metrics/metric_", metric.ind, ".csv")
     if (!file.exists(input.file)) {
@@ -114,11 +77,11 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     }
     
     ## special cases
-    input.y = list(y.1[[7]], y.1[[15]], y.1[[23]])
+    input.y = list(y[[7]], y[[15]], y[[23]])
     
-    yy.3T = rep(paste0(fly_genotype,"_3rdE1_T"), length(input.y[[1]]))
-    yy.3R = rep(paste0(fly_genotype,"_3rdE1_R"), length(input.y[[2]]))
-    yy.3N = rep(paste0(fly_genotype,"_3rdE1_N"), length(input.y[[3]]))
+    yy.3T = rep(paste0(fly_genotype,"_3rdE1_1"), length(input.y[[1]]))
+    yy.3R = rep(paste0(fly_genotype,"_3rdE1_2"), length(input.y[[2]]))
+    yy.3N = rep(paste0(fly_genotype,"_3rdE1_3"), length(input.y[[3]]))
     
     yy.label = c(yy.3T, yy.3R, yy.3N)
     
@@ -135,32 +98,6 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     return(input.y.df.pre)
 }
 
-
-query.list = c(
-"CS",
-"SUN1",
-"SUN2",
-"SUN3",
-"MB009B x JU30",
-"MB131B x JU30",
-"MB419B x JU30",
-"MB607B x JU30",
-"R60D05 x JU30",
-"JG17 x JU30",
-# "R60D05 x PKCi",
-# "JG17 x PKCi",
-# "CS x PKCi",
-# "MB009B x PKCi",
-# "MB131B x PKCi",
-# "MB419B x PKCi",
-# "MB607B x PKCi",
-"R60D05 x DopR1-IR",
-"JG17 x DopR1-IR",
-"MB009B x DopR1-IR",
-"MB131B x DopR1-IR",
-"MB419B x DopR1-IR",
-"MB607B x DopR1-IR"
-)
 
 get_query_info<-function(query.genotype){
   if(query.genotype=="CS"){
@@ -213,16 +150,80 @@ get_query_info<-function(query.genotype){
   }    
 
 
+
+
+p_value_sum = matrix(nrow = 0, ncol = 9)
+
+sessions <- c(                     
+  "E1T1",                   #4
+  "E1T1E1",                 #5 
+  "E1T1E1T1",               #6
+  "E1T1E1T1E1",             #7
+  "E1T1E1T1E1T1",           #8
+  "E1T1E1T1E1T1E1",         #9
+  "E1T1E1T1E1T1E1T1",       #10
+  "E1T1E1T1E1T1E1T1E1",     #11
+  
+  "E1R1",                   #12
+  "E1R1E1",                 #13
+  "E1R1E1R1",               #14
+  "E1R1E1R1E1",             #15
+  "E1R1E1R1E1R1",           #16
+  "E1R1E1R1E1R1E1",         #17
+  "E1R1E1R1E1R1E1R1",       #18
+  "E1R1E1R1E1R1E1R1E1",     #19
+  
+  "E1N1",                   #20
+  "E1N1E1",                 #21
+  "E1N1E1N1",               #22
+  "E1N1E1N1E1",             #23
+  "E1N1E1N1E1N1",           #24
+  "E1N1E1N1E1N1E1",         #25
+  "E1N1E1N1E1N1E1N1",       #26
+  "E1N1E1N1E1N1E1N1E1"      #27
+)
+
+metric.ind = 29  
+query.list = c(
+  "CS",
+  # "SUN1",
+  # "SUN2",
+  # "SUN3",
+  "CS x JU30",
+  "MB009B x JU30",
+  "MB131B x JU30",
+  "MB419B x JU30",
+  "MB607B x JU30",
+  "R60D05 x JU30",
+  "JG17 x JU30"
+  # "R60D05 x PKCi",
+  # "JG17 x PKCi",
+  # "CS x PKCi",
+  # "MB009B x PKCi",
+  # "MB131B x PKCi",
+  # "MB419B x PKCi",
+  # "MB607B x PKCi"
+  # "R60D05 x DopR1-IR",
+  # "JG17 x DopR1-IR",
+  # "MB009B x DopR1-IR",
+  # "MB131B x DopR1-IR",
+  # "MB419B x DopR1-IR",
+  # "MB607B x DopR1-IR"
+)
+
+input.y.df = data.frame()
+for (i in 1:length(query.list)){
+  query.fly = get_query_info(query.list[i])[[1]]
+  query.experimenter = get_query_info(query.list[i])[[2]]
+  input.y.df.pre = learning_score(metric.ind, query.list[i], query.fly=query.fly, query.experimenter=query.experimenter)
+  input.y.df = rbind(input.y.df, input.y.df.pre)
+}
+colnames(input.y.df) <- c("Value", "Genotype_Sessions")
           
 
 #########Plotting Different Genotypes together########
           
 
-    
-    input.y.df = rbind(input.y.df, input.y.df.pre)
-    input.y.T = append(input.y.T, list(input.y_3T))
-    input.y.R = append(input.y.R, list(input.y_3R))
-    input.y.N = append(input.y.N, list(input.y_3N))
     #segment
     colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     

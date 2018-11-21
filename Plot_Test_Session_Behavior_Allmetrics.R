@@ -20,6 +20,52 @@ write.table(
   sep = ","
 )
 
+#MB009B x DopR1-IR flies
+
+query.genotype <- c("MB009B x DopR1-IR")
+query.fly = fly.info.include[((fly.info.include$Genotype == "MB009B x DopR1-IR")), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB009B x DopR1-IR")), ]$experimenter
+write.table(
+  fly.info.include[((fly.info.include$Genotype == "MB009B x DopR1-IR")), ],
+  "fly_info_include_009BxDopR1-IR.csv",
+  col.names = T,
+  row.names = F,
+  quote = F,
+  sep = ","
+)
+
+
+#MB419B x DopR1-IR flies
+
+query.genotype <- c("MB419B x DopR1-IR")
+query.fly = fly.info.include[((fly.info.include$Genotype == "MB419B x DopR1-IR")), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB419B x DopR1-IR")), ]$experimenter
+write.table(
+  fly.info.include[((fly.info.include$Genotype == "MB419B x DopR1-IR")), ],
+  "fly_info_include_419BxDopR1-IR.csv",
+  col.names = T,
+  row.names = F,
+  quote = F,
+  sep = ","
+)
+
+
+#MB607B x DopR1-IR flies
+
+query.genotype <- c("MB607B x DopR1-IR")
+query.fly = fly.info.include[((fly.info.include$Genotype == "MB607B x DopR1-IR")), ]$Fly
+query.experimenter = fly.info.include[((fly.info.include$Genotype == "MB607B x DopR1-IR")), ]$experimenter
+write.table(
+  fly.info.include[((fly.info.include$Genotype == "MB607B x DopR1-IR")), ],
+  "fly_info_include_607BxDopR1-IR.csv",
+  col.names = T,
+  row.names = F,
+  quote = F,
+  sep = ","
+)
+
+
+
 #SUN1 flies
 query.genotype <- c("SUN1")
 query.fly = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
@@ -258,7 +304,7 @@ sessions <- c(
 
 pdf(
   # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-  "fly_metric_allmetricdf_CS_allflies_Filter1_102518.pdf",
+  # "fly_metric_allmetricdf_CS_allflies_Filter1_111918.pdf",
   # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_102518.pdf",
@@ -266,6 +312,9 @@ pdf(
   # "fly_metric_allmetricdf_MB419BxJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
+  # "fly_metric_allmetricdf_MB419BxDopR1IR_allflies_Filter1_111918.pdf",
+  # "fly_metric_allmetricdf_MB009BxDopR1IR_allflies_Filter1_111918.pdf",
+  "fly_metric_allmetricdf_MB607BxDopR1IR_allflies_Filter1_111918.pdf",
   # "fly_metric_allmetricdf_SUN3_allflies_Filter1_102518.pdf",
   onefile = T,
   width = 10
@@ -636,8 +685,11 @@ rownames(p_value_summary) = c("1T-1N",
 
 write.table(
   p_value_summary,
-  # "P_VALUE_SUMMARY_CS_102518.csv",
-  # "P_VALUE_SUMMARY_R60D05xJU30.csv",
+  # "P_VALUE_SUMMARY_CS_111918.csv",
+  # "P_VALUE_SUMMARY_MB419BxDopR1-IR_111918.csv",
+  # "P_VALUE_SUMMARY_MB009BxDopR1-IR_111918.csv",
+  "P_VALUE_SUMMARY_MB607BxDopR1-IR_111918.csv",
+  # "P_VALUE_SUMMARY_R60D05xJU30_111918.csv",
   # "P_VALUE_SUMMARY_JG17xJU30.csv",
   # "P_VALUE_SUMMARY_MB009BxJU30.csv",
   # "P_VALUE_SUMMARY_MB131BxJU30.csv",

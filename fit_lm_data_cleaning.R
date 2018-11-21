@@ -296,7 +296,7 @@ write.csv(
 )
 
 fly.info.include = fly.info[ind.include,]
-checking_fly_numbers(fly.info.include, filename="Mutants_headcount_111118.csv")
+checking_fly_numbers(fly.info.include, filename="Mutants_headcount_112018.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
