@@ -185,21 +185,21 @@ sessions <- c(
 
 metric.ind = 29  
 query.list = c(
-  "CS",
+  # "CS",
   # "SUN1",
   # "SUN2",
-  # "SUN3",
-  "CS x JU30",
-  "MB009B x JU30",
-  "MB131B x JU30",
-  "MB419B x JU30",
-  "MB607B x JU30",
-  "R60D05 x JU30",
+  # "SUN3"
+  # "CS x JU30",
+  # "MB009B x JU30",
+  # "MB131B x JU30",
+  # "MB419B x JU30",
+  # "MB607B x JU30",
+  # "R60D05 x JU30"
   "JG17 x JU30"
   # "R60D05 x PKCi",
   # "JG17 x PKCi",
   # "CS x PKCi",
-  # "MB009B x PKCi",
+  # "MB009B x PKCi"
   # "MB131B x PKCi",
   # "MB419B x PKCi",
   # "MB607B x PKCi"
@@ -260,9 +260,9 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
                   )
     
     pdf(
-      "LearningIndexComparison_DopR_MB_CX_only_101718.pdf",
+      "LearningIndexComparison_DopR_only_112718.pdf",
       onefile = T,
-      width = 20
+      width = 10
     )
     
     boxplot(
@@ -344,7 +344,26 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     # )
     
     dev.off()          
-          
+      
+uni = unique(input.y.df$Genotype_Sessions)    
+#CS T R: 0.0009154
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[1],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[2],]$Value)
+
+#MB009 T R 0.391
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[4],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[5],]$Value)
+#MB131 T R 0.3115
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[7],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[8],]$Value)
+
+#MB419 T R 0.1797
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[10],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[11],]$Value)
+#MB607 T R 0.02296
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[13],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[14],]$Value)
+#R60D05 T R 0.002848
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[16],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[17],]$Value)
+#189Y T R 0.001539
+wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[19],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[20],]$Value)
+
+        
 ################Plotting Individual Plots#########################          
           
           
