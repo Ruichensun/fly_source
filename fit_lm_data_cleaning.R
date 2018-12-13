@@ -102,7 +102,7 @@ data_filter <- function(filter, fly.info){
       }
       fms <- fly.info$Fly.moving.speed[ind]
       rank_fms = rank(fms)
-      ind.filter =  rank_fms <= length(fms) * 1 & rank_fms >= length(fms) * 0.3
+      ind.filter =  rank_fms <= length(fms) * 1 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }

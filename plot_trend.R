@@ -140,15 +140,15 @@ coordinates = list(append(cumsums_percentile_lower[[1]], rev(cumsums_percentile_
                    append(cumsums_percentile_lower[[6]], rev(cumsums_percentile_higher[[6]])))
 
 
-pdf("Training_Session_CS.pdf",onefile = T,width = 10)
+pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     # First training session
     plot(
       1,
       type = "n",
       xlab = "",
       ylab = "",
-      xlim = c(0, 250),
-      ylim = c(0, 150)
+      xlim = c(0, 200),
+      ylim = c(0, 100)
     )
     
     polygon(
@@ -178,21 +178,21 @@ pdf("Training_Session_CS.pdf",onefile = T,width = 10)
     
     lines(
       forward_index,
-      cumsums_mean[[1]] / framerate,
+      cumsums_median[[1]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
-      cumsums_mean[[2]] / framerate,
+      cumsums_median[[2]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
-      cumsums_mean[[3]] / framerate,
+      cumsums_median[[3]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.5, 0.5, 0.5, 0.5)
@@ -203,8 +203,8 @@ pdf("Training_Session_CS.pdf",onefile = T,width = 10)
       type = "n",
       xlab = "",
       ylab = "",
-      xlim = c(0, 250),
-      ylim = c(0, 150)
+      xlim = c(0, 200),
+      ylim = c(0, 100)
     )
     
     polygon(
@@ -234,27 +234,26 @@ pdf("Training_Session_CS.pdf",onefile = T,width = 10)
     
     lines(
       forward_index,
-      cumsums_mean[[4]] / framerate,
+      cumsums_median[[4]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
-      cumsums_mean[[5]] / framerate,
+      cumsums_median[[5]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
-      cumsums_mean[[6]] / framerate,
+      cumsums_median[[6]] / framerate,
       lty = 1,
       lwd = 2,
       col = rgb(0.5, 0.5, 0.5, 0.5)
     )
-    
-    
+  
 dev.off()
 
 

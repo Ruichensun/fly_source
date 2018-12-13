@@ -84,6 +84,7 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     yy.3N = rep(paste0(fly_genotype,"_3rdE1_3"), length(input.y[[3]]))
     
     yy.label = c(yy.3T, yy.3R, yy.3N)
+    # yy.label = c(yy.3T, yy.3R)
     
     input.y_3T = as.numeric(input.y[[1]])
     input.y_3R = as.numeric(input.y[[2]])
@@ -97,7 +98,6 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     input.y.df.pre = data.frame(input.yy, yy.label)
     return(input.y.df.pre)
 }
-
 
 get_query_info<-function(query.genotype){
   if(query.genotype=="CS"){
@@ -149,9 +149,6 @@ get_query_info<-function(query.genotype){
   return(list(query.fly, query.experimenter))
   }    
 
-
-
-
 p_value_sum = matrix(nrow = 0, ncol = 9)
 
 sessions <- c(                     
@@ -185,8 +182,8 @@ sessions <- c(
 
 metric.ind = 29  
 query.list = c(
-  # "CS",
-  # "SUN1",
+  "CS"
+  # "SUN1"
   # "SUN2",
   # "SUN3"
   # "CS x JU30",
@@ -195,7 +192,7 @@ query.list = c(
   # "MB419B x JU30",
   # "MB607B x JU30",
   # "R60D05 x JU30"
-  "JG17 x JU30"
+  # "JG17 x JU30"
   # "R60D05 x PKCi",
   # "JG17 x PKCi",
   # "CS x PKCi",

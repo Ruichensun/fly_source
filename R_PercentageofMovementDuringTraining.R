@@ -181,9 +181,10 @@ second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1
 first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1",fly.info.movement.T)
 second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
 
-pdf("ChanceofBeingHitCS_063018.pdf",
+pdf("ChanceofBeingHitCS_121318.pdf",
     onefile = T,
-    width = 10)
+    width = 5, 
+    height = 5)
 
 Chance_of_being_hit = list(
   
@@ -215,7 +216,7 @@ boxplot(
   ylab = "Percentage",
   xaxt = "n",
   col = col.pool,
-  main = "Chance of being punished in first session",
+  # main = "Chance of being punished in first session",
   ann = FALSE
 )
 stripchart(
@@ -236,10 +237,6 @@ text(
     length(Chance_of_being_hit[[2]]),
     length(Chance_of_being_hit[[3]]),
     length(Chance_of_being_hit[[4]])
-    # length(Chance_of_being_hit[[5]]),
-    # length(Chance_of_being_hit[[6]]),
-    # length(Chance_of_being_hit[[7]]),
-    # length(Chance_of_being_hit[[8]])
   ),
   xpd = T,
   srt = 0,
@@ -254,10 +251,6 @@ text(
     "T - Pause",
     "R - Walking",
     "R - Pause"
-    # length(Chance_of_being_hit[[5]]),
-    # length(Chance_of_being_hit[[6]]),
-    # length(Chance_of_being_hit[[7]]),
-    # length(Chance_of_being_hit[[8]])
   ),
   xpd = T,
   srt = 0,
@@ -283,7 +276,7 @@ boxplot(
   ylab = "Percentage",
   xaxt = "n",
   col = col.pool,
-  main = "Chance of being punished in second session",
+  # main = "Chance of being punished in second session",
   ann = FALSE
 )
 stripchart(
@@ -300,10 +293,6 @@ text(
   x = (1:length(Chance_of_being_hit[5:8])) - 0.1,
   y = 1.02,
   labels = c(
-    # length(Chance_of_being_hit[[1]]),
-    # length(Chance_of_being_hit[[2]]),
-    # length(Chance_of_being_hit[[3]]),
-    # length(Chance_of_being_hit[[4]])
     length(Chance_of_being_hit[[5]]),
     length(Chance_of_being_hit[[6]]),
     length(Chance_of_being_hit[[7]]),
@@ -322,10 +311,6 @@ text(
     "T - Pause",
     "R - Walking",
     "R - Pause"
-    # length(Chance_of_being_hit[[5]]),
-    # length(Chance_of_being_hit[[6]]),
-    # length(Chance_of_being_hit[[7]]),
-    # length(Chance_of_being_hit[[8]])
   ),
   xpd = T,
   srt = 0,
@@ -345,12 +330,52 @@ lines(c(2.5, 2.5), c(-1, 1.2),
 
 dev.off()
 
-p_being_hit = c(wilcox.test(Chance_of_being_hit[[1]],Chance_of_being_hit[[2]])$p.value,
-                wilcox.test(Chance_of_being_hit[[3]],Chance_of_being_hit[[4]])$p.value,
-                wilcox.test(Chance_of_being_hit[[5]],Chance_of_being_hit[[6]])$p.value,
-                wilcox.test(Chance_of_being_hit[[7]],Chance_of_being_hit[[8]])$p.value
-)
 
+chance_df = data.frame(rbind())
+
+chance_1 = Chance_of_being_hit[[1]][!is.na(Chance_of_being_hit[[1]])]
+chance_1_lab = rep("T1-W", length(chance_1))
+
+chance_2 = Chance_of_being_hit[[2]][!is.na(Chance_of_being_hit[[2]])]
+chance_2_lab = rep("T1-P", length(chance_2))
+
+chance_3 = Chance_of_being_hit[[3]][!is.na(Chance_of_being_hit[[3]])]
+chance_3_lab = rep("R1-W", length(chance_3))
+
+chance_4 = Chance_of_being_hit[[4]][!is.na(Chance_of_being_hit[[4]])]
+chance_4_lab = rep("R1-P", length(chance_4))
+
+chance_5 = Chance_of_being_hit[[5]][!is.na(Chance_of_being_hit[[5]])]
+chance_5_lab = rep("T2-W", length(chance_5))
+
+chance_6 = Chance_of_being_hit[[6]][!is.na(Chance_of_being_hit[[6]])]
+chance_6_lab = rep("T2-P", length(chance_6))
+
+chance_7 = Chance_of_being_hit[[7]][!is.na(Chance_of_being_hit[[7]])]
+chance_7_lab = rep("R2-W", length(chance_7))
+
+chance_8 = Chance_of_being_hit[[8]][!is.na(Chance_of_being_hit[[8]])]
+chance_8_lab = rep("R2-P", length(chance_8))
+
+chance_df_1st = rbind(
+                  cbind(chance_1, chance_1_lab),
+                  cbind(chance_2, chance_2_lab),
+                  cbind(chance_3, chance_3_lab),
+                  cbind(chance_4, chance_4_lab)
+                 )
+
+colnames(chance_df_1st) = c("Probability", "Sessions")
+dunn.test(x=as.numeric(chance_df_1st[,1]), g=chance_df_1st[,2], method=c("bonferroni"))
+
+chance_df_2nd = rbind(
+                  cbind(chance_5, chance_5_lab),
+                  cbind(chance_6, chance_6_lab),
+                  cbind(chance_7, chance_7_lab),
+                  cbind(chance_8, chance_8_lab)
+                )
+
+colnames(chance_df_2nd) = c("Probability", "Sessions")
+dunn.test(x=as.numeric(chance_df_2nd[,1]), g=chance_df_2nd[,2], method=c("bonferroni"))
 
 
 pdf("YokedFlyChanceOfBeingHitSUN2.pdf",
