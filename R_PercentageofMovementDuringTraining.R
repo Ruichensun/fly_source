@@ -1,5 +1,4 @@
-# source("plot_trend.R")
-# Requires fly_pos_to_moving_status function from "plot_trend.R"
+source("plot_trend.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
@@ -331,10 +330,11 @@ lines(c(2.5, 2.5), c(-1, 1.2),
 dev.off()
 
 
-chance_df = data.frame(rbind())
+chance_df = data.frame()
 
 chance_1 = Chance_of_being_hit[[1]][!is.na(Chance_of_being_hit[[1]])]
 chance_1_lab = rep("T1-W", length(chance_1))
+a = cbind.data.frame(chance_1, chance_1_lab)
 
 chance_2 = Chance_of_being_hit[[2]][!is.na(Chance_of_being_hit[[2]])]
 chance_2_lab = rep("T1-P", length(chance_2))
@@ -356,6 +356,15 @@ chance_7_lab = rep("R2-W", length(chance_7))
 
 chance_8 = Chance_of_being_hit[[8]][!is.na(Chance_of_being_hit[[8]])]
 chance_8_lab = rep("R2-P", length(chance_8))
+
+
+# Confidence Interval
+CI_df = data.frame()
+for (i in 1:8){
+  CI_df = rbind.data.frame(CI_df, get_Wald_CI(Chance_of_being_hit[[i]][!is.na(Chance_of_being_hit[[i]])]))
+}
+
+
 
 chance_df_1st = rbind(
                   cbind(chance_1, chance_1_lab),

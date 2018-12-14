@@ -307,3 +307,5 @@ CI_df = data.frame()
 for (i in 1:6){
   CI_df = rbind.data.frame(CI_df, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
 }
+
+colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
