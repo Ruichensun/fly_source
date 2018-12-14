@@ -285,3 +285,25 @@ colnames(N2_df) = c("Value", "Session")
 
 Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
 Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
+
+# Confidence Interval
+
+library(boot)
+
+get_Wald_CI = function(data){
+  Mboot = boot(data,
+               function(x,i) median(x[i]), 
+               R=10000)
+  
+  CI = boot.ci(Mboot,
+          conf = 0.95, 
+          type = c("norm") 
+          # "basic" ,"perc", "bca")
+          )
+  return(c(CI$t0, CI$normal[2], CI$normal[3]))
+}
+
+CI_df = data.frame()
+for (i in 1:6){
+  CI_df = rbind.data.frame(CI_df, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
+}
