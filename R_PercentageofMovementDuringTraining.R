@@ -146,17 +146,6 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
   return(laser_chance)
 }
 
-
-
-
-
-
-# file_name_filter =
-  # "E1T1"
-  # "E1R1"
-  # "E1T1E1T1"
-  # "E1R1E1R1"
-
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category =="T")&
@@ -166,24 +155,25 @@ fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
                                          (fly.info.include$Category == "R")&
                                          (fly.info.include$experimenter!="SW"), ]
-# fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
-#                                          (fly.info.include$Category =="T")&
-#                                          (fly.info.include$experimenter!="SW"), ]
-# 
-# fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "SUN2")) &
-#                                          (fly.info.include$Category == "R")&
-#                                          (fly.info.include$experimenter!="SW"), ]
 
+first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",
+                                                         fly.info.movement.R)
+first_yoked_session = first_yoked_session[complete.cases(first_yoked_session), ]
 
-first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",fly.info.movement.R)
-second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", fly.info.movement.R)
-first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1",fly.info.movement.T)
-second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",fly.info.movement.T)
+second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", 
+                                                          fly.info.movement.R)
+second_yoked_session = second_yoked_session[complete.cases(second_yoked_session), ]
 
-pdf("ChanceofBeingHitCS_121318.pdf",
-    onefile = T,
-    width = 5, 
-    height = 5)
+first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1", 
+                                                            fly.info.movement.T)
+first_training_session = first_training_session[complete.cases(first_training_session), ]
+
+second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",
+                                                             fly.info.movement.T)
+second_training_session = second_training_session[complete.cases(second_training_session), ]
+
+pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
+    onefile = T, width = 5, height = 5)
 
 Chance_of_being_hit = list(
   
@@ -385,140 +375,4 @@ chance_df_2nd = rbind(
 
 colnames(chance_df_2nd) = c("Probability", "Sessions")
 dunn.test(x=as.numeric(chance_df_2nd[,1]), g=chance_df_2nd[,2], method=c("bonferroni"))
-
-
-pdf("YokedFlyChanceOfBeingHitSUN2.pdf",
-    onefile = T,
-    width = 10)
-yokedflybeinghit= list(
-  first_yoked_session$`Laser ON duration percentage`,
-  second_yoked_session$`Laser ON duration percentage`,
-  first_yoked_session$`Chances of being hit during walking`,
-  second_yoked_session$`Chances of being hit during walking`,
-  first_yoked_session$`Chances of being hit during pause `,
-  second_yoked_session$`Chances of being hit during pause `
-)
-
-col.pool <- c("light blue",
-              "light blue",
-              "light blue",
-              "light blue",
-              "light blue",
-              "light blue"
-              )
-
-boxplot(
-  yokedflybeinghit,
-  ylim = c(0, 1),
-  outline = F,
-  notch = T,
-  lwd = 2,
-  ylab = "Chances of Being Punished",
-  xaxt = "n",
-  col = col.pool,
-  main = "Yoked's total chance of being punished, during walking and pause",
-  ann = FALSE
-)
-stripchart(
-  vertical = TRUE,
-  x = yokedflybeinghit,
-  method = "jitter",
-  add = TRUE,
-  pch = 15,
-  cex = 0.5,
-  col =  "grey40"
-)
-
-text(
-  x = (1:length(yokedflybeinghit)) - 0.1,
-  y = 1,
-  labels = c(
-    length(yokedflybeinghit[[1]]),
-    length(yokedflybeinghit[[2]]),
-    length(yokedflybeinghit[[3]]),
-    length(yokedflybeinghit[[4]]),
-    length(yokedflybeinghit[[5]]),
-    length(yokedflybeinghit[[6]])
-  ),
-  xpd = T,
-  srt = 0,
-  adj = 0
-)
-
-lines(c(2.5, 2.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
-lines(c(4.5, 4.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
-
-dev.off()
-
-
-pdf("TrainedFlyChanceOfBeingHitSUN2.pdf",
-    onefile = T,
-    width = 10)
-trainedflybeinghit= list(
-  first_training_session$`Laser ON duration percentage`,
-  second_training_session$`Laser ON duration percentage`,
-  first_training_session$`Chances of being hit during walking`,
-  second_training_session$`Chances of being hit during walking`,
-  first_training_session$`Chances of being hit during pause `,
-  second_training_session$`Chances of being hit during pause `
-)
-
-col.pool <- c("indianred3",
-              "indianred3",
-              "indianred3",
-              "indianred3",
-              "indianred3",
-              "indianred3"
-)
-
-boxplot(
-  trainedflybeinghit,
-  ylim = c(0, 1),
-  outline = F,
-  notch = T,
-  lwd = 2,
-  ylab = "Chances of Being Punished",
-  xaxt = "n",
-  col = col.pool,
-  main = "Trained's total chance of being punished, during walking and pause",
-  ann = FALSE
-)
-stripchart(
-  vertical = TRUE,
-  x = trainedflybeinghit,
-  method = "jitter",
-  add = TRUE,
-  pch = 15,
-  cex = 0.5,
-  col =  "grey40"
-)
-
-text(
-  x = (1:length(trainedflybeinghit)) - 0.1,
-  y = 1,
-  labels = c(
-    length(trainedflybeinghit[[1]]),
-    length(trainedflybeinghit[[2]]),
-    length(trainedflybeinghit[[3]]),
-    length(trainedflybeinghit[[4]]),
-    length(trainedflybeinghit[[5]]),
-    length(trainedflybeinghit[[6]])
-  ),
-  xpd = T,
-  srt = 0,
-  adj = 0
-)
-
-lines(c(2.5, 2.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
-lines(c(4.5, 4.5), c(-1, 1.2),
-      col = "light grey",
-      lty = 1)
-
-dev.off()
 
