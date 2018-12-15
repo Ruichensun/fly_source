@@ -1,4 +1,6 @@
-#testing two-way anova
+
+# Testing two-way anova
+
 library(FSA)
 library(ggplot2)
 library(multcompView)

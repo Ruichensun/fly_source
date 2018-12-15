@@ -79,9 +79,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     ## special cases
     input.y = list(y[[7]], y[[15]], y[[23]])
     
-    yy.3T = rep(paste0(fly_genotype,"_3rdE1_1"), length(input.y[[1]]))
-    yy.3R = rep(paste0(fly_genotype,"_3rdE1_2"), length(input.y[[2]]))
-    yy.3N = rep(paste0(fly_genotype,"_3rdE1_3"), length(input.y[[3]]))
+    yy.3T = rep(paste0("E11"), length(input.y[[1]]))
+    yy.3R = rep(paste0("E12"), length(input.y[[2]]))
+    yy.3N = rep(paste0("E13"), length(input.y[[3]]))
     
     yy.label = c(yy.3T, yy.3R, yy.3N)
     # yy.label = c(yy.3T, yy.3R)
@@ -182,19 +182,19 @@ sessions <- c(
 
 metric.ind = 29  
 query.list = c(
-  "CS"
-  # "SUN1"
-  # "SUN2",
+  # "CS"
+  "SUN1"
+  # "SUN2"
   # "SUN3"
-  # "CS x JU30",
-  # "MB009B x JU30",
-  # "MB131B x JU30",
-  # "MB419B x JU30",
-  # "MB607B x JU30",
+  # "CS x JU30"
+  # "MB009B x JU30"
+  # "MB131B x JU30"
+  # "MB419B x JU30"
+  # "MB607B x JU30"
   # "R60D05 x JU30"
   # "JG17 x JU30"
   # "R60D05 x PKCi",
-  # "JG17 x PKCi",
+  # "JG17 x PKCi"
   # "CS x PKCi",
   # "MB009B x PKCi"
   # "MB131B x PKCi",
@@ -202,9 +202,9 @@ query.list = c(
   # "MB607B x PKCi"
   # "R60D05 x DopR1-IR",
   # "JG17 x DopR1-IR",
-  # "MB009B x DopR1-IR",
-  # "MB131B x DopR1-IR",
-  # "MB419B x DopR1-IR",
+  # "MB009B x DopR1-IR"
+  # "MB131B x DopR1-IR"
+  # "MB419B x DopR1-IR"
   # "MB607B x DopR1-IR"
 )
 

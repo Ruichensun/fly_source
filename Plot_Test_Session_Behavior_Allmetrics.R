@@ -304,7 +304,7 @@ sessions <- c(
 
 pdf(
   # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_CS_allflies_Filter1_111918.pdf",
+  "fly_metric_allmetricdf_CS_allflies_Filter1_121418.pdf",
   # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_102518.pdf",
   # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_102518.pdf",
@@ -314,7 +314,7 @@ pdf(
   # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
   # "fly_metric_allmetricdf_MB419BxDopR1IR_allflies_Filter1_111918.pdf",
   # "fly_metric_allmetricdf_MB009BxDopR1IR_allflies_Filter1_111918.pdf",
-  "fly_metric_allmetricdf_MB607BxDopR1IR_allflies_Filter1_111918.pdf",
+  # "fly_metric_allmetricdf_MB607BxDopR1IR_allflies_Filter1_111918.pdf",
   # "fly_metric_allmetricdf_SUN3_allflies_Filter1_102518.pdf",
   onefile = T,
   width = 10

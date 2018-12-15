@@ -363,7 +363,7 @@ CI_df = data.frame()
 for (i in 1:8){
   CI_df = rbind.data.frame(CI_df, get_Wald_CI(Chance_of_being_hit[[i]][!is.na(Chance_of_being_hit[[i]])]))
 }
-
+colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
 
 
 chance_df_1st = rbind(

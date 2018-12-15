@@ -1,5 +1,6 @@
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 library(zoo)
+library(boot)
 
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos; Output: a vector of 0 and 1 of (length of input) - 1 
@@ -61,6 +62,20 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
   }
   return(cumsums)
 }
+
+get_Wald_CI = function(data){
+  Mboot = boot(data,
+               function(x,i) median(x[i]), 
+               R=10000)
+  
+  CI = boot.ci(Mboot,
+               conf = 0.95, 
+               type = c("norm") 
+               # "basic" ,"perc", "bca")
+  )
+  return(c(CI$t0, CI$normal[2], CI$normal[3]))
+}
+
 
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") | 
                                         (fly.info.include$Genotype == "CS")) & 
@@ -287,21 +302,6 @@ Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
 Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
 
 # Confidence Interval
-
-library(boot)
-
-get_Wald_CI = function(data){
-  Mboot = boot(data,
-               function(x,i) median(x[i]), 
-               R=10000)
-  
-  CI = boot.ci(Mboot,
-          conf = 0.95, 
-          type = c("norm") 
-          # "basic" ,"perc", "bca")
-          )
-  return(c(CI$t0, CI$normal[2], CI$normal[3]))
-}
 
 CI_df = data.frame()
 for (i in 1:6){
