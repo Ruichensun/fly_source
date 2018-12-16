@@ -134,26 +134,8 @@ cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 
                   apply((cumsums_total[[5]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
                   apply((cumsums_total[[6]][1:min_sequence_length,])/framerate, 1, get_Wald_CI)
                   )
-
-# start_time <- Sys.time()
-# apply((cumsums_total[[2]][1:2,])/framerate, c(1,2), get_Wald_CI)
-# end_time <- Sys.time()
-# end_time - start_time
-
-# Need to replace this section with bootstrapping
-cumsums_percentile_lower = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.25)))
-
-cumsums_percentile_higher = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.75)))
+# cumsums_CI structure: for each of the 6 lists: 3 rows by 8568 columns. First row is median
+# Second row is CI lower bound, Third row is CI upper bound
 
 trained_1 = cumsums_total[[1]][min_sequence_length, ] / framerate 
 yoked_1   = cumsums_total[[2]][min_sequence_length, ] / framerate 
@@ -200,12 +182,13 @@ reverse_index = rev(forward_index)
 index = c(forward_index, reverse_index)
 
 ##Y axis coordinate
-coordinates = list(append(cumsums_percentile_lower[[1]], rev(cumsums_percentile_higher[[1]])),
-                   append(cumsums_percentile_lower[[2]], rev(cumsums_percentile_higher[[2]])),
-                   append(cumsums_percentile_lower[[3]], rev(cumsums_percentile_higher[[3]])),
-                   append(cumsums_percentile_lower[[4]], rev(cumsums_percentile_higher[[4]])),
-                   append(cumsums_percentile_lower[[5]], rev(cumsums_percentile_higher[[5]])),
-                   append(cumsums_percentile_lower[[6]], rev(cumsums_percentile_higher[[6]])))
+coordinates = list(append(cumsums_CI[[1]][2,], rev(cumsums_CI[[1]][3,])),
+                   append(cumsums_CI[[2]][2,], rev(cumsums_CI[[2]][3,])),
+                   append(cumsums_CI[[3]][2,], rev(cumsums_CI[[3]][3,])),
+                   append(cumsums_CI[[4]][2,], rev(cumsums_CI[[4]][3,])),
+                   append(cumsums_CI[[5]][2,], rev(cumsums_CI[[5]][3,])),
+                   append(cumsums_CI[[6]][2,], rev(cumsums_CI[[6]][3,]))
+                   )
 
 
 pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
@@ -221,7 +204,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     
     polygon(
       index,
-      coordinates[[1]] / framerate,
+      coordinates[[1]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -229,7 +212,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     )
     polygon(
       index,
-      coordinates[[2]] / framerate,
+      coordinates[[2]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -237,7 +220,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     )
     polygon(
       index,
-      coordinates[[3]] / framerate,
+      coordinates[[3]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -246,21 +229,21 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     
     lines(
       forward_index,
-      cumsums_median[[1]] / framerate,
+      cumsums_CI[[1]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
-      cumsums_median[[2]] / framerate,
+      cumsums_CI[[2]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
-      cumsums_median[[3]] / framerate,
+      cumsums_CI[[3]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.5, 0.5, 0.5, 0.5)
@@ -277,7 +260,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     
     polygon(
       index,
-      coordinates[[4]] / framerate,
+      coordinates[[4]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -285,7 +268,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     )
     polygon(
       index,
-      coordinates[[5]] / framerate,
+      coordinates[[5]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -293,7 +276,7 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     )
     polygon(
       index,
-      coordinates[[6]] / framerate,
+      coordinates[[6]],
       lty = 2,
       lwd = 2,
       border = NA,
@@ -302,21 +285,21 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     
     lines(
       forward_index,
-      cumsums_median[[4]] / framerate,
+      cumsums_CI[[4]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
-      cumsums_median[[5]] / framerate,
+      cumsums_CI[[5]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
-      cumsums_median[[6]] / framerate,
+      cumsums_CI[[6]][1,],
       lty = 1,
       lwd = 2,
       col = rgb(0.5, 0.5, 0.5, 0.5)
