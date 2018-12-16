@@ -1,4 +1,4 @@
-#This script is for after fit_lm_data_cleaning.R
+#This script is for plotting all metrics relevant after fit_lm_data_cleaning.R
 
 fly.info.include = fly.info[ind.include, ]
 #WT flies
@@ -302,25 +302,9 @@ sessions <- c(
   "E1N1E1N1E1N1E1N1E1"
 )
 
-pdf(
-  # "fly_metric_allmetricdf_JG17xPKCi_allflies_Filter1_063018.pdf",
-  "fly_metric_allmetricdf_CS_allflies_Filter1_121418.pdf",
-  # "fly_metric_allmetricdf_R60D05xJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_JG17xJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_MB009BxJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_MB131BxJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_MB419BxJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_MB607BxJU30_allflies_Filter1_102518.pdf",
-  # "fly_metric_allmetricdf_R60D05xPKCi_allflies_Filter1_063018.pdf",
-  # "fly_metric_allmetricdf_MB419BxDopR1IR_allflies_Filter1_111918.pdf",
-  # "fly_metric_allmetricdf_MB009BxDopR1IR_allflies_Filter1_111918.pdf",
-  # "fly_metric_allmetricdf_MB607BxDopR1IR_allflies_Filter1_111918.pdf",
-  # "fly_metric_allmetricdf_SUN3_allflies_Filter1_102518.pdf",
-  onefile = T,
-  width = 10
-)
-
-p_value_summary = matrix(nrow = 9, ncol = 0)
+pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
+  onefile = T, width = 10
+  )
 
 for (metric.ind in 1:length(metrices)) {
   input.file = paste0("metrics/metric_", metric.ind, ".csv")
@@ -329,38 +313,11 @@ for (metric.ind in 1:length(metrices)) {
   }
   
   metric.df = read.csv(input.file)
-  
-  if (sum(colnames(metric.df) %in% "value.w") == 0) {
-    #metric.df$value.w = metric.df$value
-    #next;
-  }
-  ## covariates of interest: genotype, session
   y = list()
   
   ## E1 data
   session = "E1"
-  for (category in c("T", "R")) {
-    query.session = gsub("X", category, session)
-    
-    ind <- metric.df$Session == query.session &
-      metric.df$Genotype %in% query.genotype &
-      metric.df$Category == category &
-      metric.df$Fly %in% query.fly &
-      metric.df$Experimenter  %in%  query.experimenter
-    
-    ind.E1 <- metric.df$Session == "E1" &
-      metric.df$Genotype %in% query.genotype &
-      metric.df$Category == category &
-      metric.df$Fly %in% query.fly &
-      metric.df$Experimenter  %in%  query.experimenter
-    
-    # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
-    z = metric.df[ind, "Value"]
-    
-    y = append(y, list(na.omit(z)))
-  }
-  
-  for (category in c("N")) {
+  for (category in c("T", "R", "N")) {
     query.session = gsub("X", category, session)
     ind <- metric.df$Session == query.session &
       metric.df$Genotype %in% query.genotype &
@@ -368,23 +325,21 @@ for (metric.ind in 1:length(metrices)) {
       metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
     
-    ind.E1 <- metric.df$Session == "E1" &
-      metric.df$Genotype %in% query.genotype &
-      metric.df$Category == category &
-      metric.df$Fly %in% query.fly&
-      metric.df$Experimenter  %in%  query.experimenter
-    
+    # For normalization
+    # ind.E1 <- metric.df$Session == "E1" &
+    #   metric.df$Genotype %in% query.genotype &
+    #   metric.df$Category == category &
+    #   metric.df$Fly %in% query.fly &
+    #   metric.df$Experimenter  %in%  query.experimenter
     # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
-    z = metric.df[ind, "Value"]
     
+    z = metric.df[ind, "Value"]
     y = append(y, list(na.omit(z)))
   }
-  
   
   ## input sessions data
   
   for (session in sessions) {
-    # if (grepl("N", session) == F) {
     ind <- metric.df$Session == session &
       metric.df$Genotype %in% query.genotype &
       metric.df$Fly %in% query.fly&
@@ -570,7 +525,7 @@ for (metric.ind in 1:length(metrices)) {
   yy.3T = rep("3rdE1_1", length(input.y[[7]]))
   yy.3R = rep("3rdE1_2", length(input.y[[8]]))
   yy.3N = rep("3rdE1_3", length(input.y[[9]]))
-  yy.label = c(yy.1T, yy.1R, yy.1N, yy.2T, yy.2R, yy.2N, yy.3T, yy.3R, yy.3N)
+  yy.label = c(yy.1T, yy.1R, yy.1N, jyy.2T, yy.2R, yy.2N, yy.3T, yy.3R, yy.3N)
   
   input.y_1T = as.numeric(input.y[[1]])
   input.y_1R = as.numeric(input.y[[2]])
@@ -654,52 +609,7 @@ for (metric.ind in 1:length(metrices)) {
           col = "light grey",
           lty = 1)
   }
-  
-  p_value = c(wilcox.test(input.y_1T,input.y_1N)$p.value,
-              wilcox.test(input.y_1R,input.y_1N)$p.value,
-              wilcox.test(input.y_1T,input.y_1R)$p.value,
-              wilcox.test(input.y_2T,input.y_2N)$p.value,
-              wilcox.test(input.y_2R,input.y_2N)$p.value,
-              wilcox.test(input.y_2T,input.y_2R)$p.value,
-              wilcox.test(input.y_3T,input.y_3N)$p.value,
-              wilcox.test(input.y_3R,input.y_3N)$p.value,
-              wilcox.test(input.y_3T,input.y_3R)$p.value
-  )
-  
-  p_value_summary = cbind(p_value_summary,p_value)
 }
 dev.off()
 
-colnames(p_value_summary) = c(1:31)
-rownames(p_value_summary) = c("1T-1N",
-                              "1R-1N",
-                              "1T-1R",
-                              "2T-2N",
-                              "2R-2N",
-                              "2T-2R",
-                              "3T-3N",
-                              "3R-3N",
-                              "3T-3R"
-                              
-)
 
-write.table(
-  p_value_summary,
-  # "P_VALUE_SUMMARY_CS_111918.csv",
-  # "P_VALUE_SUMMARY_MB419BxDopR1-IR_111918.csv",
-  # "P_VALUE_SUMMARY_MB009BxDopR1-IR_111918.csv",
-  "P_VALUE_SUMMARY_MB607BxDopR1-IR_111918.csv",
-  # "P_VALUE_SUMMARY_R60D05xJU30_111918.csv",
-  # "P_VALUE_SUMMARY_JG17xJU30.csv",
-  # "P_VALUE_SUMMARY_MB009BxJU30.csv",
-  # "P_VALUE_SUMMARY_MB131BxJU30.csv",
-  # "P_VALUE_SUMMARY_MB419BxJU30.csv",
-  # "P_VALUE_SUMMARY_MB607BxJU30.csv",
-  # "P_VALUE_SUMMARY_R60D05xPKCi.csv",
-  # "P_VALUE_SUMMARY_JG17xPKCi.csv",
-  # "P_VALUE_SUMMARY_SUN3.csv",
-  col.names = T,
-  row.names = T,
-  quote = F,
-  sep = ","
-)

@@ -1,6 +1,6 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/get_fly_stats.R")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/Checking_fly_numbers.R")
+setwd("G:/Behavioral_project/behavior_experiment_data/Analysis")
+source("G:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/get_fly_stats.R")
+source("G:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/Checking_fly_numbers.R")
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 load("all_ofs.Rdata")
 
@@ -95,14 +95,13 @@ data_filter <- function(filter, fly.info){
       if (genotype == "WT") {
         ind = fly.info$Genotype %in% c("WT", "CS") &
           !(1:nrow(fly.info) %in% ind.excl)
-      }
-      else{
+      }else{
         ind = fly.info$Genotype == genotype &
           !(1:nrow(fly.info) %in% ind.excl)
       }
       fms <- fly.info$Fly.moving.speed[ind]
       rank_fms = rank(fms)
-      ind.filter =  rank_fms <= length(fms) * 1 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
+      ind.filter =  rank_fms <= length(fms) * 1.0 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
@@ -256,10 +255,10 @@ excl.fly.Mutant = na.omit(read.csv(
 )[, 1:3])
 
 excl.fly.WT = data.frame(cbind(
-  
-  #Batch 1 ES-WT: 1-276; 
-  #Batch 2 ES-WT: 276-400; 
-  #Batch 3 ES-WT: 400-present (as of June 28, 2017)
+  # Batch 1 ES-WT: 1-276; 
+  # Batch 2 ES-WT: 276-400; 
+  # Batch 3 ES-WT: 400-present (as of June 28, 2017)
+  # Only Batch 3 data is for the current project
    c(58, 48, 1:400, 1:100, 1:40,118,122),
    c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
    c(rep("WT", 544))
@@ -283,11 +282,6 @@ for (ind in 1:nrow(excl.fly)) {
 
 ind.include = data_filter(1, fly.info)
 
-# Exclude all WT
-# ind.excl = unique(c(ind.excl,which(fly.info$Genotype=="WT")))
-# Need to run this line for filter2
-# ind.include = ind.include[!(ind.include %in% ind.excl)]
-
 write.csv(
   fly.info[ind.include, ],
   "data/fly_info.csv",
@@ -296,7 +290,7 @@ write.csv(
 )
 
 fly.info.include = fly.info[ind.include,]
-checking_fly_numbers(fly.info.include, filename="Mutants_headcount_112018.csv")
+checking_fly_numbers(fly.info.include, filename="Mutants_headcount.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
@@ -371,8 +365,6 @@ for (ind in 1:length(metrices)) {
   #             row.names=F,quote=F,sep=",")
   # next
   #
-  #
-  #
   # metric.df = metric.df[metric.df$genotype %in% c("WT","SUN1","SUN2","SUN3","R3"),]
   # metric.df$genotype = factor(metric.df$genotype,
   #                             levels(metric.df$genotype)[levels(metric.df$genotype) %in% c("WT","SUN1","SUN2","SUN3","R3")][c(5,1:4)])
@@ -383,7 +375,7 @@ for (ind in 1:length(metrices)) {
   # #lm.fit.orig = glm(value ~ age + gender + batch + session + fly, metric.df,family="gaussian")
   # lm.fit = summary(lm.fit.orig)
   # ## If the model does not fit the data well, just save the original data and continue
-  #if(lm.fit$adj.r.squared < 0.6){
+  # if(lm.fit$adj.r.squared < 0.6){
   # write.table(metric.df,
   #             paste0("metrics/metric_",ind,".csv"),
   #             row.names=F,quote=F,sep=",")
@@ -394,8 +386,6 @@ for (ind in 1:length(metrices)) {
   #
   # model = model.matrix(value ~ genotype + experimenter + gender + session + batch + setup + fly + age, metric.df)
   # model = data.matrix(model[,names(coef)])
-  #
-  #
   # ## Confounding covariates
   # coef_ind <- c(#1,## intercept
   #     grep("experimenter",names(coef)),
@@ -410,8 +400,6 @@ for (ind in 1:length(metrices)) {
   #
   # metric.df$value.uw = uwv
   # metric.df$value.w = wv
-  
-  
   write.table(
     metric.df,
     paste0("metrics/metric_", ind, ".csv"),

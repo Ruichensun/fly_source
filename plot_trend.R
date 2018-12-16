@@ -66,7 +66,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 get_Wald_CI = function(data){
   Mboot = boot(data,
                function(x,i) median(x[i]), 
-               R=10000)
+               R=5000)
   
   CI = boot.ci(Mboot,
                conf = 0.95, 
@@ -127,19 +127,72 @@ cumsums_median = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, medi
                       apply(cumsums_total[[5]][1:min_sequence_length, ], 1, median),
                       apply(cumsums_total[[6]][1:min_sequence_length, ], 1, median))
 
-cumsums_percentile_lower = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
-                                apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
-                                apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.25)),
-                                apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
-                                apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.25)),#0.16
-                                apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.25)))#0.16
+cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
+                  apply((cumsums_total[[2]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
+                  apply((cumsums_total[[3]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
+                  apply((cumsums_total[[4]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
+                  apply((cumsums_total[[5]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
+                  apply((cumsums_total[[6]][1:min_sequence_length,])/framerate, 1, get_Wald_CI)
+                  )
 
-cumsums_percentile_higher = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
-                                 apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
+# start_time <- Sys.time()
+# apply((cumsums_total[[2]][1:2,])/framerate, c(1,2), get_Wald_CI)
+# end_time <- Sys.time()
+# end_time - start_time
+
+# Need to replace this section with bootstrapping
+cumsums_percentile_lower = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.25)),
+                                apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.25)),
+                                apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.25)),
+                                apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.25)),
+                                apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.25)),
+                                apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.25)))
+
+cumsums_percentile_higher = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, quantile, c(0.75)),
+                                 apply(cumsums_total[[2]][1:min_sequence_length, ], 1, quantile, c(0.75)),
                                  apply(cumsums_total[[3]][1:min_sequence_length, ], 1, quantile, c(0.75)),
-                                 apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
-                                 apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.75)),#0.84
-                                 apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.75)))#0.84
+                                 apply(cumsums_total[[4]][1:min_sequence_length, ], 1, quantile, c(0.75)),
+                                 apply(cumsums_total[[5]][1:min_sequence_length, ], 1, quantile, c(0.75)),
+                                 apply(cumsums_total[[6]][1:min_sequence_length, ], 1, quantile, c(0.75)))
+
+trained_1 = cumsums_total[[1]][min_sequence_length, ] / framerate 
+yoked_1   = cumsums_total[[2]][min_sequence_length, ] / framerate 
+blank_1   = cumsums_total[[3]][min_sequence_length, ] / framerate 
+trained_2 = cumsums_total[[4]][min_sequence_length, ] / framerate 
+yoked_2   = cumsums_total[[5]][min_sequence_length, ] / framerate 
+blank_2   = cumsums_total[[6]][min_sequence_length, ] / framerate 
+T1_label = rep("T1", length(trained_1))
+R1_label = rep("R1", length(yoked_1))
+N1_label = rep("N1", length(blank_1))
+T2_label = rep("T2", length(trained_2))
+R2_label = rep("R2", length(yoked_2))
+N2_label = rep("N2", length(blank_2))
+T1_df = cbind.data.frame(trained_1, T1_label)
+R1_df = cbind.data.frame(yoked_1, R1_label)
+N1_df = cbind.data.frame(blank_1, N1_label)
+T2_df = cbind.data.frame(trained_2, T2_label)
+R2_df = cbind.data.frame(yoked_2, R2_label)
+N2_df = cbind.data.frame(blank_2, N2_label)
+colnames(T1_df) = c("Value", "Session")
+colnames(R1_df) = c("Value", "Session")
+colnames(N1_df) = c("Value", "Session")
+colnames(T2_df) = c("Value", "Session")
+colnames(R2_df) = c("Value", "Session")
+colnames(N2_df) = c("Value", "Session")
+
+Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
+Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
+
+# Confidence Interval
+
+CI_df = data.frame()
+for (i in 1:6){
+  CI_df = rbind.data.frame(CI_df, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
+}
+
+colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
+
+
 
 ##X axis coordinate
 forward_index = c((1:min_sequence_length) / framerate)
@@ -270,42 +323,3 @@ pdf("Training_Session_CS_121318.pdf",onefile = T,width = 5, height = 5 )
     )
   
 dev.off()
-
-
-
-trained_1 = cumsums_total[[1]][min_sequence_length, ] / framerate 
-yoked_1   = cumsums_total[[2]][min_sequence_length, ] / framerate 
-blank_1   = cumsums_total[[3]][min_sequence_length, ] / framerate 
-trained_2 = cumsums_total[[4]][min_sequence_length, ] / framerate 
-yoked_2   = cumsums_total[[5]][min_sequence_length, ] / framerate 
-blank_2   = cumsums_total[[6]][min_sequence_length, ] / framerate 
-T1_label = rep("T1", length(trained_1))
-R1_label = rep("R1", length(yoked_1))
-N1_label = rep("N1", length(blank_1))
-T2_label = rep("T2", length(trained_2))
-R2_label = rep("R2", length(yoked_2))
-N2_label = rep("N2", length(blank_2))
-T1_df = cbind.data.frame(trained_1, T1_label)
-R1_df = cbind.data.frame(yoked_1, R1_label)
-N1_df = cbind.data.frame(blank_1, N1_label)
-T2_df = cbind.data.frame(trained_2, T2_label)
-R2_df = cbind.data.frame(yoked_2, R2_label)
-N2_df = cbind.data.frame(blank_2, N2_label)
-colnames(T1_df) = c("Value", "Session")
-colnames(R1_df) = c("Value", "Session")
-colnames(N1_df) = c("Value", "Session")
-colnames(T2_df) = c("Value", "Session")
-colnames(R2_df) = c("Value", "Session")
-colnames(N2_df) = c("Value", "Session")
-
-Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
-Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
-
-# Confidence Interval
-
-CI_df = data.frame()
-for (i in 1:6){
-  CI_df = rbind.data.frame(CI_df, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
-}
-
-colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
