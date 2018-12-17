@@ -1,5 +1,5 @@
 source("plot_trend.R")
-setwd("G:/Behavioral_project/behavior_experiment_data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
 Delay_of_Laser_On_Off = function(input_file){

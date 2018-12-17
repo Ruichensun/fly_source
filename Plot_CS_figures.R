@@ -1,5 +1,7 @@
 # Plot Fig 3
-setwd("G:/Behavioral_project/behavior_experiment_data/Analysis/")
+setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
+library(dunn.test)
+
 
 fly.info.include = fly.info[ind.include, ]
 #WT flies
@@ -266,6 +268,12 @@ for (metric.ind in ind_of_interest) {
     input.y_3R,
     input.y_3N
   )
+  
+  CI_df = data.frame()
+  for (i in 1:6){
+    CI_df = rbind.data.frame(CI_df, get_Wald_CI(input.y[[i]]))
+  }
+  colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
   
   input.y.df = data.frame(input.yy, yy.label)
   colnames(input.y.df) <- c("Value", "Sessions")
