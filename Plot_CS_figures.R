@@ -43,7 +43,7 @@ pdf(paste0("ind_of_interest", query.genotype[1], "_", Sys.Date(), ".pdf"),
     onefile = T, width = 5, height = 5
 )
 
-ind_of_interest = c(29, 28, 13)
+ind_of_interest = c(29, 28, 13, 21, 23)
 for (metric.ind in ind_of_interest) {
   input.file = paste0("metrics/metric_", metric.ind, ".csv")
   if (!file.exists(input.file)) {
@@ -186,7 +186,7 @@ for (metric.ind in ind_of_interest) {
   
   
   if (metric.ind == 21) {
-    yrange = c(0, 0.5)
+    yrange = c(0, 0.2)
     y_text = 0.142
   }
   
@@ -196,7 +196,7 @@ for (metric.ind in ind_of_interest) {
   }
   
   if (metric.ind == 23) {
-    yrange = c(0, 0.5)
+    yrange = c(0, 0.2)
     y_text = 1
   }
   
@@ -248,7 +248,9 @@ for (metric.ind in ind_of_interest) {
   yy.3T = rep("3rdE1_1", length(input.y[[4]]))
   yy.3R = rep("3rdE1_2", length(input.y[[5]]))
   yy.3N = rep("3rdE1_3", length(input.y[[6]]))
-  yy.label = c(yy.1T, yy.1R, yy.1N, yy.3T, yy.3R, yy.3N)
+  yy.label = c(
+               yy.1T, yy.1R, yy.1N,
+               yy.3T, yy.3R, yy.3N)
   
   input.y_1T = as.numeric(input.y[[1]])
   input.y_1R = as.numeric(input.y[[2]])
@@ -267,6 +269,19 @@ for (metric.ind in ind_of_interest) {
   
   input.y.df = data.frame(input.yy, yy.label)
   colnames(input.y.df) <- c("Value", "Sessions")
+  
+  input.yy.pre = c(input.y_1T, input.y_1R, input.y_1N)
+  yy.label.pre = c(yy.1T, yy.1R, yy.1N)
+  input.y.df_pre = data.frame(input.yy.pre, yy.label.pre)
+  colnames(input.y.df_pre) <- c("Value", "Sessions")
+  dunn.test(x = input.y.df_pre$Value, g = input.y.df_pre$Sessions, method = c("bonferroni"))
+  
+  input.yy.post = c(input.y_3T, input.y_3R, input.y_3N)
+  yy.label.post = c(yy.3T, yy.3R, yy.3N)
+  input.y.df_post = data.frame(input.yy.post, yy.label.post)
+  colnames(input.y.df_post) <- c("Value", "Sessions")
+  dunn.test(x = input.y.df_post$Value, g = input.y.df_post$Sessions, method = c("bonferroni"))
+  
   col.pool <- c(
     "indianred3",
     "light blue",
@@ -326,6 +341,8 @@ for (metric.ind in ind_of_interest) {
           col = "light grey",
           lty = 1)
   }
+  
+  
 }
 dev.off()
 
