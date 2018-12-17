@@ -1,5 +1,5 @@
 source("plot_trend.R")
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
+setwd("G:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
 Delay_of_Laser_On_Off = function(input_file){
@@ -49,22 +49,19 @@ Delay_of_Laser_On_Off = function(input_file){
 Laser_Delay <- function(file_name_filter, fly.info.movement) {
   laser_delays = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
-    input.file <- list.files(
-      path = paste0("data/",
-                    fly.info.movement$experimenter[ind],
-                    "/CS/"),
-      pattern = paste0(
-        "ProcessedData_Fly",
-        fly.info.movement$Fly[ind],
-        "_",
-        file_name_filter,
-        "_WT",
-        ".csv"
-      ),
-      full.names = T
-    )
-    if(length(input.file)==0){
-      next() 
+    if(fly.info.movement$Genotype[ind]=="WT"){
+      input.file <- list.files(
+        path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
+        full.names = T)
+      if(length(input.file)==0){next()}
+    }
+    if(fly.info.movement$Genotype[ind]=="CS"){
+      input.file <- list.files(
+        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
+        full.names = T)
+      if(length(input.file)==0){next()}
     }
     laser_delays = rbind(laser_delays, Delay_of_Laser_On_Off(input.file))
   }
@@ -122,26 +119,22 @@ chance_of_being_hit_by_laser = function(input_file){
 total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
-    input.file <- list.files(
-      path = paste0("data/",
-                    fly.info.movement$experimenter[ind],
-                    "/CS/"),
-      pattern = paste0(
-        "ProcessedData_Fly",
-        fly.info.movement$Fly[ind],
-        "_",
-        file_name_filter,
-        "_WT",
-        ".csv"
-      ),
-      full.names = T
-    )
-        if(length(input.file)==0){
-     next() 
+    if(fly.info.movement$Genotype[ind]=="WT"){
+      input.file <- list.files(
+        path = paste0("data/",fly.info.movement$experimenter[ind],"/CS/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
+        full.names = T)
+      if(length(input.file)==0){next()}
+    }
+    if(fly.info.movement$Genotype[ind]=="CS"){
+      input.file <- list.files(
+        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
+        full.names = T)
+      if(length(input.file)==0){next()}
     }
     laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
   }
-  
   names(laser_chance) = c("Chances of being hit during walking", "Chances of being hit during pause ", "Laser ON duration percentage")
   return(laser_chance)
 }
