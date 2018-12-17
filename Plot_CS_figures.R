@@ -1,5 +1,5 @@
 # Plot Fig 3
-
+setwd("G:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 fly.info.include = fly.info[ind.include, ]
 #WT flies
@@ -39,11 +39,12 @@ sessions <- c(
   "E1N1E1N1E1N1E1N1E1"
 )
 
-pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
-    onefile = T, width = 10
+pdf(paste0("ind_of_interest", query.genotype[1], "_", Sys.Date(), ".pdf"),
+    onefile = T, width = 5, height = 5
 )
 
-for (metric.ind in 1:length(metrices)) {
+ind_of_interest = c(29, 28, 13)
+for (metric.ind in ind_of_interest) {
   input.file = paste0("metrics/metric_", metric.ind, ".csv")
   if (!file.exists(input.file)) {
     next
@@ -61,15 +62,6 @@ for (metric.ind in 1:length(metrices)) {
       metric.df$Category == category &
       metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
-    
-    # For normalization
-    # ind.E1 <- metric.df$Session == "E1" &
-    #   metric.df$Genotype %in% query.genotype &
-    #   metric.df$Category == category &
-    #   metric.df$Fly %in% query.fly &
-    #   metric.df$Experimenter  %in%  query.experimenter
-    # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
-    
     z = metric.df[ind, "Value"]
     y = append(y, list(na.omit(z)))
   }
@@ -248,25 +240,22 @@ for (metric.ind in 1:length(metrices)) {
     yrange = c(0, 2050)
     y_text = 250
   }
-  
-  print(yrange)
-  print(y_text)
-  
-  input.y = y.1[1:9]
+  input.y = y.1[1:3]
+  input.y = append(input.y, y.1[7:9])
   yy.1T = rep("1stE1_1", length(input.y[[1]]))
   yy.1R = rep("1stE1_2", length(input.y[[2]]))
   yy.1N = rep("1stE1_3", length(input.y[[3]]))
-  yy.3T = rep("3rdE1_1", length(input.y[[7]]))
-  yy.3R = rep("3rdE1_2", length(input.y[[8]]))
-  yy.3N = rep("3rdE1_3", length(input.y[[9]]))
+  yy.3T = rep("3rdE1_1", length(input.y[[4]]))
+  yy.3R = rep("3rdE1_2", length(input.y[[5]]))
+  yy.3N = rep("3rdE1_3", length(input.y[[6]]))
   yy.label = c(yy.1T, yy.1R, yy.1N, yy.3T, yy.3R, yy.3N)
   
   input.y_1T = as.numeric(input.y[[1]])
   input.y_1R = as.numeric(input.y[[2]])
   input.y_1N = as.numeric(input.y[[3]])
-  input.y_3T = as.numeric(input.y[[7]])
-  input.y_3R = as.numeric(input.y[[8]])
-  input.y_3N = as.numeric(input.y[[9]])
+  input.y_3T = as.numeric(input.y[[4]])
+  input.y_3R = as.numeric(input.y[[5]])
+  input.y_3N = as.numeric(input.y[[6]])
   input.yy = c(
     input.y_1T,
     input.y_1R,

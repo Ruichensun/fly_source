@@ -56,9 +56,10 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
     }
+    if(length(input.file)==0){next()}
     if (!is.na(get_sequence_length(input.file))){
       file_names = c(file_names, input.file) 
-    }else{next}
+    }else{next()}
   }
     # Get min sequence length
     sequence_lengths = unlist(lapply(file_names, get_sequence_length))
