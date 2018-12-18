@@ -79,9 +79,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     ## special cases
     input.y = list(y[[7]], y[[15]], y[[23]])
     
-    yy.3T = rep(paste0("E11"), length(input.y[[1]]))
-    yy.3R = rep(paste0("E12"), length(input.y[[2]]))
-    yy.3N = rep(paste0("E13"), length(input.y[[3]]))
+    yy.3T = rep(paste0("E11_", query.genotype[1]), length(input.y[[1]]))
+    yy.3R = rep(paste0("E12_", query.genotype[1]), length(input.y[[2]]))
+    yy.3N = rep(paste0("E13_", query.genotype[1]), length(input.y[[3]]))
     
     yy.label = c(yy.3T, yy.3R, yy.3N)
     # yy.label = c(yy.3T, yy.3R)
@@ -146,10 +146,9 @@ get_query_info<-function(query.genotype){
     )
   }
   
-  return(list(query.fly, query.experimenter))
+  return(list(query.fly, 
+              query.experimenter))
   }    
-
-p_value_sum = matrix(nrow = 0, ncol = 9)
 
 sessions <- c(                     
   "E1T1",                   #4
@@ -183,25 +182,25 @@ sessions <- c(
 metric.ind = 29  
 query.list = c(
   # "CS"
-  "SUN1"
-  # "SUN2"
-  # "SUN3"
+  "SUN1",
+  "SUN2",
+  "SUN3"
   # "CS x JU30"
-  # "MB009B x JU30"
-  # "MB131B x JU30"
-  # "MB419B x JU30"
+  # "MB009B x JU30",
+  # "MB131B x JU30",
+  # "MB419B x JU30",
   # "MB607B x JU30"
-  # "R60D05 x JU30"
+  # "R60D05 x JU30",
   # "JG17 x JU30"
-  # "R60D05 x PKCi",
+  # "R60D05 x PKCi"
   # "JG17 x PKCi"
   # "CS x PKCi",
   # "MB009B x PKCi"
-  # "MB131B x PKCi",
-  # "MB419B x PKCi",
+  # "MB131B x PKCi"
+  # "MB419B x PKCi"
   # "MB607B x PKCi"
-  # "R60D05 x DopR1-IR",
-  # "JG17 x DopR1-IR",
+  # "R60D05 x DopR1-IR"
+  # "JG17 x DopR1-IR"
   # "MB009B x DopR1-IR"
   # "MB131B x DopR1-IR"
   # "MB419B x DopR1-IR"
@@ -209,6 +208,13 @@ query.list = c(
 )
 
 input.y.df = data.frame()
+
+query.fly = get_query_info(query.list[i])[[1]]
+query.experimenter = get_query_info(query.list[i])[[2]]
+input.y.df.pre = learning_score(metric.ind, query.list[i], query.fly=query.fly, query.experimenter=query.experimenter)
+colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
+dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
+
 for (i in 1:length(query.list)){
   query.fly = get_query_info(query.list[i])[[1]]
   query.experimenter = get_query_info(query.list[i])[[2]]
@@ -222,7 +228,6 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
           
 
     #segment
-    colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     
     col.pool <- c(  "indianred3",
                     "light blue",
@@ -257,9 +262,9 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
                   )
     
     pdf(
-      "LearningIndexComparison_DopR_only_112718.pdf",
+      paste0("LearningIndexComparison_", "DopR_", Sys.Date(),".pdf"),
       onefile = T,
-      width = 10
+      width = 6, height = 5
     )
     
     boxplot(
@@ -299,18 +304,7 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
          srt = 0,
          adj = 0
     )
-    # 
-    # n = length(input.y) / length(sessions)
     
-    # for(i in c(3,6,9,13)){
-    # for(i in c(3,6,9,12)){
-    #   #for(i in c(3,6,10)){
-    #   lines(c(i,i)+0.5,
-    #         c(yrange[1]-1e3,yrange[1]+1e3),
-    #         col="light grey",
-    #         lty=1)
-    # }
-
     for (i in c(3,6,9,12,15,18,21,24,27
                 # 27,30,33,36,39,42,45
                 )) {
@@ -321,30 +315,13 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
             lty = 1)
     }
     
-    # p_value = c(
-    #   # wilcox.test(input.y_1T,input.y_1N)$p.value,
-    #   # wilcox.test(input.y_1R,input.y_1N)$p.value,
-    #   # wilcox.test(input.y_1T,input.y_1R)$p.value,
-    #   wilcox.test(input.y_2T,input.y_2N)$p.value,
-    #   wilcox.test(input.y_2R,input.y_2N)$p.value,
-    #   wilcox.test(input.y_2T,input.y_2R)$p.value,
-    #   wilcox.test(input.y_3T,input.y_3N)$p.value,
-    #   wilcox.test(input.y_3R,input.y_3N)$p.value,
-    #   wilcox.test(input.y_3T,input.y_3R)$p.value
-    # )
-    # text((1:length(input.y)) - 0.1,
-    #      15,
-    #      paste0(sapply(input.y, length)),
-    #      xpd = T,
-    #      srt = 0,
-    #      adj = 0
-    # )
-    
     dev.off()          
       
 uni = unique(input.y.df$Genotype_Sessions)    
-#CS T R: 0.0009154
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[1],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[2],]$Value)
+#CS : 0.0009154
+dunn.test(x = input.y.df[input.y.df$Genotype_Sessions==uni[1:3],]$Value, 
+          g = input.y.df[input.y.df$Genotype_Sessions==uni[1:3],]$Genotype_Sessions,
+          method = c("bonferroni"))
 
 #MB009 T R 0.391
 wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[4],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[5],]$Value)
