@@ -182,15 +182,15 @@ sessions <- c(
 metric.ind = 29  
 query.list = c(
   # "CS"
-  "SUN1",
-  "SUN2",
+  # "SUN1"
+  # "SUN2"
   "SUN3"
   # "CS x JU30"
-  # "MB009B x JU30",
-  # "MB131B x JU30",
-  # "MB419B x JU30",
+  # "MB009B x JU30"
+  # "MB131B x JU30"
+  # "MB419B x JU30"
   # "MB607B x JU30"
-  # "R60D05 x JU30",
+  # "R60D05 x JU30"
   # "JG17 x JU30"
   # "R60D05 x PKCi"
   # "JG17 x PKCi"
@@ -209,11 +209,18 @@ query.list = c(
 
 input.y.df = data.frame()
 
-query.fly = get_query_info(query.list[i])[[1]]
-query.experimenter = get_query_info(query.list[i])[[2]]
-input.y.df.pre = learning_score(metric.ind, query.list[i], query.fly=query.fly, query.experimenter=query.experimenter)
+query.fly = get_query_info(query.list[1])[[1]]
+query.experimenter = get_query_info(query.list[1])[[2]]
+input.y.df.pre = learning_score(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
 colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
 dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
+
+CI_df = data.frame()
+for (i in 1:length(levels(input.y.df.pre[,2]))){
+  CI_df = rbind.data.frame(CI_df, get_Wald_CI(input.y.df.pre[input.y.df.pre$Genotype_Sessions==levels(input.y.df.pre[,2])[i],]$Value))
+}
+colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
+
 
 for (i in 1:length(query.list)){
   query.fly = get_query_info(query.list[i])[[1]]

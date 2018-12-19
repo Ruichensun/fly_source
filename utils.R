@@ -1117,7 +1117,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
 get_Wald_CI = function(data){
   Mboot = boot(data,
                function(x,i) median(x[i]), 
-               R=100)
+               R=10000)
   
   CI = boot.ci(Mboot,
                conf = 0.95, 
