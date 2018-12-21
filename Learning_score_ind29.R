@@ -184,8 +184,8 @@ query.list = c(
   # "CS"
   # "SUN1"
   # "SUN2"
-  "SUN3"
-  # "CS x JU30"
+  # "SUN3"
+  "CS x JU30"
   # "MB009B x JU30"
   # "MB131B x JU30"
   # "MB419B x JU30"
@@ -199,11 +199,11 @@ query.list = c(
   # "MB131B x PKCi"
   # "MB419B x PKCi"
   # "MB607B x PKCi"
-  # "R60D05 x DopR1-IR"
-  # "JG17 x DopR1-IR"
-  # "MB009B x DopR1-IR"
-  # "MB131B x DopR1-IR"
-  # "MB419B x DopR1-IR"
+  # "R60D05 x DopR1-IR",
+  # "JG17 x DopR1-IR",
+  # "MB009B x DopR1-IR",
+  # "MB131B x DopR1-IR",
+  # "MB419B x DopR1-IR",
   # "MB607B x DopR1-IR"
 )
 
