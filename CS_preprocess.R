@@ -1,13 +1,6 @@
 setwd("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/combine_flyCSV.R")
-
-get_fly_moving_speed <- function(x, framerate) {
-  data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
-  fly_pos = x[data_start:min(600 * framerate, length(x))]
-  experiment_time = length(fly_pos) / framerate
-  tot_moving_dist = sum(abs(diff(fly_pos)))
-  return(tot_moving_dist / experiment_time)
-}
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 query.sessions <- c(
   "E1",
@@ -150,17 +143,14 @@ for (ind in 1:nrow(fly.info)) {
         ((fly.info$experimenter[ind] == "JE") &
          (fly.info$Fly[ind] <= 71))
         | (fly.info$experimenter[ind] == "LM")) {
-      # print(input.file)
       fly.pos <- fly.pos[seq(1, exp.time, by = 2)]
       
       laser.status <- rep(NA, length(fly.pos))
       
       if (dim(read.csv(input.file, stringsAsFactors = F))[2] == 2) {
-        #
         laser.status <-
           read.csv(input.file, stringsAsFactors = F)[, 2]#
-      }#
-      
+      }
       framerate = 10
     }
     
@@ -202,13 +192,7 @@ for (ind in 1:nrow(fly.info)) {
     }
   }
 }
-
-#ind.passQC = order(fly.moving.speed) < length(fly.moving.speed)*0.95 &
-#  order(fly.moving.speed) > length(fly.moving.speed)*0.05
-
 colnames(fly.info.out) = colnames(fly.info)
-
-###Potential variable for QC###
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
 write.table(
@@ -218,4 +202,3 @@ write.table(
   quote = F,
   sep = ","
 )
-## Fly,Gender,Category,Setup,Birth.date,Exp.date,Death.date,Age,experimenter,Fly_Exp

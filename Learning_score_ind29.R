@@ -29,22 +29,22 @@ sessions <- c(
   "E1N1E1N1E1N1E1N1E1"      #27
 )
 
-metric.ind = 29  
+metric.ind = 29
 query.list = c(
-  # "CS"
+  "CS"
   # "SUN1"
   # "SUN2"
-  # "SUN3"
-  "CS x JU30"
-  # "MB009B x JU30"
-  # "MB131B x JU30"
-  # "MB419B x JU30"
-  # "MB607B x JU30"
-  # "R60D05 x JU30"
+  # "SUN3",
+  # "CS x JU30",
+  # "MB009B x JU30",
+  # "MB131B x JU30",
+  # "MB419B x JU30",
+  # "MB607B x JU30",
+  # "R60D05 x JU30",
   # "JG17 x JU30"
   # "R60D05 x PKCi"
   # "JG17 x PKCi"
-  # "CS x PKCi",
+  # "CS x PKCi"
   # "MB009B x PKCi"
   # "MB131B x PKCi"
   # "MB419B x PKCi"
@@ -80,11 +80,6 @@ for (i in 1:length(query.list)){
 }
 colnames(input.y.df) <- c("Value", "Genotype_Sessions")
           
-
-#########Plotting Different Genotypes together########
-          
-
-    #segment
     
     col.pool <- c(  "indianred3",
                     "light blue",
@@ -119,15 +114,15 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
                   )
     
     pdf(
-      paste0("LearningIndexComparison_", "DopR_", Sys.Date(),".pdf"),
+      paste0("LearningIndexComparison_", "Burstiness_", "PKCI_", Sys.Date(),".pdf"),
       onefile = T,
-      width = 6, height = 5
+      width = 10, height = 5
     )
     
     boxplot(
       Value ~ Genotype_Sessions,
       data = input.y.df,
-      ylim = c(-2,2), #Value set for metric #29
+      ylim = c(-3,3), #Value set for metric #29
       outline = F,
       notch = T,
       lwd = 2,
@@ -155,7 +150,7 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     }
     
     text(x = (1:length(levels(input.y.df$Genotype_Sessions))) - 0.1,
-         y = 1.5,
+         y = 25,
          labels = number_of_data,
          xpd = T,
          srt = 0,
@@ -174,26 +169,6 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     
     dev.off()          
       
-uni = unique(input.y.df$Genotype_Sessions)    
-#CS : 0.0009154
-dunn.test(x = input.y.df[input.y.df$Genotype_Sessions==uni[1:3],]$Value, 
-          g = input.y.df[input.y.df$Genotype_Sessions==uni[1:3],]$Genotype_Sessions,
-          method = c("bonferroni"))
-
-#MB009 T R 0.391
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[4],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[5],]$Value)
-#MB131 T R 0.3115
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[7],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[8],]$Value)
-
-#MB419 T R 0.1797
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[10],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[11],]$Value)
-#MB607 T R 0.02296
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[13],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[14],]$Value)
-#R60D05 T R 0.002848
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[16],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[17],]$Value)
-#189Y T R 0.001539
-wilcox.test(input.y.df[input.y.df$Genotype_Sessions==uni[19],]$Value, input.y.df[input.y.df$Genotype_Sessions==uni[20],]$Value)
-
         
 ################Plotting Individual Plots#########################          
           

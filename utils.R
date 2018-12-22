@@ -1126,3 +1126,162 @@ get_Wald_CI = function(data){
   )
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
+
+
+learning_score <- function(metric.ind, query.genotype, query.fly, query.experimenter){
+  
+  fly_genotype = query.genotype
+  if (query.genotype == c("CS")){
+    query.genotype = c("WT", "CS")
+  }
+  
+  input.file = paste0("metrics/metric_", metric.ind, ".csv")
+  if (!file.exists(input.file)) {
+    next
+  }
+  metric.df = read.csv(input.file)
+  ## covariates of interest: genotype, session
+  y = list()
+  ## E1 data
+  session = "E1"
+  for (category in c("T", "R", "N")) {
+    query.session = gsub("X", category, session)
+    ind <- metric.df$Session == query.session &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == category &
+      metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    ind.E1 <- metric.df$Session == "E1" &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == category
+    metric.df$Fly %in% query.fly&
+      metric.df$Experimenter  %in%  query.experimenter
+    # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+    y = append(y, list(na.omit(z)))
+  }
+  
+  ## input sessions data
+  for (session in sessions) {
+    if (grepl("T", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "T" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "T" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
+      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+      }
+    if (grepl("R", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "R" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "R" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+      }
+    if (grepl("N", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "N" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "N" &
+        metric.df$Fly %in% query.fly&
+        metric.df$Experimenter  %in%  query.experimenter
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
+      # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+    }
+    y = append(y, list(na.omit(z)))
+  }
+  
+  ## special cases
+  input.y = list(y[[7]], y[[15]], y[[23]])
+  
+  yy.3T = rep(paste0("E11_", query.genotype[1]), length(input.y[[1]]))
+  yy.3R = rep(paste0("E12_", query.genotype[1]), length(input.y[[2]]))
+  yy.3N = rep(paste0("E13_", query.genotype[1]), length(input.y[[3]]))
+  
+  yy.label = c(yy.3T, yy.3R, yy.3N)
+  # yy.label = c(yy.3T, yy.3R)
+  
+  input.y_3T = as.numeric(input.y[[1]])
+  input.y_3R = as.numeric(input.y[[2]])
+  input.y_3N = as.numeric(input.y[[3]])
+  
+  input.yy = c(
+    input.y_3T,
+    input.y_3R,
+    input.y_3N
+  )
+  input.y.df.pre = data.frame(input.yy, yy.label)
+  return(input.y.df.pre)
+}
+
+get_query_info<-function(query.genotype){
+  if(query.genotype=="CS"){
+    query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                    (fly.info.include$Genotype == "CS")) &
+                                   (fly.info.include$experimenter!="SW"), ]$Fly
+    query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
+                                             (fly.info.include$Genotype == "CS")) &
+                                            (fly.info.include$experimenter!="SW"), ]$experimenter
+    write.table(
+      fly.info.include[((fly.info.include$Genotype == "WT") |
+                          (fly.info.include$Genotype == "CS")) &
+                         (fly.info.include$experimenter!="SW"), ],
+      "fly_info_include_WT.csv",
+      col.names = T,
+      row.names = F,
+      quote = F,
+      sep = ","
+    )
+  }else if(query.genotype=="SUN1"){
+    query.genotype <- c("SUN1")
+    query.fly = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                                   (fly.info.include$experimenter!="SW"), ]$Fly
+    
+    query.experimenter = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                                            (fly.info.include$experimenter!="SW"), ]$experimenter
+    write.table(
+      fly.info.include[((fly.info.include$Genotype == "SUN1")) &
+                         (fly.info.include$experimenter!="SW"), ],
+      "fly_info_include_SUN1.csv",
+      col.names = T,
+      row.names = F,
+      quote = F,
+      sep = ","
+    )
+  }else{
+    query.fly = fly.info.include[(fly.info.include$Genotype == query.genotype), ]$Fly
+    query.experimenter = fly.info.include[(fly.info.include$Genotype == query.genotype), ]$experimenter
+    write.table(
+      fly.info.include[(fly.info.include$Genotype == query.genotype), ],
+      paste0("fly_info_include_",query.genotype,".csv"),
+      col.names = T,
+      row.names = F,
+      quote = F,
+      sep = ","
+    )
+  }
+  
+  return(list(query.fly, 
+              query.experimenter))
+}    

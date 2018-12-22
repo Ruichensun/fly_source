@@ -1,13 +1,6 @@
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/combine_flyCSV.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-
-get_fly_moving_speed <- function(x, framerate) {
-  data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
-  fly_pos = x[data_start:min(600 * framerate, length(x))]
-  experiment_time = length(fly_pos) / framerate
-  tot_moving_dist = sum(abs(diff(fly_pos)))
-  return(tot_moving_dist / experiment_time)
-}
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 query.sessions <- c(
   "E1",

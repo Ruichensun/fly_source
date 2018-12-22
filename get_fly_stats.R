@@ -1,7 +1,7 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/prepoccess.R")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/get_fly_speed_and_position.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 metrices = c(
   "Number of Pause Starts", #1
