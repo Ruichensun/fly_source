@@ -3,6 +3,35 @@ library(zoo)
 library(boot)
 library(dunn.test)
 
+combine_flyCSV <- function(experimenter, type){
+  all_info = NULL;
+  input_files = c()
+  for (i in 1:length(experimenter)){
+    filename = paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/", 
+                      experimenter[i], "/", type[1], "/CSV/Behavioral Experiments - ", type[2], "_", experimenter[i], ".csv")
+    input_files = c(input_files, filename)
+  }
+  
+  output_file = paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/fly_info_", type[3], ".csv")
+  for(i in 1:length(input_files)){
+    info = read.csv(input_files[i],header=T,stringsAsFactors=F)
+    info$experimenter = experimenter[i]
+    info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
+    all_info = rbind(all_info,info)
+  }
+  write.table(all_info,
+              output_file,
+              quote=F,row.names=F,col.names=T,sep=",")  
+}
+
+get_fly_moving_speed <- function(x, framerate) {
+  data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
+  fly_pos = x[data_start:min(600 * framerate, length(x))]
+  experiment_time = length(fly_pos) / framerate
+  tot_moving_dist = sum(abs(diff(fly_pos)))
+  return(tot_moving_dist / experiment_time)
+}
+
 one_fly_statistics <- function(input_file,
                                framerate = 50,
                                speed_max_thres = 28, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
