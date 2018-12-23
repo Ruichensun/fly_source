@@ -2,142 +2,6 @@ source("plot_trend.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
-Delay_of_Laser_On_Off = function(input_file){
-  
-  fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
-  fly.position.raw = fly.file$fly_pos.framerate.50
-  fly.laser.raw = fly.file$laser_status
-  # If laser status not recorded, return NA
-  if (is.na(fly.laser.raw[1]) == T) {
-    return(c(NA,NA))
-  }else{
-    fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
-    starting_point = 21
-    fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
-    fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
-    fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)] 
-  }
-  for (i in 1:length(fly.moving.status)){
-    if ((fly.position[i]<50)){
-      fly.moving.status[i] = 1
-    }
-    if ((fly.position[i]>717)){
-      fly.moving.status[i] = 1
-    }
-  }
-  moving_status_summary = rle(fly.moving.status)
-  
-  total_frame_moving = sum(moving_status_summary$lengths[moving_status_summary$values!=0])
-  total_frame_pause = sum(moving_status_summary$lengths[moving_status_summary$values==0])
-  
-  moving_laser_status.df = data.frame(fly.moving.status,fly.laser.status)
-  
-  fly.laser.status.ONSET = replace(fly.laser.status, fly.laser.status > 0, 1)
-  laser.moving.status = fly.laser.status.ONSET - fly.moving.status
-  
-  laser.moving.status_summary = rle(laser.moving.status)
-  Laser_On_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==-1]
-  Laser_Off_Delay_by_event = laser.moving.status_summary$lengths[laser.moving.status_summary$values==1]
-  Laser_On_Delay = mean(Laser_On_Delay_by_event)
-  Laser_Off_Delay = mean(Laser_Off_Delay_by_event)
-  return(c(Laser_On_Delay/50, #Framerate is 50
-           Laser_Off_Delay/50 #Framerate is 50
-           ))
-}
-
-#Quantify the delay on/off of laser of all flies
-Laser_Delay <- function(file_name_filter, fly.info.movement) {
-  laser_delays = data.frame()
-  for (ind in 1:nrow(fly.info.movement)) {
-    if(fly.info.movement$Genotype[ind]=="WT"){
-      input.file <- list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
-        full.names = T)
-      if(length(input.file)==0){next()}
-    }
-    if(fly.info.movement$Genotype[ind]=="CS"){
-      input.file <- list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
-        full.names = T)
-      if(length(input.file)==0){next()}
-    }
-    laser_delays = rbind(laser_delays, Delay_of_Laser_On_Off(input.file))
-  }
-  names(laser_delays) = c("Delays of Laser On", "Delays of Laser Off")
-  return(laser_delays)
-}
-
-#Quantify percentage of time being hit by laser both during walking and during pause
-chance_of_being_hit_by_laser = function(input_file){
-  
-  fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
-  fly.position.raw = fly.file$fly_pos.framerate.50
-  fly.laser.raw = fly.file$laser_status
-  # If laser status not recorded, return NA
-  if (is.na(fly.laser.raw[1]) == T) {
-    return(c(NA,NA,NA))
-  }else{
-    fly.moving.status.raw = fly_pos_to_moving_status(fly.position.raw)
-    starting_point = 21
-    fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
-    fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
-    fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
-
-    for (i in 1:length(fly.moving.status)){
-      if ((fly.position[i]<50)){
-        fly.moving.status[i] = 1
-      }
-      if ((fly.position[i]>717)){
-        fly.moving.status[i] = 1
-      }
-    }
-    
-    moving_status_summary = rle(fly.moving.status)
-    
-    total_frame_moving = sum(moving_status_summary$lengths[moving_status_summary$values!=0])
-    total_frame_pause = sum(moving_status_summary$lengths[moving_status_summary$values==0])
-    
-    moving_laser_status.df = data.frame(fly.moving.status,fly.laser.status)
-    moving_status_during_laser_ON = rle(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])
-    
-    moving_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==1])
-    pause_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==0])
-    
-    chance_of_being_hit_by_laser_during_moving = moving_laser_ON/total_frame_moving
-    chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
-    laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
-  
-    return(c(chance_of_being_hit_by_laser_during_moving,
-             chance_of_being_hit_by_laser_during_pause,
-             laser_on_percentage))
-  }
-}
-
-#Calculating all the flies' chance of being hit by types (T/R)
-total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.movement) {
-  laser_chance = data.frame()
-  for (ind in 1:nrow(fly.info.movement)) {
-    if(fly.info.movement$Genotype[ind]=="WT"){
-      input.file <- list.files(
-        path = paste0("data/",fly.info.movement$experimenter[ind],"/CS/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
-        full.names = T)
-      if(length(input.file)==0){next()}
-    }
-    if(fly.info.movement$Genotype[ind]=="CS"){
-      input.file <- list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
-        full.names = T)
-      if(length(input.file)==0){next()}
-    }
-    laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
-  }
-  names(laser_chance) = c("Chances of being hit during walking", "Chances of being hit during pause ", "Laser ON duration percentage")
-  return(laser_chance)
-}
 
 fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
                                           (fly.info.include$Genotype == "CS")) &
@@ -193,7 +57,7 @@ boxplot(
   Chance_of_being_hit[1:4],
   ylim = c(0, 1),
   outline = F,
-  notch = T,
+  notch = F,
   lwd = 2,
   ylab = "Percentage",
   xaxt = "n",
@@ -253,7 +117,7 @@ boxplot(
   Chance_of_being_hit[5:8],
   ylim = c(0, 1),
   outline = F,
-  notch = T,
+  notch = F,
   lwd = 2,
   ylab = "Percentage",
   xaxt = "n",

@@ -1185,9 +1185,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
       metric.df$Category == category
     metric.df$Fly %in% query.fly&
       metric.df$Experimenter  %in%  query.experimenter
-    # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
     # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-    z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+    # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     y = append(y, list(na.omit(z)))
   }
   
@@ -1204,9 +1204,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "T" &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
-      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("R", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
@@ -1219,9 +1219,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "R" &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("N", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
@@ -1234,9 +1234,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "N" &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      z = log(metric.df[ind,"Value"]) - log(metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     }
     y = append(y, list(na.omit(z)))
   }
