@@ -31,11 +31,12 @@ sessions <- c(
 
 metric.ind = 29
 query.list = c(
-  "CS"
+  "THGAL4 x JU30"
+  # "CS",
   # "SUN1"
   # "SUN2"
   # "SUN3",
-  # "CS x JU30",
+  # "CS x JU30"
   # "MB009B x JU30",
   # "MB131B x JU30",
   # "MB419B x JU30",
@@ -124,7 +125,7 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
       data = input.y.df,
       ylim = c(-3,3), #Value set for metric #29
       outline = F,
-      notch = T,
+      notch = F,
       lwd = 2,
       ylab = "Learning Index",
       xlab = "",
@@ -150,7 +151,7 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     }
     
     text(x = (1:length(levels(input.y.df$Genotype_Sessions))) - 0.1,
-         y = 25,
+         y = 2,
          labels = number_of_data,
          xpd = T,
          srt = 0,
