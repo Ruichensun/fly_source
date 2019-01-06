@@ -120,7 +120,8 @@ coordinates = list(append(cumsums_CI[[1]][2,], rev(cumsums_CI[[1]][3,])),
                    )
 
 
-pdf("Training_Session_CS_121618.pdf",onefile = T,width = 5, height = 5 )
+pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
+    onefile = T, width = 5, height = 5)
     # First training session
     plot(
       1,
