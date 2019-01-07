@@ -304,9 +304,9 @@ one_fly_statistics <- function(input_file,
   num_pause = length(subset(pause_df, (Pause_Duration >= 25))$Pause_Duration)
   
   Pause_duration = subset(pause_df, (Pause_Duration >= 25))$Pause_Duration
-  if (num_pause <= 10) {
-    burstiness_pause = NA
-  } else{
+  if (num_pause <= 3) {
+    burstiness_pause = 1
+  }else{
     burstiness_pause = (sd(Pause_duration, na.rm = T) - mean(Pause_duration, na.rm = T)) /
       (sd(Pause_duration, na.rm = T) + mean(Pause_duration, na.rm = T))
   }
@@ -318,8 +318,8 @@ one_fly_statistics <- function(input_file,
   inter_event_time <-
     rle(burstiness_inter_event)$length[rle(burstiness_inter_event)$values ==
                                          0]
-  if (length(inter_event_time) <= 10) {
-    Burst_inter_event = NA
+  if (length(inter_event_time) <= 3) {
+    Burst_inter_event = 1
   } else{
     Burst_inter_event = (sd((inter_event_time), na.rm = T) - mean((inter_event_time), na.rm = T)) /
       (sd((inter_event_time), na.rm = T) + mean((inter_event_time), na.rm = T))
@@ -331,8 +331,8 @@ one_fly_statistics <- function(input_file,
     rle(burstiness_inter_event_scrambled)$length[rle(burstiness_inter_event_scrambled)$values ==
                                                    0]
   Burst_inter_event_scrambled <- c()
-  if (length(inter_event_time_scrambled) <= 10) {
-    Burst_inter_event_scrambled = NA
+  if (length(inter_event_time_scrambled) <= 3) {
+    Burst_inter_event_scrambled = 1
   } else{
     Burst_inter_event_scrambled = (sd((inter_event_time_scrambled), na.rm = T) -
                                      mean((inter_event_time_scrambled), na.rm = T)) / (sd((inter_event_time_scrambled), na.rm = T) +
@@ -349,8 +349,8 @@ one_fly_statistics <- function(input_file,
   inter_event_time_inverted <-
     rle(burstiness_inter_event_inverted)$length[rle(burstiness_inter_event_inverted)$values ==
                                                   0]
-  if (length(inter_event_time_inverted) <= 10) {
-    Burst_inter_event_inverted = NA
+  if (length(inter_event_time_inverted) <= 3) {
+    Burst_inter_event_inverted = 1
   } else{
     Burst_inter_event_inverted = (sd((inter_event_time_inverted), na.rm = T) -
                                     mean((inter_event_time_inverted), na.rm = T)) / (sd((inter_event_time_inverted), na.rm = T) +
@@ -358,8 +358,8 @@ one_fly_statistics <- function(input_file,
   }
   
   ## Inverted burstiness_with thresholding
-  if (num_pause <= 10) {
-    burstiness_pause_inverted = NA
+  if (num_pause <= 3) {
+    burstiness_pause_inverted = 1
   } else{
     pause_start_late <- pause_start[2:length(pause_start)]
     pause_end_late <- pause_end[1:(length(pause_end) - 1)]
@@ -504,8 +504,8 @@ one_fly_statistics <- function(input_file,
   start_walk_burst_middle = rle(start_walking_middle)$length[rle(start_walking_middle)$values ==
                                                                0]
   
-  if (length(start_walk_burst_middle) <= 10) {
-    Burst_start_walking_middle = NA
+  if (length(start_walk_burst_middle) <= 3) {
+    Burst_start_walking_middle = 1
   } else{
     Burst_start_walking_middle = (sd((start_walk_burst_middle), na.rm = T) -
                                     mean((start_walk_burst_middle), na.rm = T)) / (sd((start_walk_burst_middle), na.rm = T) +
@@ -516,8 +516,8 @@ one_fly_statistics <- function(input_file,
   start_pause_burst_middle = rle(start_pause_middle)$length[rle(start_pause_middle)$values ==
                                                               0]
   
-  if (length(start_pause_burst_middle) <= 10) {
-    Burst_start_pause_middle = NA
+  if (length(start_pause_burst_middle) <= 3) {
+    Burst_start_pause_middle = 1
   } else{
     Burst_start_pause_middle = (sd((start_pause_burst_middle), na.rm = T) -
                                   mean((start_pause_burst_middle), na.rm = T)) / (sd((start_pause_burst_middle), na.rm = T) +
@@ -1178,16 +1178,16 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     ind <- metric.df$Session == query.session &
       metric.df$Genotype %in% query.genotype &
       metric.df$Category == category &
-      metric.df$Fly %in% query.fly&
+      metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
     ind.E1 <- metric.df$Session == "E1" &
       metric.df$Genotype %in% query.genotype &
-      metric.df$Category == category
-    metric.df$Fly %in% query.fly&
+      metric.df$Category == category &
+      metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
-    z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
     # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-    # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+    z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     y = append(y, list(na.omit(z)))
   }
   
@@ -1197,46 +1197,46 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
       ind.E1 <- metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "T" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
       ind <- metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "T" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
-      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("R", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "R" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
       ind <- metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "R" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("N", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "N" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
       ind <- metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "N" &
-        metric.df$Fly %in% query.fly&
+        metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
+      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     }
     y = append(y, list(na.omit(z)))
   }
