@@ -525,7 +525,7 @@ for (metric.ind in 1:length(metrices)) {
   yy.3T = rep("3rdE1_1", length(input.y[[7]]))
   yy.3R = rep("3rdE1_2", length(input.y[[8]]))
   yy.3N = rep("3rdE1_3", length(input.y[[9]]))
-  yy.label = c(yy.1T, yy.1R, yy.1N, jyy.2T, yy.2R, yy.2N, yy.3T, yy.3R, yy.3N)
+  yy.label = c(yy.1T, yy.1R, yy.1N, yy.2T, yy.2R, yy.2N, yy.3T, yy.3R, yy.3N)
   
   input.y_1T = as.numeric(input.y[[1]])
   input.y_1R = as.numeric(input.y[[2]])

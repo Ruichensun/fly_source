@@ -1185,9 +1185,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
       metric.df$Category == category &
       metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
-    # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
     # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-    z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+    # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     y = append(y, list(na.omit(z)))
   }
   
@@ -1204,9 +1204,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "T" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
-      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("R", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
@@ -1219,9 +1219,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "R" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("N", session) == T) {
       ind.E1 <- metric.df$Session == "E1" &
@@ -1234,9 +1234,9 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
         metric.df$Category == "N" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      # z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
+      z = (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"])/metric.df[ind.E1,"Value"]
       # z = -(metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-      z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+      # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
     }
     y = append(y, list(na.omit(z)))
   }
@@ -1259,6 +1259,60 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
     input.y_3T,
     input.y_3R,
     input.y_3N
+  )
+  input.y.df.pre = data.frame(input.yy, yy.label)
+  return(input.y.df.pre)
+}
+
+
+initial_condition <- function(metric.ind, query.genotype, query.fly, query.experimenter){
+  
+  fly_genotype = query.genotype
+  if (query.genotype == c("CS")){
+    query.genotype = c("WT", "CS")
+  }
+  
+  input.file = paste0("metrics/metric_", metric.ind, ".csv")
+  if (!file.exists(input.file)) {
+    next
+  }
+  metric.df = read.csv(input.file)
+  ## covariates of interest: genotype, session
+  y = list()
+  ## E1 data
+  session = "E1"
+  for (category in c("T", "R", "N")) {
+    query.session = gsub("X", category, session)
+    ind.E1 <- metric.df$Session == "E1" &
+      metric.df$Genotype %in% query.genotype &
+      metric.df$Category == category &
+      metric.df$Fly %in% query.fly &
+      metric.df$Experimenter  %in%  query.experimenter
+    z = metric.df[ind.E1,"Value"]
+    # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
+    # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
+    y = append(y, list(na.omit(z)))
+  }
+  
+  
+  ## special cases
+  input.y = list(y[[1]], y[[2]], y[[3]])
+  
+  yy.T = rep(paste0("T_", query.genotype[1]), length(input.y[[1]]))
+  yy.R = rep(paste0("R_", query.genotype[1]), length(input.y[[2]]))
+  yy.N = rep(paste0("N_", query.genotype[1]), length(input.y[[3]]))
+  
+  yy.label = c(yy.T, yy.R, yy.N)
+  # yy.label = c(yy.3T, yy.3R)
+  
+  input.y_T = as.numeric(input.y[[1]])
+  input.y_R = as.numeric(input.y[[2]])
+  input.y_N = as.numeric(input.y[[3]])
+  
+  input.yy = c(
+    input.y_T,
+    input.y_R,
+    input.y_N
   )
   input.y.df.pre = data.frame(input.yy, yy.label)
   return(input.y.df.pre)

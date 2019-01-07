@@ -29,19 +29,19 @@ sessions <- c(
   "E1N1E1N1E1N1E1N1E1"      #27
 )
 
-metric.ind = 29
+metric.ind = 13 #burstiness of pause; 29: percentage time active
 query.list = c(
-  "THGAL4 x JU30"
-  # "CS",
+  # "THGAL4 x JU30"
+  # "CS"
   # "SUN1"
   # "SUN2"
-  # "SUN3",
+  # "SUN3"
   # "CS x JU30"
-  # "MB009B x JU30",
-  # "MB131B x JU30",
-  # "MB419B x JU30",
-  # "MB607B x JU30",
-  # "R60D05 x JU30",
+  # "MB009B x JU30"
+  # "MB131B x JU30"
+  # "MB419B x JU30"
+  # "MB607B x JU30"
+  # "R60D05 x JU30"
   # "JG17 x JU30"
   # "R60D05 x PKCi"
   # "JG17 x PKCi"
@@ -123,7 +123,8 @@ colnames(input.y.df) <- c("Value", "Genotype_Sessions")
     boxplot(
       Value ~ Genotype_Sessions,
       data = input.y.df,
-      ylim = c(-3,3), #Value set for metric #29
+      # ylim = c(-3,3), #Value set for metric #29
+      ylim = c(-3,3), #Value set for metric #13
       outline = F,
       notch = F,
       lwd = 2,
