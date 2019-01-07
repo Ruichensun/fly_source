@@ -1318,6 +1318,117 @@ initial_condition <- function(metric.ind, query.genotype, query.fly, query.exper
   return(input.y.df.pre)
 }
 
+test_initial_condition = function(metric.ind, query.list){
+  input.y.df = data.frame()
+  
+  query.fly = get_query_info(query.list[1])[[1]]
+  query.experimenter = get_query_info(query.list[1])[[2]]
+  input.y.df.pre = initial_condition(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
+  colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
+  a = dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
+  return (a)
+}
+
+after_training <- function(metric.ind, query.genotype, query.fly, query.experimenter){
+  
+  fly_genotype = query.genotype
+  if (query.genotype == c("CS")){
+    query.genotype = c("WT", "CS")
+  }
+  
+  input.file = paste0("metrics/metric_", metric.ind, ".csv")
+  if (!file.exists(input.file)) {
+    next
+  }
+  metric.df = read.csv(input.file)
+  ## covariates of interest: genotype, session
+  y = list()
+  sessions = c(
+                "E1T1E1T1E1",
+                "E1R1E1R1E1", 
+                "E1N1E1N1E1" 
+                )
+  
+  for (session in sessions) {
+    if (grepl("T", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "T" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "T" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      z = metric.df[ind,"Value"]
+  
+    }
+    if (grepl("R", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "R" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "R" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      z = metric.df[ind,"Value"]
+
+    }
+    if (grepl("N", session) == T) {
+      ind.E1 <- metric.df$Session == "E1" &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "N" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      ind <- metric.df$Session == session &
+        metric.df$Genotype %in% query.genotype &
+        metric.df$Category == "N" &
+        metric.df$Fly %in% query.fly &
+        metric.df$Experimenter  %in%  query.experimenter
+      z = metric.df[ind,"Value"]
+    }
+    y = append(y, list(na.omit(z)))
+  }
+  
+  ## special cases
+  input.y = list(y[[1]], y[[2]], y[[3]])
+  
+  yy.T = rep(paste0("T_", query.genotype[1]), length(input.y[[1]]))
+  yy.R = rep(paste0("R_", query.genotype[1]), length(input.y[[2]]))
+  yy.N = rep(paste0("N_", query.genotype[1]), length(input.y[[3]]))
+  
+  yy.label = c(yy.T, yy.R, yy.N)
+  # yy.label = c(yy.3T, yy.3R)
+  
+  input.y_T = as.numeric(input.y[[1]])
+  input.y_R = as.numeric(input.y[[2]])
+  input.y_N = as.numeric(input.y[[3]])
+  
+  input.yy = c(
+    input.y_T,
+    input.y_R,
+    input.y_N
+  )
+  input.y.df.pre = data.frame(input.yy, yy.label)
+  return(input.y.df.pre)
+}
+
+test_after_training = function(metric.ind, query.list){
+  input.y.df = data.frame()
+  
+  query.fly = get_query_info(query.list[1])[[1]]
+  query.experimenter = get_query_info(query.list[1])[[2]]
+  input.y.df.pre = after_training(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
+  colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
+  a = dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
+  return(a)
+  
+}
+
 get_query_info<-function(query.genotype){
   if(query.genotype=="CS"){
     query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
