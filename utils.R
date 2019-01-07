@@ -3,6 +3,7 @@ library(zoo)
 library(boot)
 library(dunn.test)
 
+# For data preprocessing: combining all fly info into one document
 combine_flyCSV <- function(experimenter, type){
   all_info = NULL;
   input_files = c()
@@ -24,8 +25,9 @@ combine_flyCSV <- function(experimenter, type){
               quote=F,row.names=F,col.names=T,sep=",")  
 }
 
+#
 get_fly_moving_speed <- function(x, framerate) {
-  data_start = 20 #changed it to 20 from 10 on Oct 5, 2016
+  data_start = 21 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   tot_moving_dist = sum(abs(diff(fly_pos)))
@@ -45,8 +47,7 @@ one_fly_statistics <- function(input_file,
   #  A fly needs 5-6 seconds to travel from one end of the tube to the other end without pause (in a 50fps setting, 250 - 300 frames ==> 5-6sec)
   #  The tube length is 48.7mm.
   #  So the average walking speed is 48.7mm/5sec = 9.74mm/s or 48.7mm/6sec = 8.11mm/s
-  #  Between two adjacent frames (which are 0.02s apart in a 50fps setting), the possible transient speed is 8.11mm/s x 0.02s = 0.1622mm
-  #                                                                                                       or 9.74mm/s x 0.02s = 0.1948mm
+  #  Between two adjacent frames (which are 0.02s apart in a 50fps setting), the possible transient speed is 8.11mm/s x 0.02s = 0.1622mm                                                                                                   or 9.74mm/s x 0.02s = 0.1948mm
   #  This transient displacement translates to 0.1622(mm)/63.5um = 2.55px, or 0.1948mm/63.5um = 3.06px
   #  Therefore, the fly typically moves 2-3px per 0.02sec.
   #  Therefore, I set the maximum speed threshold in 0.02s duration to be 30px (10 times the usual speed)
@@ -54,55 +55,29 @@ one_fly_statistics <- function(input_file,
   
   ## Read input file
   tryCatch({
-    x = read.table(
-      input_file,
-      header = T,
-      sep = ",",
-      stringsAsFactors = F
-    )
+    x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
   }, error = function(e) {
-    stop(paste0(
-      "Input file is empty!:\n",
-      "  Input files is: ",
-      input_file,
-      "\n\n"
-    ))
+    stop(paste0("Input file is empty!:\n","  Input files is: ", input_file, "\n\n"))
   })
-  
   if (nrow(x) < 10) {
-    stop(paste0(
-      "Input file is empty!:\n",
-      "  Input files is: ",
-      input_file,
-      "\n\n"
-    ))
+    stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))
   }
   
   ##Remove the initial XXX points
   x = as.numeric(x[[1]])
   data_start = 21
-  fly_pos = x[data_start:length(x)]
-  
-  if (length(fly_pos) >= 600 * framerate) {
-    fly_pos = fly_pos[1:(600 * framerate)]
-    set_time = length(fly_pos)
-  } else{
-    fly_pos = fly_pos
-    set_time = length(fly_pos)
-  }
-  
+  fly_pos = x[data_start:min(600 * framerate, length(x))]
+  set_time = length(fly_pos)
   experiment_time = length(fly_pos)
+  middle = fly_pos[(fly_pos>=50) & (fly_pos<=717)]
   
   ##Get the transient speed
   if (data_start > 1) {
     fly_speed = diff(c(x[data_start - 1], fly_pos))
-  } else {
-    fly_speed = diff(c(NA, fly_pos))
   }
   
   ## Thresholding the max speed
-  for (i in 1:experiment_time) {
-    # print(fly_speed[i])#
+  for (i in 1:length(fly_pos)) {
     if (abs(fly_speed[i]) >= speed_max_thres) {
       fly_speed[i] = 0
     }
@@ -126,7 +101,6 @@ one_fly_statistics <- function(input_file,
       label_for_pause[i] = 4
     }
   }
-  
   
   ###Getting the index for the pause start and ends###
   starts = c()
@@ -243,7 +217,8 @@ one_fly_statistics <- function(input_file,
   ## Current pause designation: pause duration longer than 25, and pause position is between [50,717]
   pause_middle_dur <-subset(pause_df,(Pause_Duration >= 25) & (Start_Position >= 50) & (Start_Position <= 717))$Pause_Duration
   avg_pause_middle_dur <- (mean(pause_middle_dur)) / framerate
-  frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
+  # frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
+  frac_pause_middle <- (sum(pause_middle_dur)) / middle
   max_pause_middle <- (max(pause_middle_dur)) / framerate
   first_pause_middle <- (pause_middle_dur[1]) / framerate
   
@@ -549,32 +524,22 @@ one_fly_statistics <- function(input_file,
   if (length(inter_event_time_inverted) < 2) {
     memory_inverted = NA
   } else{
-    m3 <-
-      mean(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
-    m4 <-
-      mean(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
-    std3 <-
-      sd(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
-    std4 <-
-      sd(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
-    
+    m3 <- mean(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
+    m4 <- mean(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
+    std3 <- sd(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
+    std4 <- sd(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
     for (i in 1:(length(inter_event_time_inverted) - 1)) {
-      memory_inverted <-
-        memory_inverted + ((inter_event_time_inverted[i] - m3) * (inter_event_time_inverted[i +
-                                                                                              1] - m4) / (std3 * std4)
-        )
+      memory_inverted <- memory_inverted + 
+                        ((inter_event_time_inverted[i] - m3) * (inter_event_time_inverted[i + 1] - m4) / (std3 * std4))
     }
-    memory_inverted <-
-      (1 / (length(inter_event_time_inverted) - 1)) * memory_inverted
+    memory_inverted <- (1 / (length(inter_event_time_inverted) - 1)) * memory_inverted
   }
-  
-  
   
   ##  Middle-nobump pauses
   num_pause = length(pause_middle_nobump_df$Start_Index)
   frac_pause = sum((pause_middle_nobump_df$Pause_Duration), na.rm =
-                     TRUE) / experiment_time
-  avg_pause_dur = mean((pause_middle_nobump_df$Pause_Duration), na.rm = TRUE)#unit: px/frame
+                     TRUE) / middle
+  avg_pause_dur = mean((pause_middle_nobump_df$Pause_Duration), na.rm = TRUE) #unit: px/frame
   avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
   avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) >
                                                           0)]), na.rm = TRUE)
@@ -1156,7 +1121,6 @@ get_Wald_CI = function(data){
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
 
-
 learning_score <- function(metric.ind, query.genotype, query.fly, query.experimenter){
   
   fly_genotype = query.genotype
@@ -1263,7 +1227,6 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
   input.y.df.pre = data.frame(input.yy, yy.label)
   return(input.y.df.pre)
 }
-
 
 initial_condition <- function(metric.ind, query.genotype, query.fly, query.experimenter){
   
@@ -1479,9 +1442,6 @@ get_query_info<-function(query.genotype){
   return(list(query.fly, 
               query.experimenter))
 }    
-
-
-
 
 plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
   
