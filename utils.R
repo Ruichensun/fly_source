@@ -25,7 +25,6 @@ combine_flyCSV <- function(experimenter, type){
               quote=F,row.names=F,col.names=T,sep=",")  
 }
 
-#
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 21 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
@@ -33,6 +32,16 @@ get_fly_moving_speed <- function(x, framerate) {
   tot_moving_dist = sum(abs(diff(fly_pos)))
   return(tot_moving_dist / experiment_time)
 }
+
+get_fly_initial_pause <- function(x, framerate){
+  data_start = 20
+  fly_pos = x[data_start:min(600 * framerate, length(x))]
+  experiment_time = length(fly_pos) / framerate
+  fly_speed = diff(c(x[data_start - 1], fly_pos))
+  pause = sum(fly_speed == 0)
+  return( pause / experiment_time)
+}
+
 
 one_fly_statistics <- function(input_file,
                                framerate = 50,
@@ -752,6 +761,7 @@ pass_fly_QC <- function(input_file,
 }
 
 data_filter <- function(filter, fly.info){
+  # filter one: filtering flies by walking speed
   if (filter == 1) {
     ind.include = NULL
     for (genotype in unique(fly.info$Genotype)) {
@@ -776,12 +786,8 @@ data_filter <- function(filter, fly.info){
     session = "E1"
     for (ind in 1:nrow(fly.info)) {
       if (fly.info$Genotype[ind] == "WT") {
-        input.file <- paste0(
-          "data/",
-          fly.info$experimenter[ind],
-          "/CS/",
-          "ProcessedData_Fly",
-          fly.info$Fly[ind],
+        input.file <- paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
+                              fly.info$Fly[ind],
           "_",
           session,
           "_WT",
@@ -1475,17 +1481,11 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
     "E1N1E1",
     "E1T1E1T1E1",
     "E1R1E1R1E1",
-    "E1N1E1N1E1",
-    "E1T1E1T1E1T1E1",
-    "E1R1E1R1E1R1E1",
-    "E1N1E1N1E1N1E1",
-    "E1T1E1T1E1T1E1T1E1",
-    "E1R1E1R1E1R1E1R1E1",
-    "E1N1E1N1E1N1E1N1E1"
+    "E1N1E1N1E1"
   )
   
   pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
-      onefile = T, width = 10
+      onefile = T, width = 8
   )
   
   for (metric.ind in 1:length(metrices)) {
@@ -1506,15 +1506,6 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
         metric.df$Category == category &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      
-      # For normalization
-      # ind.E1 <- metric.df$Session == "E1" &
-      #   metric.df$Genotype %in% query.genotype &
-      #   metric.df$Category == category &
-      #   metric.df$Fly %in% query.fly &
-      #   metric.df$Experimenter  %in%  query.experimenter
-      # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
-      
       z = metric.df[ind, "Value"]
       y = append(y, list(na.omit(z)))
     }
@@ -1526,7 +1517,6 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
         metric.df$Genotype %in% query.genotype &
         metric.df$Fly %in% query.fly&
         metric.df$Experimenter  %in%  query.experimenter
-      # z = metric.df[ind,"value"] - metric.df[ind.E1,"value"]
       z = metric.df[ind, "Value"]
       
       y = append(y, list(na.omit(z)))
@@ -1542,7 +1532,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
     
     if (metric.ind == 2) {
       yrange = c(0, 1)
-      y_text = 0.8
+      y_text = 1.1
     }
     
     if (metric.ind == 3) {
@@ -1750,12 +1740,13 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
       ylim = yrange,
       outline = F,
       notch = F,
-      lwd = 2,
+      lwd = 1,
+      # width = proportion ,
       ylab = metrices[metric.ind],
       xlab = "",
-      xaxt = "n",
-      col = col.pool
-      # main = paste0(query.genotype, "-", metrices[metric.ind], "\n")
+      medlwd = 1,
+      xaxt = "n"
+      # col = "grey80"
     )
     stripchart(
       Value ~ Sessions,
@@ -1765,7 +1756,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
       add = TRUE,
       pch = 15,
       cex = 0.5,
-      col =  "grey40"
+      col =  col.pool
     )
     
     if (any(is.na(yrange)) |

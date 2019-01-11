@@ -1,4 +1,3 @@
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/combine_flyCSV.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
@@ -75,6 +74,7 @@ fly.info.framerate = NULL
 fly.info.out = NULL
 laser.status = NULL
 count = 0
+fly.pause = NULL
 
 for (ind in 1:nrow(fly.info)) {
   for (session in query.sessions) {
@@ -157,8 +157,8 @@ for (ind in 1:nrow(fly.info)) {
     
     if (session == "E1") {
       count = count + 1
-      fly.moving.speed = c(fly.moving.speed,
-                           get_fly_moving_speed(fly.pos, framerate))
+      fly.moving.speed = get_fly_moving_speed(fly.pos, framerate)
+      fly.pause = get_fly_initial_pause(fly.pos, framerate)
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
@@ -197,6 +197,7 @@ for (ind in 1:nrow(fly.info)) {
 colnames(fly.info.out) = colnames(fly.info)
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
+fly.info.out$Fly.pause = fly.pause
 write.table(
   fly.info.out,
   "data/fly_info_CS_preprocessed.csv",
@@ -217,6 +218,7 @@ fly.moving.speed = NULL
 fly.info.framerate = NULL
 fly.info.out = NULL
 count = 0
+fly.pause = NULL
 
 for (ind in 1:nrow(fly.info)) {
   for (session in query.sessions) {
@@ -258,8 +260,7 @@ for (ind in 1:nrow(fly.info)) {
     
     ## Read data
     fly.pos <- read.csv(input.file, stringsAsFactors = F)[, 1]
-    
-    
+
     laser.status <- rep(NA, length(fly.pos))#
     if (dim(read.csv(input.file, stringsAsFactors = F))[2] == 2) {
       laser.status <-
@@ -282,8 +283,8 @@ for (ind in 1:nrow(fly.info)) {
     
     if (session == "E1") {
       count = count + 1
-      fly.moving.speed = c(fly.moving.speed,
-                           get_fly_moving_speed(fly.pos, framerate))
+      fly.moving.speed = get_fly_moving_speed(fly.pos, framerate)
+      fly.pause = get_fly_initial_pause(fly.pos, framerate)
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
@@ -322,6 +323,7 @@ for (ind in 1:nrow(fly.info)) {
 colnames(fly.info.out) = colnames(fly.info)
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
+fly.info.out$Fly.pause = fly.pause
 write.table(
   fly.info.out,
   "data/fly_info_mutants_preprocessed.csv",
