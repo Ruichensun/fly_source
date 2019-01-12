@@ -761,7 +761,7 @@ pass_fly_QC <- function(input_file,
 }
 
 data_filter <- function(filter, fly.info){
-  # filter one: filtering flies by walking speed
+  # filter 1: filtering flies by walking speed
   if (filter == 1) {
     ind.include = NULL
     for (genotype in unique(fly.info$Genotype)) {
@@ -781,7 +781,29 @@ data_filter <- function(filter, fly.info){
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
+  
+  # filter 2: filtering flies by initial pause
   if (filter == 2) {
+    ind.include = NULL
+    for (genotype in unique(fly.info$Genotype)) {
+      if (genotype == "CS") {
+        next
+      }
+      if (genotype == "WT") {
+        ind = fly.info$Genotype %in% c("WT", "CS") &
+          !(1:nrow(fly.info) %in% ind.excl)
+      }else{
+        ind = fly.info$Genotype == genotype &
+          !(1:nrow(fly.info) %in% ind.excl)
+      }
+      pause <- fly.info$Fly.pasue[ind]
+      ind.filter =  pause >= 0.4 
+      ind.include = c(ind.include, which(ind)[ind.filter])
+    }
+  }
+  
+  # filter 3: filtering based on pass_fly_QC code
+  if (filter == 3) {
     ind.include = NULL
     session = "E1"
     for (ind in 1:nrow(fly.info)) {
