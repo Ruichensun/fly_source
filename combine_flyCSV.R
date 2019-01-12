@@ -3,12 +3,12 @@ source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils
 
 #Mutants
 type = c("Mutants","Mutants", "mutants")
-experimenter <- c("JD", "SW", "JG", "ES", "XC")
+experimenter <- c("JD", "SW", "JG", "ES", "XC", "RS", "LW")
 combine_flyCSV(experimenter, type)
-print("FlyMutantsREADY")
+
 #CS
 type = rep("CS", 3)
-experimenter <- c("ES", "RS", "JD","SW")
+experimenter <- c("ES", "RS", "JD", "SW")
 combine_flyCSV(experimenter, type)
 
 #Response
