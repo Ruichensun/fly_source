@@ -38,7 +38,7 @@ get_fly_initial_pause <- function(x, framerate){
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   fly_speed = diff(c(x[data_start - 1], fly_pos))
-  pause = sum(fly_speed == 0)
+  pause = sum(fly_speed == 0) / framerate
   return( pause / experiment_time)
 }
 
