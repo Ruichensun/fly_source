@@ -157,8 +157,8 @@ for (ind in 1:nrow(fly.info)) {
     
     if (session == "E1") {
       count = count + 1
-      fly.moving.speed = get_fly_moving_speed(fly.pos, framerate)
-      fly.pause = get_fly_initial_pause(fly.pos, framerate)
+      fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
+      fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
@@ -283,8 +283,8 @@ for (ind in 1:nrow(fly.info)) {
     
     if (session == "E1") {
       count = count + 1
-      fly.moving.speed = get_fly_moving_speed(fly.pos, framerate)
-      fly.pause = get_fly_initial_pause(fly.pos, framerate)
+      fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
+      fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
     colnames(fly.pos.dat) = c(paste0("fly_pos;framerate=", framerate), "laser_status")#
