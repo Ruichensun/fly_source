@@ -100,6 +100,7 @@ shared.info = c(
   "Age",
   "Setup",
   "Fly.moving.speed",
+  "Fly.pause",
   "Framerate"
 )
 
