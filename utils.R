@@ -768,7 +768,7 @@ data_filter <- function(filter, fly.info){
       if (genotype == "CS") {
         next
       }
-      if (genotype == "WT") {
+      else if (genotype == "WT") {
         ind = fly.info$Genotype %in% c("WT", "CS") &
           !(1:nrow(fly.info) %in% ind.excl)
       }else{
@@ -789,7 +789,7 @@ data_filter <- function(filter, fly.info){
       if (genotype == "CS") {
         next
       }
-      if (genotype == "WT") {
+      else if (genotype == "WT") {
         ind = fly.info$Genotype %in% c("WT", "CS") &
           !(1:nrow(fly.info) %in% ind.excl)
       }else{

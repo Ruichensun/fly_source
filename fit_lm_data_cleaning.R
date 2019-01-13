@@ -1,6 +1,6 @@
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 load("all_ofs.Rdata")
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 metrices = c(
   "Number of Pause Starts",#1
@@ -42,15 +42,7 @@ sessions <- c(
   "E1T1E1T1E1",
   "E1T1E1T1E1T1E1",
   "E1T1E1T1E1T1E1T1E1",
-  
-  "E1T1E1T1E1T2E1",
-  "E1T1E1T1E1T2E1T2E1",
-  
-  "E1T2E1",
-  "E1T2E1T2E1",
-  "E1T2E1T2E1T1E1",
-  "E1T2E1T2E1T1E1T1E1",
-  
+
   "E1R1E1",
   "E1R1E1R1E1",
   "E1R1E1R1E1R1E1",
@@ -59,15 +51,7 @@ sessions <- c(
   "E1N1E1",
   "E1N1E1N1E1",
   "E1N1E1N1E1N1E1",
-  "E1N1E1N1E1N1E1N1E1",
-  
-  "E1T1E1R1E1",
-  "E1T1E1R1E1R1E1",
-  "E1T1E1T1E1R1E1R1E1",
-  
-  "E1T1E1N1E1",
-  "E1T1E1N1E1N1E1",
-  "E1T1E1T1E1N1E1N1E1"
+  "E1N1E1N1E1N1E1N1E1"
 )
 sessions <- unique(sessions)
 
@@ -139,7 +123,7 @@ for (ind in 1:nrow(excl.fly)) {
   )
 }
 
-ind.include = data_filter(2, fly.info)
+ind.include = data_filter(1, fly.info)
 
 write.csv(
   fly.info[ind.include, ],
@@ -148,16 +132,15 @@ write.csv(
   row.names = F
 )
 
-fly.info.include = fly.info[ind.include,]
+fly.info.include = fly.info[ind.include, ]
 checking_fly_numbers(fly.info.include, filename="Mutants_headcount.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
   metric.df = NULL
   for (session in sessions) {
-    metric <- sapply(all_ofs[[session]],
-                     function(x) {
-                       if (length(x) == 1) {
+    metric <- sapply(all_ofs[[session]], function(x) {
+                    if (length(x) == 1) {
                          return(NA)
                        } else{
                          return(x[[ind]])
@@ -195,70 +178,6 @@ for (ind in 1:length(metrices)) {
     "Setup",
     "Session"
   )
-  
-  ## Prepare input dataframe
-  metric.df = data.frame(metric.df)
-  for (i in 1:ncol(metric.df)) {
-    metric.df[, i] = unlist(metric.df[, i])
-  }
-  metric.df$Setup <- factor(metric.df$Setup,
-                            levels = levels(metric.df$Setup)[c(2, 1, 3, 4)])
-  metric.df$Age <- factor(metric.df$Age, levels = levels(metric.df$Age)[c(3, 1, 2, 4)])
-  metric.df$Value = as.numeric(as.character(metric.df$Value))
-  
-  # Need to update batch info
-  # metric.df$batch = as.numeric(as.character(metric.df$fly))
-  #
-  # metric.df$batch[metric.df$batch <= 276] = 1
-  # metric.df$batch[metric.df$batch >= 277 & metric.df$batch <=400 ] = 2
-  # metric.df$batch[metric.df$batch > 400] = 3
-  # metric.df$batch = factor(metric.df$batch)
-  #
-  # metric.df$value[is.infinite(metric.df$value)] = NA
-  
-  #metric.df = na.omit(metric.df)
-  #metric.df = metric.df[complete.cases(metric.df),]
-  # ## NO LM FIT
-  # write.table(metric.df,
-  #             paste0("metrics/metric_",ind,".csv"),
-  #             row.names=F,quote=F,sep=",")
-  # next
-  #
-  # metric.df = metric.df[metric.df$genotype %in% c("WT","SUN1","SUN2","SUN3","R3"),]
-  # metric.df$genotype = factor(metric.df$genotype,
-  #                             levels(metric.df$genotype)[levels(metric.df$genotype) %in% c("WT","SUN1","SUN2","SUN3","R3")][c(5,1:4)])
-  #
-  # ## Linear fit
-  # lm.fit.orig <- lm(value ~ genotype + experimenter + gender + session + batch + setup + fly + age,
-  #                   metric.df)
-  # #lm.fit.orig = glm(value ~ age + gender + batch + session + fly, metric.df,family="gaussian")
-  # lm.fit = summary(lm.fit.orig)
-  # ## If the model does not fit the data well, just save the original data and continue
-  # if(lm.fit$adj.r.squared < 0.6){
-  # write.table(metric.df,
-  #             paste0("metrics/metric_",ind,".csv"),
-  #             row.names=F,quote=F,sep=",")
-  # next
-  # #}
-  
-  # coef = na.omit(lm.fit.orig$coefficients)
-  #
-  # model = model.matrix(value ~ genotype + experimenter + gender + session + batch + setup + fly + age, metric.df)
-  # model = data.matrix(model[,names(coef)])
-  # ## Confounding covariates
-  # coef_ind <- c(#1,## intercept
-  #     grep("experimenter",names(coef)),
-  #     grep("batch",names(coef)),
-  #     grep("setup",names(coef)),
-  #     grep("age",names(coef)),
-  #     grep("gender",names(coef))
-  #                                     #grep("fly",names(coef))
-  #          )
-  # uwv <- model[,coef_ind] %*% coef[coef_ind]
-  # wv <- model[,-coef_ind] %*% coef[-coef_ind]
-  #
-  # metric.df$value.uw = uwv
-  # metric.df$value.w = wv
   write.table(
     metric.df,
     paste0("metrics/metric_", ind, ".csv"),
