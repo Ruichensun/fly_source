@@ -1,5 +1,4 @@
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-load("all_ofs.Rdata")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 metrices = c(
@@ -123,7 +122,7 @@ for (ind in 1:nrow(excl.fly)) {
   )
 }
 
-ind.include = data_filter(1, fly.info)
+ind.include = data_filter(2, fly.info)
 
 write.csv(
   fly.info[ind.include, ],
