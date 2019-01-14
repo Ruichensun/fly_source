@@ -1547,7 +1547,6 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
     y.1 = y
     ## special cases
     y_text = c()
-    print(metric.ind)
     if (metric.ind == 1) {
       yrange = c(0, 600)
       y_text = 610
@@ -1706,10 +1705,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
       yrange = c(0, 2050)
       y_text = 250
     }
-    
-    print(yrange)
-    print(y_text)
-    
+  
     input.y = y.1[1:9]
     yy.1T = rep("1stE1_1", length(input.y[[1]]))
     yy.1R = rep("1stE1_2", length(input.y[[2]]))
