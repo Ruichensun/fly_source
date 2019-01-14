@@ -132,7 +132,7 @@ for(ind in 1:nrow(fly.info.mutant)){
     all_ofs_mutants[[sessions[ind.session]]] = append(all_ofs_mutants[[sessions[ind.session]]],list(ofs))
   }
 }
-save.image("all_ofs.Rdata")
+
 
 #CS_constant
 all_ofs_constant = list()
@@ -159,4 +159,5 @@ for(ind in 1:nrow(fly.info.constant)){
     all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(ofs))
   }
 }
-save.image("all_ofs_constant.Rdata")
+
+save.image("all_ofs.Rdata")

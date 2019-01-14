@@ -3,55 +3,20 @@ load("all_ofs.Rdata")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 metrices = c(
-  "Number of Pause Starts",#1
-  "Percentage Time Active",#2
-  "Average Pause Duration",#3
-  "Max Pause Duration",#4
-  "Average Moving Speed ",#5
-  "Average Moving Speed (excluding pause)",#6
-  "Average Speed When Enter Pause",#7
-  "Average Speed When Exit Pause",#8
-  "Moving Distance Per Minute",#9
-  "Number of Turns",#10
-  "Number of Middle Turns",#11
-  "Fration of Middle Turns Out of Total Turns",#12
+ 
   "Burstiness (Pause)",#13
-  "Burstiness (Inter Event Time)",#14
-  "Burstiness (Scrambled)",#15
-  "Burstiness (Walking bouts-thresholding)",#16
-  "Burstiness (Walking events-thresholding)",#17
-  "Beginning Pause Duration",#18
-  "First Pause Duration",#19
-  "Transition Probability (Pause not at the end): Pause to Pause",#20
-  "Transition Probability (Pause not at the end): Pause to Walking",#21
-  "Transition Probability (Pasue not at the end): Walking to Walking",#22
-  "Transition Probability (Pause not at the end): Walking to Pause",#23
-  "Memory",#24
-  "Memory (inverted)",#25
-  "Burstiness of Start of Walking (Pause not at the end)",#26
-  "Burstiness of Start of Pause (Pause not at the end)",#27 *
-  "Average Pause Duration (Pause not at the End)",#28
-  "Percentage Time Active (Pause not at the End)",#29
-  "Max Pause Duration (Pause not at the End)",#30
-  "First Pause Duration (Pause not at the End)" #31
+
+  "Percentage Time Active (Pause not at the End)"#29
 )
 
 sessions <- c(
   "E1",
   "E1T1E1",
   "E1T1E1T1E1",
-  "E1T1E1T1E1T1E1",
-  "E1T1E1T1E1T1E1T1E1",
-  
   "E1R1E1",
   "E1R1E1R1E1",
-  "E1R1E1R1E1R1E1",
-  "E1R1E1R1E1R1E1R1E1",
-  
   "E1N1E1",
-  "E1N1E1N1E1",
-  "E1N1E1N1E1N1E1",
-  "E1N1E1N1E1N1E1N1E1"
+  "E1N1E1N1E1"
 )
 sessions <- unique(sessions)
 
@@ -124,19 +89,12 @@ for (ind in 1:nrow(excl.fly)) {
 }
 
 ind.include = data_filter(1, fly.info)
+fly.info.include = fly.info[ind.include, ][1:10,]
 
-write.csv(
-  fly.info[ind.include, ],
-  "data/fly_info.csv",
-  quote = F,
-  row.names = F
-)
-
-fly.info.include = fly.info[ind.include, ]
-checking_fly_numbers(fly.info.include, filename="Mutants_headcount.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
+  print(ind)
   metric.df = NULL
   for (session in sessions) {
     metric <- sapply(all_ofs[[session]], function(x) {
@@ -180,18 +138,10 @@ for (ind in 1:length(metrices)) {
   )
   write.table(
     metric.df,
-    paste0("metrics/metric_", ind, ".csv"),
+    paste0("metrics/metric_debug_", ind, ".csv"),
     row.names = F,
     quote = F,
     sep = ","
   )
 }
 
-write.table(
-  metrices,
-  "metrics/list_metrices.csv",
-  col.names = F,
-  row.names = F,
-  quote = F,
-  sep = ","
-)

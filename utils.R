@@ -76,9 +76,10 @@ one_fly_statistics <- function(input_file,
   x = as.numeric(x[[1]])
   data_start = 21
   fly_pos = x[data_start:min(600 * framerate, length(x))]
+  middle = fly_pos[(fly_pos>=50) & (fly_pos<=717)]
   set_time = length(fly_pos)
   experiment_time = length(fly_pos)
-  middle = fly_pos[(fly_pos>=50) & (fly_pos<=717)]
+  middle_time = length(middle)
   
   ##Get the transient speed
   if (data_start > 1) {
@@ -227,7 +228,7 @@ one_fly_statistics <- function(input_file,
   pause_middle_dur <-subset(pause_df,(Pause_Duration >= 25) & (Start_Position >= 50) & (Start_Position <= 717))$Pause_Duration
   avg_pause_middle_dur <- (mean(pause_middle_dur)) / framerate
   # frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
-  frac_pause_middle <- (sum(pause_middle_dur)) / middle
+  frac_pause_middle <- (sum(pause_middle_dur)) / middle_time
   max_pause_middle <- (max(pause_middle_dur)) / framerate
   first_pause_middle <- (pause_middle_dur[1]) / framerate
   
@@ -547,7 +548,7 @@ one_fly_statistics <- function(input_file,
   ##  Middle-nobump pauses
   num_pause = length(pause_middle_nobump_df$Start_Index)
   frac_pause = sum((pause_middle_nobump_df$Pause_Duration), na.rm =
-                     TRUE) / middle
+                     TRUE) / middle_time
   avg_pause_dur = mean((pause_middle_nobump_df$Pause_Duration), na.rm = TRUE) #unit: px/frame
   avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
   avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) >
