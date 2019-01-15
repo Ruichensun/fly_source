@@ -20,6 +20,8 @@ combine_flyCSV <- function(experimenter, type){
     info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
     all_info = rbind(all_info,info)
   }
+  colnames(all_info) = c("Fly", "Gender", "Category", "Setup", "Birth.date", "Exp.date", "Death.date",
+                         "Age", "Humidity", "E1_loading_times", "Experimenter", "Fly_Exp")
   write.table(all_info,
               output_file,
               quote=F,row.names=F,col.names=T,sep=",")  
@@ -34,7 +36,7 @@ get_fly_moving_speed <- function(x, framerate) {
 }
 
 get_fly_initial_pause <- function(x, framerate){
-  data_start = 20
+  data_start = 21
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   fly_speed = diff(c(x[data_start - 1], fly_pos))
@@ -398,9 +400,9 @@ one_fly_statistics <- function(input_file,
   
   ## Behavioral states for pauses not in the middle
   
-  fly_pos_sum_middle = (is_pause_middle[2:(length(is_pause_middle) - 1)]) *
-    1 + 2 * (is_pause_middle[3:length(is_pause_middle)]) + 4 * (is_pause_middle[1:(length(is_pause_middle) -
-                                                                                     2)])
+  fly_pos_sum_middle = 
+    (is_pause_middle[2:(length(is_pause_middle) - 1)]) *
+    1 + (is_pause_middle[3:length(is_pause_middle)]) * 2 + (is_pause_middle[1:(length(is_pause_middle) - 2)]) * 4
   
   ## Behavioral states for pauses not at the end & not bumping to the wall
   pause_middle_nobump_df = subset(pause_df,
@@ -761,6 +763,9 @@ pass_fly_QC <- function(input_file,
   }
 }
 
+
+
+
 data_filter <- function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
@@ -839,20 +844,21 @@ data_filter <- function(filter, fly.info){
   return(ind.include)
 }
 
-checking_fly_numbers <- function(fly.info.include, filename){
-  
-  type_of_mutants = length(unique(fly.info.include$Genotype))
-  number_of_mutants = c()
-  names_of_mutants = unique(fly.info.include$Genotype)
-  
+checking_fly_numbers <- function(fly.info, filter, filename){
+  ind.include = data_filter(1, fly.info)
+  fly.info.temp = fly.info[ind.include, ]
+  ind = data_filter(filter, fly.info.temp)
+  fly.info.include = fly.info.temp[ind, ]
+  type_of_mutants = length(unique(fly.info.temp$Genotype))
+  names_of_mutants = unique(fly.info.temp$Genotype)
+  n = c()
+  n_QCed = c()
   for (i in 1:type_of_mutants){
-    number_of_mutants[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
+    n[i] = dim(fly.info.temp[fly.info.temp$Genotype==names_of_mutants[i],])[1]
+    n_QCed[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
   }
-  
-  mutant_info = data.frame(names_of_mutants,number_of_mutants)
-  
-  colnames(mutant_info) = c("Mutant Genotype", "Number of Flies")
-  
+  mutant_info = data.frame(names_of_mutants,n, n_QCed)
+  colnames(mutant_info) = c("Genotype", "Number of Flies", "Number of Flies QCed")
   write.csv(mutant_info, file = filename , row.names = FALSE)
 }
 
