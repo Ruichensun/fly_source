@@ -763,9 +763,6 @@ pass_fly_QC <- function(input_file,
   }
 }
 
-
-
-
 data_filter <- function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
@@ -775,11 +772,9 @@ data_filter <- function(filter, fly.info){
         next
       }
       else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS") &
-          !(1:nrow(fly.info) %in% ind.excl)
+        ind = fly.info$Genotype %in% c("WT", "CS")
       }else{
-        ind = fly.info$Genotype == genotype &
-          !(1:nrow(fly.info) %in% ind.excl)
+        ind = fly.info$Genotype == genotype 
       }
       fms <- fly.info$Fly.moving.speed[ind]
       rank_fms = rank(fms)
@@ -796,11 +791,9 @@ data_filter <- function(filter, fly.info){
         next
       }
       else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS") &
-          !(1:nrow(fly.info) %in% ind.excl)
+        ind = fly.info$Genotype %in% c("WT", "CS")
       }else{
-        ind = fly.info$Genotype == genotype &
-          !(1:nrow(fly.info) %in% ind.excl)
+        ind = fly.info$Genotype == genotype
       }
       pause <- fly.info$Fly.pause[ind]
       ind.filter =  pause <= 0.6321 
@@ -815,25 +808,9 @@ data_filter <- function(filter, fly.info){
     for (ind in 1:nrow(fly.info)) {
       if (fly.info$Genotype[ind] == "WT") {
         input.file <- paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
-                              fly.info$Fly[ind],
-          "_",
-          session,
-          "_WT",
-          ".csv"
-        )
-      } else{
-        input.file <- paste0(
-          "data/",
-          fly.info$experimenter[ind],
-          "/Mutants/",
-          "ProcessedData_Fly",
-          fly.info$Fly[ind],
-          "_",
-          session,
-          "_",
-          fly.info$Genotype[ind],
-          ".csv"
-        )
+                              fly.info$Fly[ind], "_",session,"_WT",".csv")
+      } else{input.file <- paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
+                                  fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
       }
       framerate =	fly.info$Framerate[ind]
       if (pass_fly_QC(input.file, framerate)) {
@@ -845,16 +822,14 @@ data_filter <- function(filter, fly.info){
 }
 
 checking_fly_numbers <- function(fly.info, filter, filename){
-  ind.include = data_filter(1, fly.info)
-  fly.info.temp = fly.info[ind.include, ]
-  ind = data_filter(filter, fly.info.temp)
-  fly.info.include = fly.info.temp[ind, ]
-  type_of_mutants = length(unique(fly.info.temp$Genotype))
-  names_of_mutants = unique(fly.info.temp$Genotype)
+  ind.include = data_filter(filter, fly.info)
+  fly.info.include = fly.info[ind.include, ]
+  type_of_mutants = length(unique(fly.info.include$Genotype))
+  names_of_mutants = unique(fly.info.include$Genotype)
   n = c()
   n_QCed = c()
   for (i in 1:type_of_mutants){
-    n[i] = dim(fly.info.temp[fly.info.temp$Genotype==names_of_mutants[i],])[1]
+    n[i] = dim(fly.info[fly.info$Genotype==names_of_mutants[i],])[1]
     n_QCed[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
   }
   mutant_info = data.frame(names_of_mutants,n, n_QCed)

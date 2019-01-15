@@ -61,78 +61,55 @@ for (session in sessions) {
 names(all_ofs) = sessions
 
 ## Fly info
-fly.info.CS = read.csv(
-  "data/fly_info_CS_preprocessed.csv",
-  header = T,
-  stringsAsFactors = F
-)
+fly.info.CS = read.csv("data/fly_info_CS_preprocessed.csv", header = T, stringsAsFactors = F)
 fly.info.CS$Genotype = "WT"
 
-fly.info.mutants = read.csv(
-  "data/fly_info_mutants_preprocessed.csv",
-  header = T,
-  stringsAsFactors = F
-)
+fly.info.mutants = read.csv("data/fly_info_mutants_preprocessed.csv",header = T, stringsAsFactors = F)
 
-shared.info = c(
-  "Fly",
-  "Category",
-  "Gender",
-  "Genotype",
-  "experimenter",
-  "Age",
-  "Setup",
-  "Fly.moving.speed",
-  "Fly.pause",
-  "Framerate"
-)
+shared.info = c("Fly", "Category", "Gender","Genotype","Experimenter","Age",
+                "Setup", "Fly.moving.speed", "Fly.pause","Framerate")
 
+# All raw data to-date
 fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
 
 #For Mutant data collected after Mar 20, 2017
-excl.fly.Mutant = na.omit(read.csv(
-  "excl_fly_mutant.csv",
-  header = T,
-  stringsAsFactors = F
-)[, 1:3])
+excl.fly.Mutant = na.omit(read.csv("excl_fly_mutant.csv",header = T, stringsAsFactors = F)[, 1:3])
 
+#WT data
 excl.fly.WT = data.frame(cbind(
-  # Batch 1 ES-WT: 1-276; 
-  # Batch 2 ES-WT: 276-400; 
-  # Batch 3 ES-WT: 400-present (as of June 28, 2017)
-  # Only Batch 3 data is for the current project
+  # Batch 1 ES-WT: 1-276; Batch 2 ES-WT: 276-400; Batch 3 ES-WT: 400-present (as of June 28, 2017)
+  # Only Batch 3 data is for the current project. All prior data was for prototyping
    c(58, 48, 1:400, 1:100, 1:40,118,122),
    c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
    c(rep("WT", 544))
 ))
 colnames(excl.fly.WT) = colnames(excl.fly.Mutant)
-excl.fly = rbind(excl.fly.Mutant,
-                 excl.fly.WT)
+excl.fly = rbind(excl.fly.Mutant, excl.fly.WT)
 
+# All data to be excluded
 ind.excl = NULL
 for (ind in 1:nrow(excl.fly)) {
-  #Mutant data
-  ind.excl = c(
-    ind.excl,
-    which(
-      fly.info$Genotype == excl.fly[ind, 3] &
-        fly.info$experimenter == excl.fly[ind, 2] &
-        fly.info$Fly == excl.fly[ind, 1]
-    )
-  )
+  ind.excl = c(ind.excl, which(fly.info$Genotype == excl.fly[ind, 3] & 
+                                 fly.info$Experimenter == excl.fly[ind, 2] & 
+                                 fly.info$Fly == excl.fly[ind, 1]))
 }
 
-ind.include = data_filter(2, fly.info)
+# All data to be included
+ind.include = NULL
+for (genotype in unique(fly.info$Genotype)) {
+  if (genotype == "CS") {next}
+  else if (genotype == "WT") {ind = fly.info$Genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl)}
+  else{ind = fly.info$Genotype == genotype & !(1:nrow(fly.info) %in% ind.excl)}
+  ind.include = c(ind.include,which(ind)) 
+}
+fly.info.include = fly.info[ind.include,]
 
-write.csv(
-  fly.info[ind.include, ],
-  "data/fly_info.csv",
-  quote = F,
-  row.names = F
-)
+ind.filtered = data_filter(2, fly.info.include) 
+fly.info.end = fly.info.include[ind.filtered, ]
 
-fly.info.include = fly.info[ind.include, ]
-checking_fly_numbers(fly.info, 2, filename="Mutants_headcount.csv")
+write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
+
+checking_fly_numbers(fly.info.include, 2, filename="Mutants_headcount.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
