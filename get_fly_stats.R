@@ -87,7 +87,7 @@ fly.info = read.csv("data/fly_info_CS_preprocessed.csv",header=T,stringsAsFactor
 for(ind in 1:nrow(fly.info)){
   for(ind.session in 1:length(query.sessions)){
     input.file <- list.files(path = paste0("data/",
-                                           fly.info$experimenter[ind],
+                                           fly.info$Experimenter[ind],
                                            "/CS/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
                                               "_",query.sessions[ind.session],
@@ -115,7 +115,7 @@ fly.info.mutant = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,str
 for(ind in 1:nrow(fly.info.mutant)){
   query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info.mutant$experimenter[ind], "/mutants/"),                             
+    input.file <- list.files(path = paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
                                               "_",query.sessions[ind.session],
                                               "_",fly.info.mutant$Genotype[ind],
@@ -135,29 +135,29 @@ for(ind in 1:nrow(fly.info.mutant)){
 
 
 #CS_constant
-all_ofs_constant = list()
-for(session in sessions){
-  all_ofs_constant = append(all_ofs_constant,list(c()))
-}
-fly.info.constant = read.csv("data/fly_info_CS_constant_preprocessed.csv",header=T,stringsAsFactors=F)
-for(ind in 1:nrow(fly.info.constant)){
-  query.sessions = gsub("X",fly.info.constant$Category[ind],sessions)
-  for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info.constant$experimenter[ind], "/CS_constant/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info.constant$Fly[ind],
-                                              "_",query.sessions[ind.session],
-                                              "_WT",
-                                              ".csv"),
-                             full.names=T
-    )
-    if(length(input.file) == 0){
-      all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(NA))
-      next
-    }   
-    framerate = fly.info.constant$Framerate[ind]        
-    ofs = one_fly_statistics(input.file,framerate=framerate)
-    all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(ofs))
-  }
-}
+# all_ofs_constant = list()
+# for(session in sessions){
+#   all_ofs_constant = append(all_ofs_constant,list(c()))
+# }
+# fly.info.constant = read.csv("data/fly_info_CS_constant_preprocessed.csv",header=T,stringsAsFactors=F)
+# for(ind in 1:nrow(fly.info.constant)){
+#   query.sessions = gsub("X",fly.info.constant$Category[ind],sessions)
+#   for(ind.session in 1:length(query.sessions)){
+#     input.file <- list.files(path = paste0("data/", fly.info.constant$Experimenter[ind], "/CS_constant/"),                             
+#                              pattern = paste0("ProcessedData_Fly",fly.info.constant$Fly[ind],
+#                                               "_",query.sessions[ind.session],
+#                                               "_WT",
+#                                               ".csv"),
+#                              full.names=T
+#     )
+#     if(length(input.file) == 0){
+#       all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(NA))
+#       next
+#     }   
+#     framerate = fly.info.constant$Framerate[ind]        
+#     ofs = one_fly_statistics(input.file,framerate=framerate)
+#     all_ofs_constant[[sessions[ind.session]]] = append(all_ofs_constant[[sessions[ind.session]]],list(ofs))
+#   }
+# }
 
 save.image("all_ofs.Rdata")

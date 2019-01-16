@@ -136,7 +136,7 @@ for (ind in 1:length(metrices)) {
         fly.info$Category,
         fly.info$Gender,
         fly.info$Genotype,
-        fly.info$experimenter,
+        fly.info$Experimenter,
         fly.info$Age,
         fly.info$Setup,
         array.session
