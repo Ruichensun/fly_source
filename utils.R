@@ -16,16 +16,17 @@ combine_flyCSV <- function(experimenter, type){
   output_file = paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/fly_info_", type[3], ".csv")
   for(i in 1:length(input_files)){
     info = read.csv(input_files[i],header=T,stringsAsFactors=F)
-    info$experimenter = experimenter[i]
+    info$Experimenter = experimenter[i]
     info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
     all_info = rbind(all_info,info)
   }
-  colnames(all_info) = c("Fly", "Gender", "Category", "Setup", "Birth.date", "Exp.date", "Death.date",
-                         "Age", "Humidity", "E1_loading_times", "Experimenter", "Fly_Exp")
   write.table(all_info,
               output_file,
               quote=F,row.names=F,col.names=T,sep=",")  
 }
+
+
+
 
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 21 #changed it to 20 from 10 on Oct 5, 2016

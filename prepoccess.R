@@ -113,7 +113,7 @@ for (ind in 1:nrow(fly.info)) {
       fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
       fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
       fly.info.framerate = c(fly.info.framerate, framerate)
-      print(fly.info[ind,])
+      # print(fly.info[ind,])
       fly.info.out = rbind(fly.info.out, fly.info[ind, ])
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
@@ -125,7 +125,7 @@ for (ind in 1:nrow(fly.info)) {
     )
     output.file <- paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",
                           fly.info$Fly[ind],"_",session,"_WT", ".csv")
-    print(output.file)
+    # print(output.file)
     write.table(fly.pos.dat, output.file, row.names = F, quote = F, sep = ',')
   }
 }
@@ -152,7 +152,6 @@ for (ind in 1:nrow(fly.info)) {
                              pattern = paste0("ProcessedData_Fly", fly.info$Fly[ind],"_",
                                               session,"_",fly.info$Gender[ind], "_.*"),
                              full.names = T)
-  
     if (fly.info$Experimenter[ind] == "ES" & session == "E1" & length(input.file) == 0) {
       cat("M", fly.info$Fly[ind],fly.info$Category[ind],input.file,"\n",sep = "\t")
       break
@@ -160,10 +159,10 @@ for (ind in 1:nrow(fly.info)) {
     if (length(input.file) == 0) {
       next
     }
-    
     if ((fly.info$Fly[ind] <= 113) & (fly.info$Experimenter[ind] == "JG")){
       if (dim(read.csv(input.file, header = T, nrow = 1))[2] == 1){
         fly.pos <- read.csv(input.file, header = T, stringsAsFactors = F)[, 1]
+        exp.time = length(fly.pos)
         fly.pos <- fly.pos[seq(1, exp.time, by = 2)]
         laser.status <- rep(NA, length(fly.pos))
       } else if (dim(read.csv(input.file, header = T, nrow = 1))[2] == 2) {
@@ -182,14 +181,13 @@ for (ind in 1:nrow(fly.info)) {
           fly.pos = file[,1]
           laser.status <- file[,2]
        }
-       exp.time = length(fly.pos)
     }
     if (session == "E1") {
       count = count + 1
       fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
       fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
       fly.info.framerate = c(fly.info.framerate, framerate)
-      print(fly.info[ind,])
+      # print(fly.info[ind,])
       fly.info.out = rbind(fly.info.out, fly.info[ind, ])
     }
     fly.pos.dat = data.frame(fly.pos, laser.status)
@@ -202,7 +200,7 @@ for (ind in 1:nrow(fly.info)) {
     
     output.file <- paste0("data/", fly.info$Experimenter[ind], "/mutants/","ProcessedData_Fly", 
                           fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
-    print(output.file)
+    # print(output.file)
     write.table(fly.pos.dat,output.file, row.names = F, quote = F, sep = ',')
   }
 }
