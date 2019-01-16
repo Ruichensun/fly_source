@@ -125,22 +125,22 @@ for (ind in 1:length(metrices)) {
     
     array.session = rep(session, length(metric))
     for (i in 1:length(array.session)) {
-      array.session[i] = gsub("X", fly.info$Category[i], array.session[i])
+      array.session[i] = gsub("X", fly.info.end$Category[i], array.session[i])
     }
     
     metric.df <- rbind(
       metric.df,
       cbind(
         metric,
-        fly.info$Fly,
-        fly.info$Category,
-        fly.info$Gender,
-        fly.info$Genotype,
-        fly.info$Experimenter,
-        fly.info$Age,
-        fly.info$Setup,
+        fly.info.end$Fly,
+        fly.info.end$Category,
+        fly.info.end$Gender,
+        fly.info.end$Genotype,
+        fly.info.end$Experimenter,
+        fly.info.end$Age,
+        fly.info.end$Setup,
         array.session
-      )[ind.include, ]
+      )
     )
   }
   colnames(metric.df) = c(
