@@ -44,7 +44,7 @@ get_fly_initial_pause <- function(x, framerate){
 
 one_fly_statistics <- function(input_file,
                                framerate = 50,
-                               speed_max_thres = 28, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
+                               speed_max_thres = 90, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
                                speed_zero_thres = 1e-2,
                                pause_frame_thres = 25,
                                chamber_end_thres = 50,
@@ -163,7 +163,7 @@ one_fly_statistics <- function(input_file,
       num_pause = length(real_pause_df$Start_Index)
       
       # Pauses not at the end: pause position is between [chamber_left, chamber_right]
-      mid_pause_df = subset(pause_df, (Pause_Duration >= (framerate / 2)) & (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
+      mid_pause_df = subset(real_pause_df, (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
       
       pause_middle_dur <- mid_pause_df$Pause_Duration
       
@@ -200,12 +200,40 @@ one_fly_statistics <- function(input_file,
       #unfinished
   
   # 3rd Metric Group: Turns
-      turns_pause_df = subset(pause_df, ((Start_Type == 1) & (End_Type == 3))|((Start_Type == 4) & (End_Type == 2)))
-      real_turns_df = subset(turns_pause_df, Pause_Duration >= pause_frame_thres)
-      mid_turns_df = subset(real_turns_df, (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
-      num_turns = length(real_turns_df$Pause_Duration)
-      mid_turns = length(mid_turns_df$Pause_Duration)
-  
+
+      # Step 0 - smoothing
+      ma <- function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
+      bin_size = 150
+      fly_pos_sm = ma(fly_pos, bin_size)
+      fly_speed_sm = diff(fly_speed_sm)
+      
+      # Step 1 - get the moving direction (speed sign)
+      bin_positive_frac = NULL
+      t = bin_size
+      while (t < experiment_time) {
+        bin_fly_speed = fly_speed_sm[t - 1:bin_size + 1]
+        frac = sum(bin_fly_speed > 0, na.rm = T) / sum(bin_fly_speed != 0, na.rm = T)
+        bin_positive_frac = c(bin_positive_frac, frac)
+        t = t + bin_size
+      }
+      
+      # Step 2 - get the turns
+      turns = find_intersect_points(bin_positive_frac, rep(0.5, length(bin_positive_frac)))
+      turns = ceiling(turns * bin_size - bin_size / 2)
+      position_turns = (fly_pos[turns] + fly_pos[turns - 1]) / 2 # Use original fly_pos value as the actual position
+      mid_turns = turns[position_turns > chamber_left & position_turns < chamber_right]
+      position_mid_turns = position_turns[position_turns > chamber_left & position_turns < chamber_right]
+      
+      # Step 3 - get turn numbers
+      num_turn = length(turns)
+      num_mid_turns = length(mid_turns)
+      
+      if (num_turns == 0){
+        frac_pause_middle = 0
+      } else{
+        frac_mid_turns = num_mid_turns / num_turn
+      }
+
   # 4th Metric Group: Burstiness
       ## inter-event time is pause defined previously ##
       PD = real_pause_df$Pause_Duration
@@ -213,14 +241,14 @@ one_fly_statistics <- function(input_file,
       if (num_pause <= 3) {B_pause = 1
       }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
       
-      ## inter-event time is frames with zero velocity ##
+      ## inter-event time is frames with zero velocity #
       b_inter_event <- replace(abs(fly_speed), abs(fly_speed) > 0, 1)
       inter_event_time <- rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
       if (length(inter_event_time) <= 3) {
         Burst_inter_event = 1
       }else{
-        Burst_inter_event = (sd((inter_event_time), na.rm = T) - mean((inter_event_time), na.rm = T)) /
-                            (sd((inter_event_time), na.rm = T) + mean((inter_event_time), na.rm = T))
+        Burst_inter_event = (sd(pause_df$Pause_Duration) - mean(pause_df$Pause_Duration)) /
+                            (sd(pause_df$Pause_Duration) + mean(pause_df$Pause_Duration))
       }
       
       ## scrambled burstiness 
@@ -248,73 +276,53 @@ one_fly_statistics <- function(input_file,
       m_inverted <-rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
       if (length(m_inverted) <= 3) {m_burstiness = 1
       } else{
-        m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
+        m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / 
+                       (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
       }
       
   # 5th Metric Group: Behavioral States
   ## Behavioral states
-  fly_pos_original = b_inter_event[1:(length(b_inter_event) -
-                                                 1)]
-  fly_pos_lag = b_inter_event[2:length(b_inter_event)]
-  fly_pos_sum = (fly_pos_original) * 1 + 2 * fly_pos_lag
-  
-  ## Get Behavioral State (all) 
-  
-  p_to_p = sum(pause_df$Pause_Duration - 1)
-  if (num_pause < 2) {
-    w_to_w = 0
-  } else{
-    w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - pause_df$End_Index[1:(length(pause_df$Start_Index) - 1)] - 1)
-  }
-  
-  p_to_w = length(pause_df$Start_Index)
-  w_to_p = length(pause_df$End_Index)
-  
-  p_p2p <- c()
-  p_p2w <- c()
-  p_w2p <- c()
-  p_w2w <- c()
-  if (p_to_p + p_to_w == 0) {
-    p_p2p = NA
-    p_p2w = NA
-  } else{
-    p_p2p = p_to_p / (p_to_p + p_to_w)
-    p_p2w = p_to_w / (p_to_p + p_to_w)
-  }
-  
-  if ((w_to_p) + (w_to_w) == 0) {
-    p_w2p = NA
-    p_w2w = NA
-  } else if (is.na((w_to_p) + (w_to_w))) {
-    p_w2p = NA
-    p_w2w = NA
-  } else{
-    p_w2p = w_to_p / (w_to_p + w_to_w)
-    p_w2w = w_to_w / (w_to_p + w_to_w)
-  }
-  
+  # fly_pos_original = b_inter_event[1:(length(b_inter_event) - 1)]
+  # fly_pos_lag = b_inter_event[2:length(b_inter_event)]
+  # fly_pos_sum = (fly_pos_original) * 1 + 2 * fly_pos_lag
+      ## Get Behavioral State
+      p_to_p = sum(pause_df$Pause_Duration - 1)
+      if (num_pause < 2) {w_to_w = 0
+      } else{w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - 
+                       pause_df$End_Index[1:(length(pause_df$Start_Index) - 1)] - 1)
+      }
+      p_to_w = length(pause_df$Start_Index)
+      w_to_p = length(pause_df$End_Index)
+      p_p2p <- c()
+      p_p2w <- c()
+      p_w2p <- c()
+      p_w2w <- c()
+      if ((p_to_p) + (p_to_w) == 0) {
+        p_p2p = NA
+        p_p2w = NA
+      } else{
+        p_p2p = p_to_p / (p_to_p + p_to_w)
+        p_p2w = p_to_w / (p_to_p + p_to_w)
+      }
+      
+      if ((w_to_p) + (w_to_w) == 0) {
+        p_w2p = NA
+        p_w2w = NA
+      } else if (is.na((w_to_p) + (w_to_w))) {
+        p_w2p = NA
+        p_w2w = NA
+      } else{
+        p_w2p = w_to_p / (w_to_p + w_to_w)
+        p_w2w = w_to_w / (w_to_p + w_to_w)
+      }
+      
   ## Behavioral states for pauses not in the middle
   
-  fly_pos_sum_middle = 
-    (is_pause_middle[2:(length(is_pause_middle) - 1)]) *
-    1 + (is_pause_middle[3:length(is_pause_middle)]) * 2 + (is_pause_middle[1:(length(is_pause_middle) - 2)]) * 4
+  fly_pos_sum_middle = (is_pause_middle[2:(length(is_pause_middle) - 1)]) * 1 + (is_pause_middle[3:length(is_pause_middle)]) * 2 + (is_pause_middle[1:(length(is_pause_middle) - 2)]) * 4
   
   ## Behavioral states for pauses not at the end & not bumping to the wall
-  pause_middle_nobump_df = subset(pause_df,
-                                  (Start_Position >= 50)& 
-                                    (Start_Position <= 717)&
-                                    (((Start_Type == 1) &
-                                        (End_Type == 2)) |
-                                       ((Start_Type == 4) &
-                                          (End_Type == 3))))
-  pause_middle_bump_df = subset(pause_df,
-                                (Start_Position >= 50)
-                                & (Start_Position <= 717)
-                                &
-                                  (((Start_Type == 1) &
-                                      (End_Type == 3)) |
-                                     ((Start_Type == 4) &
-                                        (End_Type == 2))))
+  pause_middle_nobump_df = subset(pause_df, (Start_Position >= 50) & (Start_Position <= 717) & (((Start_Type == 1) & (End_Type == 2)) | ((Start_Type == 4) & (End_Type == 3))))
+  pause_middle_bump_df = subset(pause_df,(Start_Position >= 50) & (Start_Position <= 717) & (((Start_Type == 1) &(End_Type == 3)) | ((Start_Type == 4) & (End_Type == 2))))
   pause_end_df = subset(pause_df,
                         (Start_Position < 50)
                         | (Start_Position > 717))
@@ -462,9 +470,7 @@ one_fly_statistics <- function(input_file,
   
   tot_moving_dist = sum(abs(fly_speed[1:set_time]), na.rm = TRUE)
   
-  num_turn = length(turns)
-  num_mid_turns = length(mid_turns)
-  frac_mid_turns = num_mid_turns / num_turn
+
   
   ## Return output
   ret = list(
@@ -552,9 +558,7 @@ find_intersect_points <- function(x1, x2){
   x1.slopes <- x1[intersect.points + 1] - x1[intersect.points]
   x2.slopes <- x2[intersect.points + 1] - x2[intersect.points]
   ## Find the intersection for each segment.
-  x.points <-
-    intersect.points + ((x2[intersect.points] - x1[intersect.points]) / (x1.slopes -
-                                                                           x2.slopes))
+  x.points <- intersect.points + ((x2[intersect.points] - x1[intersect.points]) / (x1.slopes - x2.slopes))
   return(x.points)
 }
 
