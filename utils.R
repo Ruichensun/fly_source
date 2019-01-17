@@ -64,120 +64,122 @@ one_fly_statistics <- function(input_file,
   ## chamber_end_thres - How close (in ) a position to one end of the chamber to be treated as part of the end
   
   # Load data
-  tryCatch({
-    x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
-  }, error = function(e) {
-    stop(paste0("Input file is empty!:\n","  Input files is: ", input_file, "\n\n"))
-  })
-  if (nrow(x) < 10) {stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))}
-  x = as.numeric(x[[1]])
-  data_start = 21
-  fly_pos = x[data_start:min(600 * framerate, length(x))]
-  set_time = length(fly_pos)
-  experiment_time = length(fly_pos)
   
-  # Remove system noise using speed threshold
-  fly_speed = diff(c(x[data_start - 1], fly_pos))
-  for (i in 1:length(fly_pos)) {
-    if (abs(fly_speed[i]) >= speed_max_thres) {
-      fly_speed[i] = 0
-    }
-  }
-
-  # 1st Metric Group: Pause #
-  # Two types of pauses (fly walking left/right). Each types of pause has two ends (start/end) 
-  label_for_pause = rep(0, length(fly_pos))
-  for (i in 2:length(label_for_pause)) {
-    if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
-    else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 2}
-    else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 3}
-    else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {label_for_pause[i] = 4}
-  }
-  
-  # Getting the index for the pause start and ends #
-  starts = c()
-  ends = c()
-  is_start = 1
-  for (i in 1:length(label_for_pause)) {
-    if (label_for_pause[i] != 0) {
-      if (is_start == 1) {
-        if ((label_for_pause[i] == 1) | (label_for_pause[i] == 4)) {
-          starts = c(starts, i)
-          is_start = 0
+      tryCatch({
+        x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
+      }, error = function(e) {
+        stop(paste0("Input file is empty!:\n","  Input files is: ", input_file, "\n\n"))
+      })
+      if (nrow(x) < 10) {stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))}
+      x = as.numeric(x[[1]])
+      data_start = 21
+      fly_pos = x[data_start:min(600 * framerate, length(x))]
+      set_time = length(fly_pos)
+      experiment_time = length(fly_pos)
+      
+      # Remove system noise using speed threshold
+      fly_speed = diff(c(x[data_start - 1], fly_pos))
+      for (i in 1:length(fly_pos)) {
+        if (abs(fly_speed[i]) >= speed_max_thres) {
+          fly_speed[i] = 0
         }
       }
-      else{
-        ends = c(ends, i)
-        is_start = 1
+
+  # 1st Metric Group: Pause #
+      
+      # Two types of pauses (fly walking left/right). Each types of pause has two ends (start/end) 
+      label_for_pause = rep(0, length(fly_pos))
+      for (i in 2:length(label_for_pause)) {
+        if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
+        else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 2}
+        else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 3}
+        else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {label_for_pause[i] = 4}
       }
-    }
-  }
-  
-  if (length(starts) < 1) {
-    starts = 1
-  }
-  pause_df = data.frame()
-  end_type = label_for_pause[ends]
-  start_type = label_for_pause[starts]
-  start_position = fly_pos[starts - 1]
-  end_position = fly_pos[ends - 2]
-  
-  if (length(ends) < 1) {
-    ends = length(fly_pos)
-    end_position = fly_pos[ends]
-    end_type = label_for_pause[ends]
-    pause_df = data.frame(
-      starts[1:length(ends)] - 1,
-      start_position[1:length(ends)],
-      start_type[1:length(ends)],
-      ends,
-      end_position,
-      end_type,
-      ends - starts[1:length(ends)]
-    )
-  } else{
-    pause_df = data.frame(
-      starts[1:length(ends)] - 1,
-      start_position[1:length(ends)],
-      start_type[1:length(ends)],
-      ends - 1,
-      end_position,
-      end_type,
-      ends - starts[1:length(ends)]
-    )
-  }
-  colnames(pause_df) = c(
-    "Start_Index",
-    "Start_Position",
-    "Start_Type",
-    "End_Index",
-    "End_Position",
-    "End_Type",
-    "Pause_Duration"
-  )
-  
-  
-  # Real pause designation: pause duration longer than framerate/2 (500ms)
-  real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
-  num_pause = length(real_pause_df$Start_Index)
-  
-  # Pauses not at the end: pause position is between [21,752]
-  mid_pause_df = subset(pause_df, (Pause_Duration >= (framerate / 2)) & (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
-  
-  pause_middle_dur <- mid_pause_df$Pause_Duration
-  
-  md_pause_middle_dur <- (median(pause_middle_dur)) / framerate
-  
-  frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
-  
-  max_pause_middle <- (max(pause_middle_dur)) / framerate
-  
-  # First_pause_duration: first real pause or first real pause not at the end
-  first_pause_middle <- (pause_middle_dur[1]) / framerate
-  first_pause_duration_all = real_pause_df$Pause_Duration[1] / framerete
-  
+      
+      # Getting the index for the pause start and ends #
+      starts = c()
+      ends = c()
+      is_start = 1
+      for (i in 1:length(label_for_pause)) {
+        if (label_for_pause[i] != 0) {
+          if (is_start == 1) {
+            if ((label_for_pause[i] == 1) | (label_for_pause[i] == 4)) {
+              starts = c(starts, i)
+              is_start = 0
+            }
+          }
+          else{
+            ends = c(ends, i)
+            is_start = 1
+          }
+        }
+      }
+      
+      if (length(starts) < 1) {
+        starts = 1
+      }
+      pause_df = data.frame()
+      end_type = label_for_pause[ends]
+      start_type = label_for_pause[starts]
+      start_position = fly_pos[starts - 1]
+      end_position = fly_pos[ends - 2]
+      
+      if (length(ends) < 1) {
+        ends = length(fly_pos)
+        end_position = fly_pos[ends]
+        end_type = label_for_pause[ends]
+        pause_df = data.frame(
+          starts[1:length(ends)] - 1,
+          start_position[1:length(ends)],
+          start_type[1:length(ends)],
+          ends,
+          end_position,
+          end_type,
+          ends - starts[1:length(ends)]
+        )
+      } else{
+        pause_df = data.frame(
+          starts[1:length(ends)] - 1,
+          start_position[1:length(ends)],
+          start_type[1:length(ends)],
+          ends - 1,
+          end_position,
+          end_type,
+          ends - starts[1:length(ends)]
+        )
+      }
+      colnames(pause_df) = c(
+        "Start_Index",
+        "Start_Position",
+        "Start_Type",
+        "End_Index",
+        "End_Position",
+        "End_Type",
+        "Pause_Duration"
+      )
+
+      # Real pause is the pauses with duration longer than pause_frame_thres
+      real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
+      num_pause = length(real_pause_df$Start_Index)
+      
+      # Pauses not at the end: pause position is between [chamber_left, chamber_right]
+      mid_pause_df = subset(pause_df, (Pause_Duration >= (framerate / 2)) & (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
+      
+      pause_middle_dur <- mid_pause_df$Pause_Duration
+      
+      md_pause_middle_dur <- (median(pause_middle_dur)) / framerate
+      
+      frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
+      
+      max_pause_middle <- (max(pause_middle_dur)) / framerate
+      
+      # First_pause_duration: first real pause or first real pause not at the end
+      first_pause_middle <- (pause_middle_dur[1]) / framerate
+      first_pause_duration_all = real_pause_df$Pause_Duration[1] / framerate
+      
   
   # 2nd Metric Group: Speed
+      
       ## Enter and exit pause speeds (for all pauses)
       fly_speed_at_pause_start = NULL
       fly_speed_at_pause_end = NULL
@@ -206,18 +208,14 @@ one_fly_statistics <- function(input_file,
   
   # 4th Metric Group: Burstiness
       ## inter-event time is pause defined previously ##
-      Pause_duration = real_pause_df$Pause_Duration
-      if (num_pause <= 3) {
-        burstiness_pause = 1
-      }else{
-        burstiness_pause = (sd(Pause_duration, na.rm = T) - mean(Pause_duration, na.rm = T)) /
-                           (sd(Pause_duration, na.rm = T) + mean(Pause_duration, na.rm = T))
-      }
+      PD = real_pause_df$Pause_Duration
+      
+      if (num_pause <= 3) {B_pause = 1
+      }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
       
       ## inter-event time is frames with zero velocity ##
-      burstiness_inter_event <- replace(abs(fly_speed), abs(fly_speed) > 0, 1)
-      inter_event_time <- rle(burstiness_inter_event)$length[rle(burstiness_inter_event)$values == 0]
-      
+      b_inter_event <- replace(abs(fly_speed), abs(fly_speed) > 0, 1)
+      inter_event_time <- rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
       if (length(inter_event_time) <= 3) {
         Burst_inter_event = 1
       }else{
@@ -226,20 +224,17 @@ one_fly_statistics <- function(input_file,
       }
       
       ## scrambled burstiness 
-      burstiness_inter_event_scrambled <- sample(burstiness_inter_event)
-      inter_event_time_scrambled <-rle(burstiness_inter_event_scrambled)$length[rle(burstiness_inter_event_scrambled)$values == 0]
+      b_scrambled <- sample(b_inter_event)
+      t_scrambled <-rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
       B_scrambled <- c()
-      if (length(inter_event_time_scrambled) <= 3) {
-        B_scrambled = 1
+      if (length(t_scrambled) <= 3) {B_scrambled = 1
       } else{
-        B_scrambled = (sd((inter_event_time_scrambled), na.rm = T) - mean((inter_event_time_scrambled), na.rm = T)) / 
-                       (sd((inter_event_time_scrambled), na.rm = T) + mean((inter_event_time_scrambled), na.rm = T))
+        B_scrambled = (sd((t_scrambled), na.rm = T) - mean((t_scrambled), na.rm = T)) / 
+                       (sd((t_scrambled), na.rm = T) + mean((t_scrambled), na.rm = T))
       }
-      
-    
+
       ## inter event is walking (with thresholding)
-      if (num_pause <= 3) {
-        burstiness_pause_inverted = 1
+      if (num_pause <= 3) {burstiness_pause_inverted = 1
       } else{
         walk_end <- pause_df$Start_Index[2:dim(pause_df)[1]]
         walk_start <- pause_df$End_Index[1:(dim(pause_df)[1]-1)]
@@ -248,20 +243,19 @@ one_fly_statistics <- function(input_file,
       }
       
       ## inter event is walking (no thresholding)
-      burstiness_m_inverted <- rep(0, length(burstiness_inter_event))
-      burstiness_m_inverted <- replace(burstiness_m_inverted, burstiness_inter_event == 0, 1)
+      burstiness_m_inverted <- rep(0, length(b_inter_event))
+      burstiness_m_inverted <- replace(burstiness_m_inverted, b_inter_event == 0, 1)
       m_inverted <-rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
-      if (length(m_inverted) <= 3) {
-        m_burstiness = 1
+      if (length(m_inverted) <= 3) {m_burstiness = 1
       } else{
         m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
       }
       
-  
+  # 5th Metric Group: Behavioral States
   ## Behavioral states
-  fly_pos_original = burstiness_inter_event[1:(length(burstiness_inter_event) -
+  fly_pos_original = b_inter_event[1:(length(b_inter_event) -
                                                  1)]
-  fly_pos_lag = burstiness_inter_event[2:length(burstiness_inter_event)]
+  fly_pos_lag = b_inter_event[2:length(b_inter_event)]
   fly_pos_sum = (fly_pos_original) * 1 + 2 * fly_pos_lag
   
   ## Get Behavioral State (all) 
@@ -486,7 +480,7 @@ one_fly_statistics <- function(input_file,
       framerate * 60,
      num_turn,#NU
      num_mid_turns,#NU
-    burstiness_pause,
+      B_pause,
     Burst_inter_event,#NU
      B_scrambled,#NU
      w_burstiness, #NU
