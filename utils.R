@@ -25,9 +25,6 @@ combine_flyCSV <- function(experimenter, type){
               quote=F,row.names=F,col.names=T,sep=",")  
 }
 
-
-
-
 get_fly_moving_speed <- function(x, framerate) {
   data_start = 21 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
@@ -45,13 +42,14 @@ get_fly_initial_pause <- function(x, framerate){
   return( pause / experiment_time)
 }
 
-
 one_fly_statistics <- function(input_file,
                                framerate = 50,
                                speed_max_thres = 28, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
                                speed_zero_thres = 1e-2,
                                pause_frame_thres = 25,
-                               chamber_end_thres = 50){
+                               chamber_end_thres = 50,
+                               chamber_left = 21,
+                               chamber_right = 752){
   #  pause_frame_thres - Least of number of frames in a pause
   #  speed_zero_thres - How small the speed is to be treated as not moving (i.e. zero)
   #  speed_max_thres - Maximum speed allowed (The setting for this threshold is as follows:
@@ -65,61 +63,41 @@ one_fly_statistics <- function(input_file,
   #  Therefore, I set the maximum speed threshold in 0.02s duration to be 30px (10 times the usual speed)
   ## chamber_end_thres - How close (in ) a position to one end of the chamber to be treated as part of the end
   
-  ## Read input file
+  # Load data
   tryCatch({
     x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
   }, error = function(e) {
     stop(paste0("Input file is empty!:\n","  Input files is: ", input_file, "\n\n"))
   })
-  if (nrow(x) < 10) {
-    stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))
-  }
-  
-  ##Remove the initial XXX points
+  if (nrow(x) < 10) {stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))}
   x = as.numeric(x[[1]])
   data_start = 21
   fly_pos = x[data_start:min(600 * framerate, length(x))]
-  middle = fly_pos[(fly_pos>=50) & (fly_pos<=717)]
   set_time = length(fly_pos)
   experiment_time = length(fly_pos)
-  middle_time = length(middle)
   
-  ##Get the transient speed
-  if (data_start > 1) {
-    fly_speed = diff(c(x[data_start - 1], fly_pos))
-  }
-  
-  ## Thresholding the max speed
+  # Remove system noise using speed threshold
+  fly_speed = diff(c(x[data_start - 1], fly_pos))
   for (i in 1:length(fly_pos)) {
     if (abs(fly_speed[i]) >= speed_max_thres) {
       fly_speed[i] = 0
     }
   }
-  
-  ###Generating the Pause data.frame ###
-  
+
+  # 1st Metric Group: Pause #
+  # Two types of pauses (fly walking left/right). Each types of pause has two ends (start/end) 
   label_for_pause = rep(0, length(fly_pos))
-  
   for (i in 2:length(label_for_pause)) {
-    if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {
-      label_for_pause[i] = 1
-    }
-    else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {
-      label_for_pause[i] = 2
-    }
-    else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {
-      label_for_pause[i] = 3
-    }
-    else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {
-      label_for_pause[i] = 4
-    }
+    if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
+    else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 2}
+    else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 3}
+    else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {label_for_pause[i] = 4}
   }
   
-  ###Getting the index for the pause start and ends###
+  # Getting the index for the pause start and ends #
   starts = c()
   ends = c()
   is_start = 1
-  
   for (i in 1:length(label_for_pause)) {
     if (label_for_pause[i] != 0) {
       if (is_start == 1) {
@@ -138,7 +116,6 @@ one_fly_statistics <- function(input_file,
   if (length(starts) < 1) {
     starts = 1
   }
-  
   pause_df = data.frame()
   end_type = label_for_pause[ends]
   start_type = label_for_pause[starts]
@@ -179,183 +156,107 @@ one_fly_statistics <- function(input_file,
     "Pause_Duration"
   )
   
-  #  Get the time spans when fly paused
-  pause_start = NULL
-  pause_end = NULL
-  potential_pause_start = 1
-  current_zero_length = 0
-  is_pause = rep(0, experiment_time)
-  if (fly_speed[1] == 0) {
-    current_zero_length = 1
-  }
-  for (t in 2:experiment_time) {
-    if (fly_speed[t] == 0) {
-      if (current_zero_length == 0) {
-        potential_pause_start = t
-        current_zero_length = current_zero_length + 1
-      } else{
-        current_zero_length = current_zero_length + 1
-      }
-    } else{
-      if (current_zero_length >= pause_frame_thres) {
-        pause_start = c(pause_start, potential_pause_start)
-        pause_end = c(pause_end, t - 1)
-        is_pause[potential_pause_start:(t - 1)] = 1
-      }
-      current_zero_length = 0
-    }
-  }
-  if (current_zero_length >= pause_frame_thres) {
-    pause_start = c(pause_start, potential_pause_start)
-    pause_end = c(pause_end, experiment_time)
-    is_pause[potential_pause_start:experiment_time] = 1
-  }
-  num_pause = length(pause_start)
   
-  # Pause not at the end is between [50,717])
-  is_pause_middle = is_pause
-  for (i in 1:experiment_time) {
-    if (is_pause[i] == 1) {
-      if (fly_pos[i] < 50) {
-        is_pause_middle[i] = 0
-      }
-      else if (fly_pos[i] > 717) {
-        is_pause_middle[i] = 0
-      }
-      else{
-        is_pause_middle[i] = 1
-      }
-    }
-  }
-  ## Current pause designation: pause duration longer than 25, and pause position is between [50,717]
-  pause_middle_dur <-subset(pause_df,(Pause_Duration >= 25) & (Start_Position >= 50) & (Start_Position <= 717))$Pause_Duration
-  avg_pause_middle_dur <- (mean(pause_middle_dur)) / framerate
-  # frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
-  frac_pause_middle <- (sum(pause_middle_dur)) / middle_time
+  # Real pause designation: pause duration longer than framerate/2 (500ms)
+  real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
+  num_pause = length(real_pause_df$Start_Index)
+  
+  # Pauses not at the end: pause position is between [21,752]
+  mid_pause_df = subset(pause_df, (Pause_Duration >= (framerate / 2)) & (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
+  
+  pause_middle_dur <- mid_pause_df$Pause_Duration
+  
+  md_pause_middle_dur <- (median(pause_middle_dur)) / framerate
+  
+  frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
+  
   max_pause_middle <- (max(pause_middle_dur)) / framerate
+  
+  # First_pause_duration: first real pause or first real pause not at the end
   first_pause_middle <- (pause_middle_dur[1]) / framerate
+  first_pause_duration_all = real_pause_df$Pause_Duration[1] / framerete
   
-  ### First_pause_duration (for all pauses)###
   
-  first_pause_duration = c()
-  if (is_pause[1] == 1) {
-    first_pause_duration = (pause_end[1]) - (pause_start[1])
-  } else{
-    first_pause_duration = 0
-  }
-  first_pause_duration_all = pause_df$Pause_Duration[1]
-  
-  ## Enter and exit pause speeds (for all pauses) and average of three frames before/after pause
-  fly_speed_at_pause_start = NULL
-  fly_speed_at_pause_end = NULL
-  window_size = 0.5 * framerate
-  if (num_pause != 0) {
-    for (i in 1:num_pause) {
-      ps = pause_start[i]
-      pe = pause_end[i]
-      if (ps < window_size ||
-          pe > experiment_time - window_size) {
-        fly_speed_at_pause_start = c(fly_speed_at_pause_start, NA)
-        fly_speed_at_pause_end = c(fly_speed_at_pause_end, NA)
-      } else{
-        fly_speed_at_pause_start = c(fly_speed_at_pause_start,
-                                     mean(abs(fly_speed[(ps - window_size):ps])))
-        fly_speed_at_pause_end = c(fly_speed_at_pause_end,
-                                   mean(abs(fly_speed[pe:(pe + window_size)])))
+  # 2nd Metric Group: Speed
+      ## Enter and exit pause speeds (for all pauses)
+      fly_speed_at_pause_start = NULL
+      fly_speed_at_pause_end = NULL
+      window_size = 0.5 * framerate
+      if (num_pause >= 2) {
+        for (i in 2:num_pause) {
+          ps = real_pause_df$Start_Index[i]
+          pe = real_pause_df$End_Index[i]
+          if (ps < window_size || pe > experiment_time - window_size) {
+            fly_speed_at_pause_start = c(fly_speed_at_pause_start, NA)
+            fly_speed_at_pause_end = c(fly_speed_at_pause_end, NA)
+          } else{
+            fly_speed_at_pause_start = c(fly_speed_at_pause_start, mean(abs(fly_speed[(ps - window_size):ps])))
+            fly_speed_at_pause_end = c(fly_speed_at_pause_end, mean(abs(fly_speed[pe:(pe + window_size)])))
+          }
+        }
       }
-    }
-  }
+      #unfinished
   
-  ## Turns
-  ## Step 1 - get the moving direction (speed sign)
-  bin_size = framerate * 0.5
-  bin_positive_frac = NULL
-  t = bin_size
-  while (t < experiment_time) {
-    bin_fly_speed = fly_speed[t - 1:bin_size + 1]
-    frac = sum(bin_fly_speed > 0, na.rm = T) / sum(bin_fly_speed != 0, na.rm =
-                                                     T)
-    bin_positive_frac = c(bin_positive_frac, frac)
-    t = t + bin_size
-  }
-  ## Step 2 - get the turns
-  turns = find_intersect_points(bin_positive_frac, rep(0.5, length(bin_positive_frac)))
-  turns = ceiling(turns * bin_size - bin_size / 2)
-  position_turns = (fly_pos[turns] + fly_pos[turns - 1]) / 2
-  mid_turns = turns[position_turns > chamber_end_thres &
-                      position_turns < 767 - chamber_end_thres]
-  position_mid_turns = position_turns[position_turns > chamber_end_thres &
-                                        position_turns < 767 - chamber_end_thres]
+  # 3rd Metric Group: Turns
+      turns_pause_df = subset(pause_df, ((Start_Type == 1) & (End_Type == 3))|((Start_Type == 4) & (End_Type == 2)))
+      real_turns_df = subset(turns_pause_df, Pause_Duration >= pause_frame_thres)
+      mid_turns_df = subset(real_turns_df, (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
+      num_turns = length(real_turns_df$Pause_Duration)
+      mid_turns = length(mid_turns_df$Pause_Duration)
   
-  ## Calculating burstiness - inter-event time is pause defined previously ##
-  
-  num_pause = length(subset(pause_df, (Pause_Duration >= 25))$Pause_Duration)
-  
-  Pause_duration = subset(pause_df, (Pause_Duration >= 25))$Pause_Duration
-  if (num_pause <= 3) {
-    burstiness_pause = 1
-  }else{
-    burstiness_pause = (sd(Pause_duration, na.rm = T) - mean(Pause_duration, na.rm = T)) /
-      (sd(Pause_duration, na.rm = T) + mean(Pause_duration, na.rm = T))
-  }
-  
-  ## Calculating burstiness - inter-event time is frames with zero velocity ##
-  burstiness_inter_event <-
-    replace(abs(fly_speed), abs(fly_speed) > 0, 1)
-  
-  inter_event_time <-
-    rle(burstiness_inter_event)$length[rle(burstiness_inter_event)$values ==
-                                         0]
-  if (length(inter_event_time) <= 3) {
-    Burst_inter_event = 1
-  } else{
-    Burst_inter_event = (sd((inter_event_time), na.rm = T) - mean((inter_event_time), na.rm = T)) /
-      (sd((inter_event_time), na.rm = T) + mean((inter_event_time), na.rm = T))
-  }
-  
-  ## Calculating scrambled burstiness 
-  burstiness_inter_event_scrambled <- sample(burstiness_inter_event)
-  inter_event_time_scrambled <-
-    rle(burstiness_inter_event_scrambled)$length[rle(burstiness_inter_event_scrambled)$values ==
-                                                   0]
-  Burst_inter_event_scrambled <- c()
-  if (length(inter_event_time_scrambled) <= 3) {
-    Burst_inter_event_scrambled = 1
-  } else{
-    Burst_inter_event_scrambled = (sd((inter_event_time_scrambled), na.rm = T) -
-                                     mean((inter_event_time_scrambled), na.rm = T)) / (sd((inter_event_time_scrambled), na.rm = T) +
-                                                                                         mean((inter_event_time_scrambled), na.rm = T))
-  }
-  
-  ## Inverted burstiness with no thresholding
-  burstiness_inter_event_inverted <-
-    rep(0, length(burstiness_inter_event))
-  burstiness_inter_event_inverted <-
-    replace(burstiness_inter_event_inverted,
-            burstiness_inter_event == 0,
-            1)
-  inter_event_time_inverted <-
-    rle(burstiness_inter_event_inverted)$length[rle(burstiness_inter_event_inverted)$values ==
-                                                  0]
-  if (length(inter_event_time_inverted) <= 3) {
-    Burst_inter_event_inverted = 1
-  } else{
-    Burst_inter_event_inverted = (sd((inter_event_time_inverted), na.rm = T) -
-                                    mean((inter_event_time_inverted), na.rm = T)) / (sd((inter_event_time_inverted), na.rm = T) +
-                                                                                       mean((inter_event_time_inverted), na.rm = T))
-  }
-  
-  ## Inverted burstiness_with thresholding
-  if (num_pause <= 3) {
-    burstiness_pause_inverted = 1
-  } else{
-    pause_start_late <- pause_start[2:length(pause_start)]
-    pause_end_late <- pause_end[1:(length(pause_end) - 1)]
+  # 4th Metric Group: Burstiness
+      ## inter-event time is pause defined previously ##
+      Pause_duration = real_pause_df$Pause_Duration
+      if (num_pause <= 3) {
+        burstiness_pause = 1
+      }else{
+        burstiness_pause = (sd(Pause_duration, na.rm = T) - mean(Pause_duration, na.rm = T)) /
+                           (sd(Pause_duration, na.rm = T) + mean(Pause_duration, na.rm = T))
+      }
+      
+      ## inter-event time is frames with zero velocity ##
+      burstiness_inter_event <- replace(abs(fly_speed), abs(fly_speed) > 0, 1)
+      inter_event_time <- rle(burstiness_inter_event)$length[rle(burstiness_inter_event)$values == 0]
+      
+      if (length(inter_event_time) <= 3) {
+        Burst_inter_event = 1
+      }else{
+        Burst_inter_event = (sd((inter_event_time), na.rm = T) - mean((inter_event_time), na.rm = T)) /
+                            (sd((inter_event_time), na.rm = T) + mean((inter_event_time), na.rm = T))
+      }
+      
+      ## scrambled burstiness 
+      burstiness_inter_event_scrambled <- sample(burstiness_inter_event)
+      inter_event_time_scrambled <-rle(burstiness_inter_event_scrambled)$length[rle(burstiness_inter_event_scrambled)$values == 0]
+      B_scrambled <- c()
+      if (length(inter_event_time_scrambled) <= 3) {
+        B_scrambled = 1
+      } else{
+        B_scrambled = (sd((inter_event_time_scrambled), na.rm = T) - mean((inter_event_time_scrambled), na.rm = T)) / 
+                       (sd((inter_event_time_scrambled), na.rm = T) + mean((inter_event_time_scrambled), na.rm = T))
+      }
+      
     
-    burstiness_pause_inverted = (sd((pause_start_late - pause_end_late), na.rm = T) -
-                                   mean((pause_start_late - pause_end_late), na.rm = T)) / (sd((pause_start_late - pause_end_late), na.rm = T) +
-                                                                                              mean((pause_start_late - pause_end_late), na.rm = T))
-  }
+      ## inter event is walking (with thresholding)
+      if (num_pause <= 3) {
+        burstiness_pause_inverted = 1
+      } else{
+        walk_end <- pause_df$Start_Index[2:dim(pause_df)[1]]
+        walk_start <- pause_df$End_Index[1:(dim(pause_df)[1]-1)]
+        walks_dur = walk_end - walk_start
+        w_burstiness = (sd(walks_dur) - mean(walks_dur)) / (sd(walks_dur) + mean(walks_dur))
+      }
+      
+      ## inter event is walking (no thresholding)
+      burstiness_m_inverted <- rep(0, length(burstiness_inter_event))
+      burstiness_m_inverted <- replace(burstiness_m_inverted, burstiness_inter_event == 0, 1)
+      m_inverted <-rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
+      if (length(m_inverted) <= 3) {
+        m_burstiness = 1
+      } else{
+        m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
+      }
+      
   
   ## Behavioral states
   fly_pos_original = burstiness_inter_event[1:(length(burstiness_inter_event) -
@@ -369,8 +270,7 @@ one_fly_statistics <- function(input_file,
   if (num_pause < 2) {
     w_to_w = 0
   } else{
-    w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - pause_df$End_Index[1:(length(pause_df$Start_Index) -
-                                                                                                1)] - 1)
+    w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - pause_df$End_Index[1:(length(pause_df$Start_Index) - 1)] - 1)
   }
   
   p_to_w = length(pause_df$Start_Index)
@@ -584,17 +484,15 @@ one_fly_statistics <- function(input_file,
     (avg_fly_speed_exit * (48.7 - 1) / 768) / (1 / framerate),
     (((tot_moving_dist) * (48.7 - 1) / 768) / experiment_time) *
       framerate * 60,
-    num_turn,#NU
-    num_mid_turns,#NU
-    frac_mid_turns,#NU
+     num_turn,#NU
+     num_mid_turns,#NU
     burstiness_pause,
     Burst_inter_event,#NU
-    Burst_inter_event_scrambled,#NU
-    burstiness_pause_inverted, #NU
-    Burst_inter_event_inverted, #NU
-    first_pause_duration / (framerate),#NU
-    first_pause_duration_all / (framerate), #NU
-    # state_transition_middle,#Removed Jan31, 2018
+     B_scrambled,#NU
+     w_burstiness, #NU
+     m_burstiness, #NU
+     first_pause_middle,#NU
+     first_pause_duration_all, #NU
     p_p2p_middle,
     p_p2w_middle,
     p_w2w_middle,
@@ -606,7 +504,9 @@ one_fly_statistics <- function(input_file,
     avg_pause_middle_dur,
     1-frac_pause_middle,
     max_pause_middle,
-    first_pause_middle
+    first_pause_middle,
+    max(fly_pos),
+    min(fly_pos)
   )
   
   names(ret) = c(
@@ -640,7 +540,9 @@ one_fly_statistics <- function(input_file,
     "Average Pause Duration (Pause not at the End)",#28
     "Percentage Time Active (Pause not at the End)",#29
     "Max Pause Duration (Pause not at the End)", #30
-    "First Pause Duration (Pause not at the End)" #31
+    "First Pause Duration (Pause not at the End)", #31
+    "Left most point", #32
+    "Right most point" #33
   )
   return(ret)
 }
@@ -1294,7 +1196,6 @@ initial_condition <- function(metric.ind, query.genotype, query.fly, query.exper
 
 test_initial_condition = function(metric.ind, query.list){
   input.y.df = data.frame()
-  
   query.fly = get_query_info(query.list[1])[[1]]
   query.experimenter = get_query_info(query.list[1])[[2]]
   input.y.df.pre = initial_condition(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
@@ -1405,16 +1306,16 @@ test_after_training = function(metric.ind, query.list){
 
 get_query_info<-function(query.genotype){
   if(query.genotype=="CS"){
-    query.fly = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                    (fly.info.include$Genotype == "CS")) &
-                                   (fly.info.include$experimenter!="SW"), ]$Fly
-    query.experimenter = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                             (fly.info.include$Genotype == "CS")) &
-                                            (fly.info.include$experimenter!="SW"), ]$experimenter
+    query.fly = fly.info.end[((fly.info.end$Genotype == "WT") |
+                                    (fly.info.end$Genotype == "CS")) &
+                                   (fly.info.end$experimenter!="SW"), ]$Fly
+    query.experimenter = fly.info.end[((fly.info.end$Genotype == "WT") |
+                                             (fly.info.end$Genotype == "CS")) &
+                                            (fly.info.end$experimenter!="SW"), ]$Experimenter
     write.table(
-      fly.info.include[((fly.info.include$Genotype == "WT") |
-                          (fly.info.include$Genotype == "CS")) &
-                         (fly.info.include$experimenter!="SW"), ],
+      fly.info.end[((fly.info.end$Genotype == "WT") |
+                          (fly.info.end$Genotype == "CS")) &
+                         (fly.info.end$experimenter!="SW"), ],
       "fly_info_include_WT.csv",
       col.names = T,
       row.names = F,
@@ -1423,14 +1324,14 @@ get_query_info<-function(query.genotype){
     )
   }else if(query.genotype=="SUN1"){
     query.genotype <- c("SUN1")
-    query.fly = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
-                                   (fly.info.include$experimenter!="SW"), ]$Fly
+    query.fly = fly.info.end[((fly.info.end$Genotype == "SUN1")) &
+                                   (fly.info.end$Experimenter!="SW"), ]$Fly
     
-    query.experimenter = fly.info.include[((fly.info.include$Genotype == "SUN1")) &
-                                            (fly.info.include$experimenter!="SW"), ]$experimenter
+    query.experimenter = fly.info.end[((fly.info.end$Genotype == "SUN1")) &
+                                            (fly.info.end$Experimenter!="SW"), ]$experimenter
     write.table(
-      fly.info.include[((fly.info.include$Genotype == "SUN1")) &
-                         (fly.info.include$experimenter!="SW"), ],
+      fly.info.end[((fly.info.end$Genotype == "SUN1")) &
+                         (fly.info.end$Experimenter!="SW"), ],
       "fly_info_include_SUN1.csv",
       col.names = T,
       row.names = F,
@@ -1438,10 +1339,10 @@ get_query_info<-function(query.genotype){
       sep = ","
     )
   }else{
-    query.fly = fly.info.include[(fly.info.include$Genotype == query.genotype), ]$Fly
-    query.experimenter = fly.info.include[(fly.info.include$Genotype == query.genotype), ]$experimenter
+    query.fly = fly.info.end[(fly.info.end$Genotype == query.genotype), ]$Fly
+    query.experimenter = fly.info.end[(fly.info.end$Genotype == query.genotype), ]$Experimenter
     write.table(
-      fly.info.include[(fly.info.include$Genotype == query.genotype), ],
+      fly.info.end[(fly.info.end$Genotype == query.genotype), ],
       paste0("fly_info_include_",query.genotype,".csv"),
       col.names = T,
       row.names = F,
@@ -1454,13 +1355,13 @@ get_query_info<-function(query.genotype){
               query.experimenter))
 }    
 
-plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
+plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, fly.info.end){
   
   if(query.genotype[1] == "WT"){
     write.table(
-      fly.info.include[((fly.info.include$Genotype == "WT") |
-                          (fly.info.include$Genotype == "CS")) &
-                         (fly.info.include$experimenter!="SW"), ],
+      fly.info.end[((fly.info.end$Genotype == "WT") |
+                          (fly.info.end$Genotype == "CS")) &
+                         (fly.info.end$Experimenter!="SW"), ],
       "fly_info_include_WT.csv",
       col.names = T,
       row.names = F,
@@ -1469,7 +1370,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter){
     )
   }else{
     write.table(
-      fly.info.include[((fly.info.include$Genotype == query.genotype[1])),],
+      fly.info.end[((fly.info.end$Genotype == query.genotype[1])),],
       paste0("fly_info_include_", query.genotype[1], ".csv"),
       col.names = T,
       row.names = F,

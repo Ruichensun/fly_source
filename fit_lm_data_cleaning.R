@@ -102,10 +102,12 @@ for (genotype in unique(fly.info$Genotype)) {
   else{ind = fly.info$Genotype == genotype & !(1:nrow(fly.info) %in% ind.excl)}
   ind.include = c(ind.include,which(ind)) 
 }
+
 fly.info.include = fly.info[ind.include,]
 
-ind.filtered = data_filter(2, fly.info.include) 
+ind.filtered = data_filter(1, fly.info.include) 
 fly.info.end = fly.info.include[ind.filtered, ]
+# fly.info.end = fly.info.include
 
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
 
@@ -116,32 +118,23 @@ for (ind in 1:length(metrices)) {
   metric.df = NULL
   for (session in sessions) {
     metric <- sapply(all_ofs[[session]], function(x) {
-                    if (length(x) == 1) {
-                         return(NA)
-                       } else{
-                         return(x[[ind]])
-                       }
+                    if (length(x) == 1) {return(NA)} else{return(x[[ind]])}
                      })
-    
     array.session = rep(session, length(metric))
     for (i in 1:length(array.session)) {
       array.session[i] = gsub("X", fly.info.end$Category[i], array.session[i])
     }
-    
-    metric.df <- rbind(
-      metric.df,
-      cbind(
-        metric,
-        fly.info.end$Fly,
-        fly.info.end$Category,
-        fly.info.end$Gender,
-        fly.info.end$Genotype,
-        fly.info.end$Experimenter,
-        fly.info.end$Age,
-        fly.info.end$Setup,
-        array.session
-      )
-    )
+    metric.df <- rbind(metric.df, cbind(metric,
+                                        fly.info.include$Fly,
+                                        fly.info.include$Category,
+                                        fly.info.include$Gender,
+                                        fly.info.include$Genotype,
+                                        fly.info.include$Experimenter,
+                                        fly.info.include$Age,
+                                        fly.info.include$Setup,
+                                        array.session
+                                       )[ind.filtered, ]
+                      )
   }
   colnames(metric.df) = c(
     "Value",
