@@ -47,7 +47,7 @@ one_fly_statistics <- function(input_file,
                                speed_max_thres = 90, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
                                speed_zero_thres = 1e-2,
                                pause_frame_thres = 25,
-                               chamber_end_thres = 50,
+                               chamber_end_thres = 60,
                                chamber_left = 21,
                                chamber_right = 752){
   #  pause_frame_thres - Least of number of frames in a pause
@@ -160,34 +160,37 @@ one_fly_statistics <- function(input_file,
 
       # Real pause is the pauses with duration longer than pause_frame_thres
       real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
-      num_pause = length(real_pause_df$Start_Index)
-      
+  
       # Pauses not at the end: pause position is between [chamber_left, chamber_right]
-      mid_pause_df = subset(real_pause_df, (Start_Position >= chamber_left) & (Start_Position <= chamber_right))
-      
+      mid_pause_df = subset(real_pause_df, (Start_Position >= chamber_end_thres) & (Start_Position <= 767 - chamber_end_thres))
       pause_middle_dur <- mid_pause_df$Pause_Duration
       
+      num_pause = length(real_pause_df$Start_Index)
+      num_mid_pause = length(mid_pause_df$Start_Index)
+      
+      md_pause_dur <- median(real_pause_df$Pause_Duration) / framerate
       md_pause_middle_dur <- (median(pause_middle_dur)) / framerate
       
+      frac_pause <- sum(real_pause_df$Pause_Duration) / experiment_time 
       frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
       
+      max_pause <- max(real_pause_df$Pause_Duration) / framerate
       max_pause_middle <- (max(pause_middle_dur)) / framerate
       
       # First_pause_duration: first real pause or first real pause not at the end
+      first_pause = real_pause_df$Pause_Duration[1] / framerate
       first_pause_middle <- (pause_middle_dur[1]) / framerate
-      first_pause_duration_all = real_pause_df$Pause_Duration[1] / framerate
       
-  
   # 2nd Metric Group: Speed
       
-      ## Enter and exit pause speeds (for all pauses)
+      # Enter and exit pause speeds (for all pauses)
       fly_speed_at_pause_start = NULL
       fly_speed_at_pause_end = NULL
       window_size = 0.5 * framerate
-      if (num_pause >= 2) {
-        for (i in 2:num_pause) {
-          ps = real_pause_df$Start_Index[i]
-          pe = real_pause_df$End_Index[i]
+      if (num_mid_pause >= 2) {
+        for (i in 2:num_mid_pause) {
+          ps = mid_pause_df$Start_Index[i]
+          pe = mid_pause_df$End_Index[i]
           if (ps < window_size || pe > experiment_time - window_size) {
             fly_speed_at_pause_start = c(fly_speed_at_pause_start, NA)
             fly_speed_at_pause_end = c(fly_speed_at_pause_end, NA)
@@ -197,15 +200,38 @@ one_fly_statistics <- function(input_file,
           }
         }
       }
-      #unfinished
-  
-  # 3rd Metric Group: Turns
+      
+      #Avg fly speed 
+      avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
+      avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) > 0)]), na.rm = TRUE)
+      
+      if (length(fly_speed[which(abs(fly_speed) > 0)]) < 10) {
+        avg_fly_speed_not_in_pause = 0
+      }
+      if (max(abs(fly_speed)) == 0) {
+        avg_fly_speed_not_in_pause = NA
+      }
+      
+      avg_fly_speed_enter = mean(fly_speed_at_pause_start, na.rm = TRUE)
+      avg_fly_speed_exit = mean(fly_speed_at_pause_end, na.rm = TRUE)
 
+      # Convert the speed from px/frame to mm/sec
+      # The visible part of the tube is 47 mm
+      avg_speed = (avg_fly_speed * 47 / 768) / (1 / framerate)
+      avg_speed_moving = (avg_fly_speed_not_in_pause * 47 / 768) / (1 / framerate)
+      avg_speed_enter = (avg_fly_speed_enter * 47 / 768) / (1 / framerate)
+      avg_speed_exit = (avg_fly_speed_exit * 47 / 768) / (1 / framerate)
+      
+      # Total Moving Distance
+      tot_moving_dist = sum(abs(fly_speed[1:experiment_time]), na.rm = TRUE)
+      dist = tot_moving_dist * 47 / 768 
+      
+  # 3rd Metric Group: Turns
       # Step 0 - smoothing
       ma <- function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
       bin_size = 150
       fly_pos_sm = ma(fly_pos, bin_size)
-      fly_speed_sm = diff(fly_speed_sm)
+      fly_speed_sm = diff(fly_pos_sm)
       
       # Step 1 - get the moving direction (speed sign)
       bin_positive_frac = NULL
@@ -221,8 +247,8 @@ one_fly_statistics <- function(input_file,
       turns = find_intersect_points(bin_positive_frac, rep(0.5, length(bin_positive_frac)))
       turns = ceiling(turns * bin_size - bin_size / 2)
       position_turns = (fly_pos[turns] + fly_pos[turns - 1]) / 2 # Use original fly_pos value as the actual position
-      mid_turns = turns[position_turns > chamber_left & position_turns < chamber_right]
-      position_mid_turns = position_turns[position_turns > chamber_left & position_turns < chamber_right]
+      mid_turns = turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
+      position_mid_turns = position_turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
       
       # Step 3 - get turn numbers
       num_turn = length(turns)
@@ -235,10 +261,11 @@ one_fly_statistics <- function(input_file,
       }
 
   # 4th Metric Group: Burstiness
-      ## inter-event time is pause defined previously ##
-      PD = real_pause_df$Pause_Duration
+      # inter-event time is pause defined previously #
+      PD = mid_pause_df$Pause_Duration
       
-      if (num_pause <= 3) {B_pause = 1
+      if (num_pause <= 3) {
+        B_pause = 1
       }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
       
       ## inter-event time is frames with zero velocity #
@@ -251,7 +278,7 @@ one_fly_statistics <- function(input_file,
                             (sd(pause_df$Pause_Duration) + mean(pause_df$Pause_Duration))
       }
       
-      ## scrambled burstiness 
+      # scrambled burstiness 
       b_scrambled <- sample(b_inter_event)
       t_scrambled <-rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
       B_scrambled <- c()
@@ -261,11 +288,12 @@ one_fly_statistics <- function(input_file,
                        (sd((t_scrambled), na.rm = T) + mean((t_scrambled), na.rm = T))
       }
 
-      ## inter event is walking (with thresholding)
-      if (num_pause <= 3) {burstiness_pause_inverted = 1
+      # inter event is walking (with thresholding)
+      if (num_pause <= 3) {
+        burstiness_pause_inverted = 1
       } else{
-        walk_end <- pause_df$Start_Index[2:dim(pause_df)[1]]
-        walk_start <- pause_df$End_Index[1:(dim(pause_df)[1]-1)]
+        walk_end <- mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
+        walk_start <- mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
         walks_dur = walk_end - walk_start
         w_burstiness = (sd(walks_dur) - mean(walks_dur)) / (sd(walks_dur) + mean(walks_dur))
       }
@@ -279,13 +307,41 @@ one_fly_statistics <- function(input_file,
         m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / 
                        (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
       }
+
+  # 5th Metric Group: Memory
+      # inter_event_time is the unfiltered ones and zeros (rasterplot) versions of fly_pos
+      # When walking bout is an event
+      memory <- 0
+      if (length(inter_event_time) < 2) {
+        memory = NA
+      } else{
+        m1 = mean(inter_event_time[1:(length(inter_event_time) - 1)]) #mean of inter-event time from 1 to n-1
+        m2 = mean(inter_event_time[2:(length(inter_event_time))]) #mean of inter-event time from 2 to n
+        std1 <- sd(inter_event_time[1:(length(inter_event_time) - 1)])
+        std2 <- sd(inter_event_time[2:(length(inter_event_time))])
+        for (i in 1:(length(inter_event_time) - 1)) {
+          memory <- memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /(std1 * std2))
+        }
+        memory = (1 / (length(inter_event_time) - 1)) * memory
+      }
       
-  # 5th Metric Group: Behavioral States
-  ## Behavioral states
-  # fly_pos_original = b_inter_event[1:(length(b_inter_event) - 1)]
-  # fly_pos_lag = b_inter_event[2:length(b_inter_event)]
-  # fly_pos_sum = (fly_pos_original) * 1 + 2 * fly_pos_lag
-      ## Get Behavioral State
+      # When pause is an event (inter event is walking)
+      memory_w <- 0
+      if (length(m_inverted) < 2) {
+        memory_w = NA
+      } else{
+        m3 <- mean(m_inverted[1:(length(m_inverted) - 1)])
+        m4 <- mean(m_inverted[2:(length(m_inverted))])
+        std3 <- sd(m_inverted[1:(length(m_inverted) - 1)])
+        std4 <- sd(m_inverted[2:(length(m_inverted))])
+        for (i in 1:(length(m_inverted) - 1)) {
+          memory_w <- memory_w + ((m_inverted[i] - m3) * (m_inverted[i + 1] - m4) / (std3 * std4))
+        }
+        memory_w <- (1 / (length(m_inverted) - 1)) * memory_w
+      }
+      
+  # 6th Metric Group: Behavioral States
+      # Get Behavioral State
       p_to_p = sum(pause_df$Pause_Duration - 1)
       if (num_pause < 2) {w_to_w = 0
       } else{w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - 
@@ -293,10 +349,6 @@ one_fly_statistics <- function(input_file,
       }
       p_to_w = length(pause_df$Start_Index)
       w_to_p = length(pause_df$End_Index)
-      p_p2p <- c()
-      p_p2w <- c()
-      p_w2p <- c()
-      p_w2w <- c()
       if ((p_to_p) + (p_to_w) == 0) {
         p_p2p = NA
         p_p2w = NA
@@ -316,235 +368,162 @@ one_fly_statistics <- function(input_file,
         p_w2w = w_to_w / (w_to_p + w_to_w)
       }
       
-  ## Behavioral states for pauses not in the middle
+      # Behavioral states for pauses not at the end
+      
+      p_2_p_m = sum(mid_pause_df$Pause_Duration - 1)
+      if (num_mid_pause < 2){
+        w_2_w_m = 0
+      }else{
+        w_2_w_m = sum(mid_pause_df$Start_Index[2:length(mid_pause_df$Start_Index)] - 
+                        mid_pause_df$End_Index[1:(length(mid_pause_df)-1)] - 1)
+      }
+      p_2_w_m = length(mid_pause_df$Start_Index)
+      w_2_p_m = length(mid_pause_df$End_Index)
+      if (p_2_p_m + p_2_w_m == 0){
+        p_p2pm = NA
+        p_p2wm = NA
+      }else{
+        p_p2pm = p_2_p_m / (p_2_p_m + p_2_w_m)
+        p_p2wm = p_2_w_m / (p_2_p_m + p_2_w_m)
+      }
+      if (w_2_p_m + w_2_w_m == 0){
+        p_w2pm = NA
+        p_w2wm = NA
+      }else{
+        p_w2pm = w_2_p_m / (w_2_p_m + w_2_w_m)
+        p_w2wm = w_2_w_m / (w_2_p_m + w_2_w_m)
+      }
+      
+      ## Behavioral states for pauses not at the end & not bumping to the wall
+      nobump_df = subset(mid_pause_df, ((Start_Type == 1) & (End_Type == 2)) | ((Start_Type == 4) & (End_Type == 3)))
+      bump_df = subset(mid_pause_df, ((Start_Type == 1) &(End_Type == 3)) | ((Start_Type == 4) & (End_Type == 2)))
+      pause_end_df = subset(pause_df, (Start_Position < chamber_end_thres) | (Start_Position > 767 - chamber_end_thres))
+      
+      p_to_p_end = sum(pause_end_df$Pause_Duration - 1)
+      p_to_w_end = length(pause_end_df$Start_Index)
+      w_to_p_end = length(pause_end_df$End_Index)
+      p_to_p_middle_bump = sum(bump_df$Pause_Duration - 1)
+      p_to_w_middle_bump = length(bump_df$Start_Index)
+      w_to_p_middle_bump = length(bump_df$End_Index)
+      p_to_p_middle_nobump = sum(nobump_df$Pause_Duration - 1)
+      num_pause_middle_nobump = nrow(nobump_df)
+      num_pause_middle_bump = nrow(bump_df)
+      num_pause_end = nrow(pause_end_df)
+      
+      if (num_pause < 2) {
+        w_to_w_middle_nobump = 0
+      } else{
+        if (num_pause_middle_nobump < 2) {
+          w_to_w_middle_nobump = 0
+        } else{
+          w_to_w_middle_nobump = 
+            sum(nobump_df$Start_Index[2:dim(nobump_df)[1]] - nobump_df$End_Index[1:(dim(nobump_df)[1] - 1)] - 1) - 
+            sum(p_to_p_end, p_to_w_end, w_to_p_end, p_to_p_middle_bump, p_to_w_middle_bump, w_to_p_middle_bump)
+        }
+      }
+      
+      p_to_w_middle_nobump = length(nobump_df$Start_Index)
+      w_to_p_middle_nobump = length(nobump_df$End_Index)
+      
+      if (p_to_p_middle_nobump + p_to_w_middle_nobump == 0) {
+        p_p2p_middle = NA
+        p_p2w_middle = NA
+      } else{
+        p_p2p_middle = p_to_p_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
+        p_p2w_middle = p_to_w_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
+      }
+      
+      if (is.na(w_to_w_middle_nobump)) {w_to_w_middle_nobump = 0}
+      
+      if (w_to_p_middle_nobump + w_to_w_middle_nobump == 0) {
+        p_w2p_middle = NA
+        p_w2w_middle = NA
+      } else{
+        p_w2p_middle = w_to_p_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
+        p_w2w_middle = w_to_w_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
+      }
   
-  fly_pos_sum_middle = (is_pause_middle[2:(length(is_pause_middle) - 1)]) * 1 + (is_pause_middle[3:length(is_pause_middle)]) * 2 + (is_pause_middle[1:(length(is_pause_middle) - 2)]) * 4
+  #7th: Return output
+      ret = list(
+        num_pause,
+        num_mid_pause,
+        1 - frac_pause, #unit: percentage
+        1 - frac_pause_middle,
+        md_pause_dur, 
+        md_pause_middle_dur, 
+        max_pause,
+        max_pause_middle,
+        first_pause,
+        first_pause_middle,
+        avg_speed,
+        avg_speed_moving,
+        avg_speed_enter,
+        avg_speed_exit,
+        dist,
+        num_turn,
+        num_mid_turns,
+        frac_mid_turns,
+        B_pause,    
+        Burst_inter_event,
+        B_scrambled,
+        w_burstiness,
+        m_burstiness,
+        memory,
+        memory_inverted,
+        p_p2p,
+        p_p2pm,
+        p_p2p_middle,
+        p_p2w,
+        p_p2wm,
+        p_p2w_middle,
+        p_w2w,
+        p_w2wm,
+        p_w2w_middle,
+        p_w2p,
+        p_w2pm,
+        p_w2p_middle
+      )
   
-  ## Behavioral states for pauses not at the end & not bumping to the wall
-  pause_middle_nobump_df = subset(pause_df, (Start_Position >= 50) & (Start_Position <= 717) & (((Start_Type == 1) & (End_Type == 2)) | ((Start_Type == 4) & (End_Type == 3))))
-  pause_middle_bump_df = subset(pause_df,(Start_Position >= 50) & (Start_Position <= 717) & (((Start_Type == 1) &(End_Type == 3)) | ((Start_Type == 4) & (End_Type == 2))))
-  pause_end_df = subset(pause_df,
-                        (Start_Position < 50)
-                        | (Start_Position > 717))
-  
-  p_to_p_end = sum(pause_end_df$Pause_Duration - 1)
-  p_to_w_end = length(pause_end_df$Start_Index)
-  w_to_p_end = length(pause_end_df$End_Index)
-  p_to_p_middle_bump = sum(pause_middle_bump_df$Pause_Duration - 1)
-  p_to_w_middle_bump = length(pause_middle_bump_df$Start_Index)
-  w_to_p_middle_bump = length(pause_middle_bump_df$End_Index)
-  
-  p_to_p_middle_nobump = sum(pause_middle_nobump_df$Pause_Duration - 1)
-  
-  num_pause_middle_nobump = nrow(pause_middle_nobump_df)
-  num_pause_middle_bump = nrow(pause_middle_bump_df)
-  num_pause_end = nrow(pause_end_df)
-  
-  if (num_pause < 2) {
-    w_to_w_middle_nobump = 0
-  } else{
-    if (num_pause_middle_nobump < 2) {
-      w_to_w_middle_nobump = 0
-    } else{
-      w_to_w_middle_nobump = sum(pause_middle_nobump_df$Start_Index[2:length(pause_middle_nobump_df$Start_Index)] -
-                                   pause_middle_nobump_df$End_Index[1:(length(pause_middle_nobump_df$Start_Index) -
-                                                                         1)] - 1) - sum(
-                                                                           p_to_p_end,
-                                                                           p_to_w_end,
-                                                                           w_to_p_end,
-                                                                           p_to_p_middle_bump,
-                                                                           p_to_w_middle_bump,
-                                                                           w_to_p_middle_bump
-                                                                         )
-    }
-  }
-  
-  p_to_w_middle_nobump = length(pause_middle_nobump_df$Start_Index)
-  w_to_p_middle_nobump = length(pause_middle_nobump_df$End_Index)
-  
-  p_p2p_middle <- c()
-  p_p2w_middle <- c()
-  p_w2p_middle <- c()
-  p_w2w_middle <- c()
-  
-  if (p_to_p_middle_nobump + p_to_w_middle_nobump == 0) {
-    p_p2p_middle = NA
-    p_p2w_middle = NA
-  } else{
-    p_p2p_middle = p_to_p_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
-    p_p2w_middle = p_to_w_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
-  }
-  
-  if (is.na(w_to_w_middle_nobump)) {
-    w_to_w_middle_nobump = 0
-  }
-  
-  if (w_to_p_middle_nobump + w_to_w_middle_nobump == 0) {
-    p_w2p_middle = NA
-    p_w2w_middle = NA
-  } else{
-    p_w2p_middle = w_to_p_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
-    p_w2w_middle = w_to_w_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
-  }
-  
-  ## Burstiness of start of walking (event) -- Pause not at the end
-  
-  start_walking_middle = replace(fly_pos_sum_middle, fly_pos_sum_middle !=
-                                   4, 0)
-  start_walk_burst_middle = rle(start_walking_middle)$length[rle(start_walking_middle)$values ==
-                                                               0]
-  
-  if (length(start_walk_burst_middle) <= 3) {
-    Burst_start_walking_middle = 1
-  } else{
-    Burst_start_walking_middle = (sd((start_walk_burst_middle), na.rm = T) -
-                                    mean((start_walk_burst_middle), na.rm = T)) / (sd((start_walk_burst_middle), na.rm = T) +
-                                                                                     mean((start_walk_burst_middle), na.rm = T))
-  }
-  ## Burstiness of start of pause (event) -- Pause not at the end
-  start_pause_middle = replace(fly_pos_sum_middle, fly_pos_sum_middle != 3, 0)
-  start_pause_burst_middle = rle(start_pause_middle)$length[rle(start_pause_middle)$values ==
-                                                              0]
-  
-  if (length(start_pause_burst_middle) <= 3) {
-    Burst_start_pause_middle = 1
-  } else{
-    Burst_start_pause_middle = (sd((start_pause_burst_middle), na.rm = T) -
-                                  mean((start_pause_burst_middle), na.rm = T)) / (sd((start_pause_burst_middle), na.rm = T) +
-                                                                                    mean((start_pause_burst_middle), na.rm = T))
-  }
-  
-  ## Memory - pause as inter event and walking as event
-  memory <- 0
-  if (length(inter_event_time) < 2) {
-    memory = NA
-  } else{
-    m1 <-
-      mean(inter_event_time[1:(length(inter_event_time) - 1)]) #mean of inter-event time from 1 to n-1
-    m2 <-
-      mean(inter_event_time[2:(length(inter_event_time))]) #mean of inter-event time from 2 to n
-    std1 <- sd(inter_event_time[1:(length(inter_event_time) - 1)])
-    std2 <- sd(inter_event_time[2:(length(inter_event_time))])
-    
-    for (i in 1:(length(inter_event_time) - 1)) {
-      memory <-
-        memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /
-                    (std1 * std2))
-    }
-    memory <- (1 / (length(inter_event_time) - 1)) * memory
-  }
-  
-  ## #Inverted burstiness' memory
-  memory_inverted <- 0
-  if (length(inter_event_time_inverted) < 2) {
-    memory_inverted = NA
-  } else{
-    m3 <- mean(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
-    m4 <- mean(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
-    std3 <- sd(inter_event_time_inverted[1:(length(inter_event_time_inverted) - 1)])
-    std4 <- sd(inter_event_time_inverted[2:(length(inter_event_time_inverted))])
-    for (i in 1:(length(inter_event_time_inverted) - 1)) {
-      memory_inverted <- memory_inverted + 
-                        ((inter_event_time_inverted[i] - m3) * (inter_event_time_inverted[i + 1] - m4) / (std3 * std4))
-    }
-    memory_inverted <- (1 / (length(inter_event_time_inverted) - 1)) * memory_inverted
-  }
-  
-  ##  Middle-nobump pauses
-  num_pause = length(pause_middle_nobump_df$Start_Index)
-  frac_pause = sum((pause_middle_nobump_df$Pause_Duration), na.rm =
-                     TRUE) / middle_time
-  avg_pause_dur = mean((pause_middle_nobump_df$Pause_Duration), na.rm = TRUE) #unit: px/frame
-  avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
-  avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) >
-                                                          0)]), na.rm = TRUE)
-  if (length(fly_speed[which(abs(fly_speed) > 0)]) < 10) {
-    avg_fly_speed_not_in_pause = 0
-  }
-  if (max(abs(fly_speed)) == 0) {
-    avg_fly_speed_not_in_pause = NA
-  }
-  
-  avg_fly_speed_enter = mean(fly_speed_at_pause_start, na.rm = TRUE)
-  avg_fly_speed_exit = mean(fly_speed_at_pause_end, na.rm = TRUE)
-  
-  tot_moving_dist = sum(abs(fly_speed[1:set_time]), na.rm = TRUE)
-  
-
-  
-  ## Return output
-  ret = list(
-    num_pause,
-    1-frac_pause, #unit: percentage
-    avg_pause_dur / (framerate), # max(pause_end - pause_start) / framerate,
-    max(pause_middle_nobump_df$Pause_Duration) / framerate,
-    (avg_fly_speed * (48.7 - 1) / 768) / (1 / framerate),
-    (avg_fly_speed_not_in_pause * (48.7 - 1) / 768) / (1 / framerate),
-    (avg_fly_speed_enter * (48.7 - 1) / 768) / (1 / framerate),
-    (avg_fly_speed_exit * (48.7 - 1) / 768) / (1 / framerate),
-    (((tot_moving_dist) * (48.7 - 1) / 768) / experiment_time) *
-      framerate * 60,
-     num_turn,#NU
-     num_mid_turns,#NU
-      B_pause,
-    Burst_inter_event,#NU
-     B_scrambled,#NU
-     w_burstiness, #NU
-     m_burstiness, #NU
-     first_pause_middle,#NU
-     first_pause_duration_all, #NU
-    p_p2p_middle,
-    p_p2w_middle,
-    p_w2w_middle,
-    p_w2p_middle,
-    memory,#NU
-    memory_inverted,#NU
-    Burst_start_walking_middle,#NU
-    Burst_start_pause_middle,#NU
-    avg_pause_middle_dur,
-    1-frac_pause_middle,
-    max_pause_middle,
-    first_pause_middle,
-    max(fly_pos),
-    min(fly_pos)
-  )
-  
-  names(ret) = c(
-    "Number of Pause Starts",#1
-    "Percentage Time Active",#2
-    "Average Pause Duration",#3
-    "Max Pause Duration",#4
-    "Average Moving Speed ",#5
-    "Average Moving Speed (excluding pause)",#6
-    "Average Speed When Enter Pause",#7
-    "Average Speed When Exit Pause",#8
-    "Moving Distance Per Minute",#9
-    "Number of Turns",#10
-    "Number of Middle Turns",#11
-    "Fration of Middle Turns Out of Total Turns",#12
-    "Burstiness (Pause)",#13
-    "Burstiness (Inter Event Time)",#14
-    "Burstiness (Scrambled)",#15
-    "Burstiness (Walking bouts-thresholding)",#16
-    "Burstiness (Walking events-thresholding)",#17
-    "Beginning Pause Duration",#18
-    "First Pause Duration",#19
-    "Transition Probability (Pause not at the end): Pause to Pause", #20
-    "Transition Probability (Pause not at the end): Pause to Walking", #21
-    "Transition Probability (Pause not at the end): Walking to Walking", #22
-    "Transition Probability (Pause not at the end): Walking to Pause", #23
-    "Memory", #24
-    "Memory (inverted)", #25
-    "Burstiness of Start of Walking (Pause not at the end)", #26 *
-    "Burstiness of Start of Pause (Pause not at the end)", #27 *
-    "Average Pause Duration (Pause not at the End)",#28
-    "Percentage Time Active (Pause not at the End)",#29
-    "Max Pause Duration (Pause not at the End)", #30
-    "First Pause Duration (Pause not at the End)", #31
-    "Left most point", #32
-    "Right most point" #33
-  )
-  return(ret)
+      names(ret) = c(
+        "Number of Pause", #1
+        "Number of Middle Pause", #2
+        "Percentage Time Active", #3
+        "Percentage Time Active - Pause not at the End", #4
+        "Median Pause Duration",#5
+        "Median Middle Pause Duration", #6    
+        "Max Pause Duration", #7
+        "Max Middle Pause Duration", #8
+        "First Pause Duration", #9
+        "First Middle Pause Duration", #10
+        "Average Moving Speed", #11
+        "Average Moving Speed (excluding pause)", #12
+        "Average Speed When Enter Pause", #13
+        "Average Speed When Exit Pause",#14
+        "Moving Distance",#15
+        "Number of Turns",#16
+        "Number of Middle Turns",#17
+        "Fration of Middle Turns Out of Total Turns",#18
+        "Burstiness (Pause)",#19
+        "Burstiness (Inter Event Time)",#20
+        "Burstiness (Scrambled)",#21
+        "Burstiness (Walking bouts-thresholding)",#22
+        "Burstiness (Walking events-no thres)",#23
+        "Memory of Pause", #24
+        "Memory of Walking", #25
+        "Transition Probability (Pause not at the end): Pause to Pause", #26
+        "Transition Probability (Pause not at the end): Pause to Pause - middle", #27
+        "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #28
+        "Transition Probability (Pause not at the end): Pause to Walking", #29
+        "Transition Probability (Pause not at the end): Pause to Walking - middle", #30
+        "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #31
+        "Transition Probability (Pause not at the end): Walking to Walking", #32
+        "Transition Probability (Pause not at the end): Walking to Walking - middle", #33
+        "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #34
+        "Transition Probability (Pause not at the end): Walking to Pause", #35
+        "Transition Probability (Pause not at the end): Walking to Pause - middle", #36
+        "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #37
+      )
+      return(ret)
 }
 
 find_intersect_points <- function(x1, x2){
