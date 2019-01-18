@@ -289,7 +289,7 @@ one_fly_statistics <- function(input_file,
       }
 
       # inter event is walking (with thresholding)
-      if (num_pause <= 3) {
+      if (num_mid_pause <= 3) {
         burstiness_pause_inverted = 1
       } else{
         walk_end <- mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
@@ -375,7 +375,7 @@ one_fly_statistics <- function(input_file,
         w_2_w_m = 0
       }else{
         w_2_w_m = sum(mid_pause_df$Start_Index[2:length(mid_pause_df$Start_Index)] - 
-                        mid_pause_df$End_Index[1:(length(mid_pause_df)-1)] - 1)
+                        mid_pause_df$End_Index[1:(length(mid_pause_df$End_Index)-1)] - 1)
       }
       p_2_w_m = length(mid_pause_df$Start_Index)
       w_2_p_m = length(mid_pause_df$End_Index)
@@ -469,7 +469,7 @@ one_fly_statistics <- function(input_file,
         w_burstiness,
         m_burstiness,
         memory,
-        memory_inverted,
+        memory_w,
         p_p2p,
         p_p2pm,
         p_p2p_middle,
