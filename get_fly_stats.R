@@ -88,7 +88,8 @@ all_ofs_WT = list()
 for(session in sessions){
   all_ofs_WT = append(all_ofs_WT,list(c()))
 }
-fly.info = read.csv("data/fly_info_CS_preprocessed.csv",header=T,stringsAsFactors=F)
+
+fly.info = fly.info.end[fly.info.end$Genotype %in% c("WT", "CS"),]
 
 for(ind in 1:nrow(fly.info)){
 # for(ind in c(380:381)){
@@ -109,12 +110,17 @@ for(ind in 1:nrow(fly.info)){
     all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(ofs))
   }
 }
+
+
+
 ## Mutants
 all_ofs_mutants = list()
 for(session in sessions){
   all_ofs_mutants = append(all_ofs_mutants,list(c()))
 }
-fly.info.mutant = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
+
+fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
+
 for(ind in 1:nrow(fly.info.mutant)){
   query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
   for(ind.session in 1:length(query.sessions)){
