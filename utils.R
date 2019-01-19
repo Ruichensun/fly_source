@@ -676,7 +676,7 @@ data_filter <- function(filter, fly.info){
         ind = fly.info$Genotype == genotype
       }
       pause <- fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.5
+      ind.filter =  pause <= 0.7
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }

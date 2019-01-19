@@ -128,13 +128,13 @@ for (genotype in unique(fly.info$Genotype)) {
 
 fly.info.include = fly.info[ind.include,]
 
-ind.filtered = data_filter(1, fly.info.include) 
+ind.filtered = data_filter(2, fly.info.include) 
 fly.info.end = fly.info.include[ind.filtered, ]
 # fly.info.end = fly.info.include
 
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
 
-checking_fly_numbers(fly.info.include, 1, filename="Mutants_headcount.csv")
+checking_fly_numbers(fly.info.include, 2, filename="Mutants_headcount.csv")
 
 ## Fit linear model for each metric
 for (ind in 1:length(metrices)) {
