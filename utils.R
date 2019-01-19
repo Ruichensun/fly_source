@@ -39,7 +39,7 @@ get_fly_initial_pause <- function(x, framerate){
   experiment_time = length(fly_pos) / framerate
   fly_speed = diff(c(x[data_start - 1], fly_pos))
   pause = sum(fly_speed == 0) / framerate
-  return( pause / experiment_time)
+  return(pause / experiment_time)
 }
 
 one_fly_statistics <- function(input_file,
@@ -676,7 +676,7 @@ data_filter <- function(filter, fly.info){
         ind = fly.info$Genotype == genotype
       }
       pause <- fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.6321 
+      ind.filter =  pause <= 0.5
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
@@ -1184,7 +1184,7 @@ test_initial_condition = function(metric.ind, query.list){
 after_training <- function(metric.ind, query.genotype, query.fly, query.experimenter){
   
   fly_genotype = query.genotype
-  if (query.genotype == c("CS")){
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
     query.genotype = c("WT", "CS")
   }
   
@@ -1271,7 +1271,6 @@ after_training <- function(metric.ind, query.genotype, query.fly, query.experime
 
 test_after_training = function(metric.ind, query.list){
   input.y.df = data.frame()
-  
   query.fly = get_query_info(query.list[1])[[1]]
   query.experimenter = get_query_info(query.list[1])[[2]]
   input.y.df.pre = after_training(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
@@ -1282,17 +1281,13 @@ test_after_training = function(metric.ind, query.list){
 }
 
 get_query_info<-function(query.genotype){
-  if(query.genotype=="CS"){
+  if(query.genotype %in% c("CS", "WT")){
     query.fly = fly.info.end[((fly.info.end$Genotype == "WT") |
-                                    (fly.info.end$Genotype == "CS")) &
-                                   (fly.info.end$experimenter!="SW"), ]$Fly
+                                    (fly.info.end$Genotype == "CS")), ]$Fly
     query.experimenter = fly.info.end[((fly.info.end$Genotype == "WT") |
-                                             (fly.info.end$Genotype == "CS")) &
-                                            (fly.info.end$experimenter!="SW"), ]$Experimenter
+                                             (fly.info.end$Genotype == "CS")), ]$Experimenter
     write.table(
-      fly.info.end[((fly.info.end$Genotype == "WT") |
-                          (fly.info.end$Genotype == "CS")) &
-                         (fly.info.end$experimenter!="SW"), ],
+      fly.info.end[((fly.info.end$Genotype == "WT") |(fly.info.end$Genotype == "CS")), ],
       "fly_info_include_WT.csv",
       col.names = T,
       row.names = F,
@@ -1301,11 +1296,9 @@ get_query_info<-function(query.genotype){
     )
   }else if(query.genotype=="SUN1"){
     query.genotype <- c("SUN1")
-    query.fly = fly.info.end[((fly.info.end$Genotype == "SUN1")) &
-                                   (fly.info.end$Experimenter!="SW"), ]$Fly
+    query.fly = fly.info.end[(fly.info.end$Genotype == "SUN1"), ]$Fly
     
-    query.experimenter = fly.info.end[((fly.info.end$Genotype == "SUN1")) &
-                                            (fly.info.end$Experimenter!="SW"), ]$experimenter
+    query.experimenter = fly.info.end[(fly.info.end$Genotype == "SUN1"), ]$experimenter
     write.table(
       fly.info.end[((fly.info.end$Genotype == "SUN1")) &
                          (fly.info.end$Experimenter!="SW"), ],
@@ -1337,8 +1330,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
   if(query.genotype[1] == "WT"){
     write.table(
       fly.info.end[((fly.info.end$Genotype == "WT") |
-                          (fly.info.end$Genotype == "CS")) &
-                         (fly.info.end$Experimenter!="SW"), ],
+                          (fly.info.end$Genotype == "CS")), ],
       "fly_info_include_WT.csv",
       col.names = T,
       row.names = F,
@@ -1407,165 +1399,48 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     y.1 = y
     ## special cases
     y_text = c()
-    if (metric.ind == 1) {
-      yrange = c(0, 600)
+    if (metric.ind %in% c(1, 2)) {
+      yrange = c(0, 200)
       y_text = 610
     }
     
-    if (metric.ind == 2) {
+    if (metric.ind %in% c(3, 4)) {
       yrange = c(0, 1)
       y_text = 1.1
     }
     
-    if (metric.ind == 3) {
-      yrange = c(0, 100)
-      y_text = 100
-    }
-    
-    if (metric.ind == 4) {
+    if (metric.ind %in% c(5:10)) {
       yrange = c(0, 600)
-      y_text = 600
+      y_text = 610
     }
-    
-    if (metric.ind == 5) {
-      yrange = c(0, 30)
-      y_text = 30
-    }
-    
-    if (metric.ind == 6) {
-      yrange = c(0, 30)
-      y_text = 30
-    }
-    
-    if (metric.ind == 7) {
+ 
+    if (metric.ind %in% c(11:14)) {
       yrange = c(0, 10)
-      y_text = 8.5
+      y_text = 10.5
     }
-    
-    if (metric.ind == 8) {
-      yrange = c(0, 10)
-      y_text = 8.3
-    }
-    
-    
-    if (metric.ind == 9) {
-      yrange = c(0, 600)
-      y_text = 600
-    }
-    
-    if (metric.ind == 10) {
-      yrange = c(0, 200)
-      y_text = 160
-    }
-    
-    if (metric.ind == 11) {
-      yrange = c(0, 200)
-      y_text = 110
-    }
-    
-    if (metric.ind == 12) {
-      yrange = c(0, 1)
-      y_text = 1
-    }
-    
-    if (metric.ind == 13) {
-      yrange = c(-1, 1)
-      y_text = 0.7
-    }
-    
-    if (metric.ind == 14) {
-      yrange = c(-1, 1)
-      y_text = 0.85
-    }
-    
+ 
     if (metric.ind == 15) {
-      yrange = c(-1, 1)
-      y_text = 0.12
+      yrange = c(0, 60000)
+      y_text = 60000
     }
     
-    if (metric.ind == 16) {
-      yrange = c(-1, 1)
-      y_text = 0.42
-    }
-    
-    if (metric.ind == 17) {
-      yrange = c(-1, 1)
-      y_text = 0.42
-    }
-    
-    if (metric.ind == 18) {
-      yrange = c(0, 600)
-      y_text = 600
-    }
-    
-    
-    if (metric.ind == 19) {
-      yrange = c(0, 600)
-      y_text = 600
-    }
-    
-    if (metric.ind == 20) {
-      yrange = c(0.5, 1)
-      y_text = 1.01
-    }
-    
-    
-    if (metric.ind == 21) {
-      yrange = c(0, 0.5)
-      y_text = 0.142
-    }
-    
-    if (metric.ind == 22) {
-      yrange = c(0, 1)
-      y_text = 1
-    }
-    
-    if (metric.ind == 23) {
-      yrange = c(0, 0.5)
-      y_text = 1
-    }
-    
-    if (metric.ind == 24) {
-      yrange = c(-0.6, 0.6)
-      y_text = 0.6
-    }
-    
-    if (metric.ind == 25) {
-      yrange = c(-0.6, 0.6)
-      y_text = 0.6
-    }
-    
-    if (metric.ind == 26) {
-      yrange = c(-0.4, 0.6)
-      y_text = 0.6
-    }
-    
-    if (metric.ind == 27) {
-      yrange = c(-0.4, 0.6)
-      y_text = 0.6
-    }
-    
-    if (metric.ind == 28) {
+    if (metric.ind %in% c(16, 17)) {
       yrange = c(0, 100)
       y_text = 100
     }
-    
-    
-    if (metric.ind == 29) {
+
+    if (metric.ind == 18) {
       yrange = c(0, 1)
       y_text = 1
     }
-    
-    if (metric.ind == 30) {
-      yrange = c(0, 600)
-      y_text = 600
+    if (metric.ind %in% c(19:25)) {
+      yrange = c(-1, 1)
+      y_text = 1.1
     }
-    
-    if (metric.ind == 31) {
-      yrange = c(0, 2050)
-      y_text = 250
+    if (metric.ind %in% c(26:37)) {
+      yrange = c(0, 1)
+      y_text = 1.1
     }
-  
     input.y = y.1[1:9]
     yy.1T = rep("1stE1_1", length(input.y[[1]]))
     yy.1R = rep("1stE1_2", length(input.y[[2]]))

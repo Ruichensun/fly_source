@@ -91,27 +91,24 @@ for(session in sessions){
 fly.info = read.csv("data/fly_info_CS_preprocessed.csv",header=T,stringsAsFactors=F)
 
 for(ind in 1:nrow(fly.info)){
+# for(ind in c(380:381)){
+  print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind], "_"))
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/",
-                                           fly.info$Experimenter[ind],
-                                           "/CS/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind],
-                                              "_",query.sessions[ind.session],
-                                              "_WT",
-                                              ".csv"),
-                             full.names=T
-    )
+    input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
+                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
+                             full.names=T)
     if(length(input.file) == 0){
       all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(NA))
       next
-    }   
+    }
     framerate = fly.info$Framerate[ind]        
     ofs = one_fly_statistics(input.file,framerate=framerate)
-    
+    basic = list(fly.info$Experimenter[ind], fly.info$Fly[ind], "WT")
+    names(basic) = c("Experimenter", "FlyNumber", "Genotype")
+    ofs = append(basic, ofs)
     all_ofs_WT[[sessions[ind.session]]] = append(all_ofs_WT[[sessions[ind.session]]],list(ofs))
   }
 }
-
 ## Mutants
 all_ofs_mutants = list()
 for(session in sessions){
@@ -134,7 +131,9 @@ for(ind in 1:nrow(fly.info.mutant)){
     }   
     framerate = fly.info.mutant$Framerate[ind]        
     ofs = one_fly_statistics(input.file,framerate=framerate)
-    
+    basic = list(fly.info$Experimenter[ind], fly.info$Fly[ind], fly.info$Genotype[ind])
+    names(basic) = c("Experimenter", "FlyNumber", "Genotype")
+    ofs = append(basic, ofs)
     all_ofs_mutants[[sessions[ind.session]]] = append(all_ofs_mutants[[sessions[ind.session]]],list(ofs))
   }
 }

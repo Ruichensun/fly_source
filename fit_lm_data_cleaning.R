@@ -42,12 +42,21 @@ metrices = c(
 )
 
 sessions <- c(
+  
   "E1",
   "E1T1E1",
   "E1T1E1T1E1",
   "E1T1E1T1E1T1E1",
   "E1T1E1T1E1T1E1T1E1",
-
+  
+  "E1T1E1T1E1T2E1",
+  "E1T1E1T1E1T2E1T2E1",
+  
+  "E1T2E1",
+  "E1T2E1T2E1",
+  "E1T2E1T2E1T1E1",
+  "E1T2E1T2E1T1E1T1E1",
+  
   "E1R1E1",
   "E1R1E1R1E1",
   "E1R1E1R1E1R1E1",
@@ -56,7 +65,15 @@ sessions <- c(
   "E1N1E1",
   "E1N1E1N1E1",
   "E1N1E1N1E1N1E1",
-  "E1N1E1N1E1N1E1N1E1"
+  "E1N1E1N1E1N1E1N1E1",
+  
+  "E1T1E1R1E1",
+  "E1T1E1R1E1R1E1",
+  "E1T1E1T1E1R1E1R1E1",
+  
+  "E1T1E1N1E1",
+  "E1T1E1N1E1N1E1",
+  "E1T1E1T1E1N1E1N1E1"
 )
 sessions <- unique(sessions)
 
@@ -128,18 +145,18 @@ for (ind in 1:length(metrices)) {
                      })
     array.session = rep(session, length(metric))
     for (i in 1:length(array.session)) {
-      array.session[i] = gsub("X", fly.info.end$Category[i], array.session[i])
+      array.session[i] = gsub("X", fly.info$Category[i], array.session[i])
     }
     metric.df <- rbind(metric.df, cbind(metric,
-                                        fly.info.include$Fly,
-                                        fly.info.include$Category,
-                                        fly.info.include$Gender,
-                                        fly.info.include$Genotype,
-                                        fly.info.include$Experimenter,
-                                        fly.info.include$Age,
-                                        fly.info.include$Setup,
+                                        fly.info$Fly,
+                                        fly.info$Category,
+                                        fly.info$Gender,
+                                        fly.info$Genotype,
+                                        fly.info$Experimenter,
+                                        fly.info$Age,
+                                        fly.info$Setup,
                                         array.session
-                                       )[ind.filtered, ]
+                                       )[ind.include, ]
                       )
   }
   colnames(metric.df) = c(
