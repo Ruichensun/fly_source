@@ -68,7 +68,7 @@ one_fly_statistics <- function(input_file,
       Experimenter = file_path[2]
       file_name = unlist(strsplit(file_path[4], "_"))
       file_session = file_name[3]
-      genotype = unlist(strsplit(file_name[4],"."))[1]
+      genotype = unlist(strsplit(file_name[4],".csv"))[1]
       fly_num = as.integer(unlist((strsplit(file_name[2], "Fly")))[2])
   
   # Load data

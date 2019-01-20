@@ -54,7 +54,7 @@ for(ind in 1:nrow(fly.info)){
     ofs = one_fly_statistics(input.file, framerate=framerate)
     Type = fly.info$Category[ind]
     ofs = cbind(Type, ofs)
-    all_ofs_WT = rbind(all_ofs_WT, ofs)
+    all_ofs_WT = rbind(all_ofs_WT, ofs,  stringsAsfactors = F)
   }
 }
 
@@ -65,7 +65,7 @@ all_ofs_mutants = data.frame()
 fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
 
 for(ind in 1:nrow(fly.info.mutant)){
-  print(paste0("data/", fly.info.mutant$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info.mutant$Fly[ind]))
+  print(paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/", "ProcessedData_Fly",fly.info.mutant$Fly[ind]))
   query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
   for(ind.session in 1:length(query.sessions)){
     input.file <- list.files(path = paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/"),                             
@@ -80,7 +80,7 @@ for(ind in 1:nrow(fly.info.mutant)){
     ofs = one_fly_statistics(input.file, framerate=framerate)
     Type = fly.info.mutant$Category[ind]
     ofs = cbind(Type, ofs)
-    all_ofs_mutants = rbind(all_ofs_mutants,(ofs))
+    all_ofs_mutants = rbind(all_ofs_mutants, ofs, stringsAsfactors = F)
   }
 }
 
