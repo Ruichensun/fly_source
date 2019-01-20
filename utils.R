@@ -281,7 +281,7 @@ one_fly_statistics <- function(input_file,
       num_mid_turns = length(mid_turns)
       
       if (num_turns == 0){
-        frac_pause_middle = 0
+        frac_mid_turns = 0
       } else{
         frac_mid_turns = num_mid_turns / num_turns
       }
@@ -512,7 +512,7 @@ one_fly_statistics <- function(input_file,
         p_w2p,
         p_w2pm,
         p_w2p_middle
-      ))
+      ), stringsAsFactors=FALSE)
   
       colnames(ret) = c(
         "Experimenter", #2

@@ -49,12 +49,15 @@ for(ind in 1:nrow(fly.info)){
     input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
                              full.names=T)
-    if(length(input.file) == 0){next}
-    framerate = fly.info$Framerate[ind]        
-    ofs = one_fly_statistics(input.file, framerate=framerate)
-    Type = fly.info$Category[ind]
-    ofs = cbind(Type, ofs)
-    all_ofs_WT = rbind(all_ofs_WT, ofs,  stringsAsfactors = F)
+    if(length(input.file) == 0){next
+      }else{
+          framerate = fly.info$Framerate[ind]        
+          ofs = one_fly_statistics(input.file, framerate=framerate)
+          Type = fly.info$Category[ind]
+          ofs = cbind(Type, ofs)
+          all_ofs_WT = rbind(all_ofs_WT, ofs)
+    }
+    
   }
 }
 
@@ -75,15 +78,19 @@ for(ind in 1:nrow(fly.info.mutant)){
                                               ".csv"),
                              full.names=T
     )
-    if(length(input.file) == 0){next}   
-    framerate = fly.info.mutant$Framerate[ind]        
-    ofs = one_fly_statistics(input.file, framerate=framerate)
-    Type = fly.info.mutant$Category[ind]
-    ofs = cbind(Type, ofs)
-    all_ofs_mutants = rbind(all_ofs_mutants, ofs, stringsAsfactors = F)
+    if(length(input.file) == 0){next
+      }else{   
+        framerate = fly.info.mutant$Framerate[ind]        
+        ofs = one_fly_statistics(input.file, framerate=framerate)
+        Type = fly.info.mutant$Category[ind]
+        ofs = cbind(Type, ofs)
+        all_ofs_mutants = rbind(all_ofs_mutants, ofs)
+      }
   }
 }
 
+write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 
 #CS_constant
 # all_ofs_constant = list()
