@@ -61,10 +61,20 @@ one_fly_statistics <- function(input_file,
   #  This transient displacement translates to 0.1622(mm)/63.5um = 2.55px, or 0.1948mm/63.5um = 3.06px
   #  Therefore, the fly typically moves 2-3px per 0.02sec.
   #  Therefore, I set the maximum speed threshold in 0.02s duration to be 30px (10 times the usual speed)
-  ## chamber_end_thres - How close (in ) a position to one end of the chamber to be treated as part of the end
+  #  chamber_end_thres - How close (in ) a position to one end of the chamber to be treated as part of the end
+  
+  # Get File Info
+      file_path = unlist(strsplit(input_file, "/"))
+      Experimenter = file_path[2]
+      file_name = unlist(strsplit(file_path[4], "_"))
+      file_session = file_name[3]
+      genotype = unlist(strsplit(file_name[4],"."))[1]
+      fly_num = as.integer(unlist((strsplit(file_name[2], "Fly")))[2])
   
   # Load data
+      
   
+    
       tryCatch({
         x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
       }, error = function(e) {
@@ -72,7 +82,7 @@ one_fly_statistics <- function(input_file,
       })
       if (nrow(x) < 10) {stop(paste0("Input file is empty!:\n", "  Input files is: ", input_file, "\n\n"))}
       x = as.numeric(x[[1]])
-      data_start = 21
+      data_start = 31
       fly_pos = x[data_start:min(600 * framerate, length(x))]
       set_time = length(fly_pos)
       experiment_time = length(fly_pos)
@@ -100,6 +110,11 @@ one_fly_statistics <- function(input_file,
       starts = c()
       ends = c()
       is_start = 1
+      if (fly_speed[1] == 0){
+        starts = c(starts, 1)
+        is_start = 0
+      }
+        
       for (i in 1:length(label_for_pause)) {
         if (label_for_pause[i] != 0) {
           if (is_start == 1) {
@@ -119,12 +134,10 @@ one_fly_statistics <- function(input_file,
         starts = 1
       }
       pause_df = data.frame()
-      end_type = label_for_pause[ends]
-      start_type = label_for_pause[starts]
-      start_position = fly_pos[starts - 1]
-      end_position = fly_pos[ends - 2]
-      
+
       if (length(ends) < 1) {
+        start_type = label_for_pause[starts]
+        start_position = fly_pos[starts - 1]
         ends = length(fly_pos)
         end_position = fly_pos[ends]
         end_type = label_for_pause[ends]
@@ -138,8 +151,21 @@ one_fly_statistics <- function(input_file,
           ends - starts[1:length(ends)]
         )
       } else{
+        if (length(starts) - length(ends) == 1){
+          ends = c(ends, experiment_time)
+        }
+        end_type = label_for_pause[ends]
+        start_type = label_for_pause[starts]
+        if (starts[1] == 1){
+          start_position = fly_pos[starts]
+          startindex = starts[1:length(ends)]
+        }else{
+          start_position = fly_pos[starts - 1]
+          startindex = starts[1:length(ends)] - 1
+        }
+        end_position = fly_pos[ends]
         pause_df = data.frame(
-          starts[1:length(ends)] - 1,
+          startindex,
           start_position[1:length(ends)],
           start_type[1:length(ends)],
           ends - 1,
@@ -251,13 +277,13 @@ one_fly_statistics <- function(input_file,
       position_mid_turns = position_turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
       
       # Step 3 - get turn numbers
-      num_turn = length(turns)
+      num_turns = length(turns)
       num_mid_turns = length(mid_turns)
       
       if (num_turns == 0){
         frac_pause_middle = 0
       } else{
-        frac_mid_turns = num_mid_turns / num_turn
+        frac_mid_turns = num_mid_turns / num_turns
       }
 
   # 4th Metric Group: Burstiness
@@ -290,7 +316,7 @@ one_fly_statistics <- function(input_file,
 
       # inter event is walking (with thresholding)
       if (num_mid_pause <= 3) {
-        burstiness_pause_inverted = 1
+        w_burstiness = 1
       } else{
         walk_end <- mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
         walk_start <- mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
@@ -442,9 +468,13 @@ one_fly_statistics <- function(input_file,
         p_w2p_middle = w_to_p_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
         p_w2w_middle = w_to_w_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
       }
-  
+
   #7th: Return output
-      ret = list(
+      ret = data.frame(cbind(
+        Experimenter,
+        genotype,
+        fly_num,
+        file_session,
         num_pause,
         num_mid_pause,
         1 - frac_pause, #unit: percentage
@@ -460,7 +490,7 @@ one_fly_statistics <- function(input_file,
         avg_speed_enter,
         avg_speed_exit,
         dist,
-        num_turn,
+        num_turns,
         num_mid_turns,
         frac_mid_turns,
         B_pause,    
@@ -482,46 +512,50 @@ one_fly_statistics <- function(input_file,
         p_w2p,
         p_w2pm,
         p_w2p_middle
-      )
+      ))
   
-      names(ret) = c(
-        "Number of Pause", #1
-        "Number of Middle Pause", #2
-        "Percentage Time Active", #3
-        "Percentage Time Active - Pause not at the End", #4
-        "Median Pause Duration",#5
-        "Median Middle Pause Duration", #6    
-        "Max Pause Duration", #7
-        "Max Middle Pause Duration", #8
-        "First Pause Duration", #9
-        "First Middle Pause Duration", #10
-        "Average Moving Speed", #11
-        "Average Moving Speed (excluding pause)", #12
-        "Average Speed When Enter Pause", #13
-        "Average Speed When Exit Pause",#14
-        "Moving Distance",#15
-        "Number of Turns",#16
-        "Number of Middle Turns",#17
-        "Fration of Middle Turns Out of Total Turns",#18
-        "Burstiness (Pause)",#19
-        "Burstiness (Inter Event Time)",#20
-        "Burstiness (Scrambled)",#21
-        "Burstiness (Walking bouts-thresholding)",#22
-        "Burstiness (Walking events-no thres)",#23
-        "Memory of Pause", #24
-        "Memory of Walking", #25
-        "Transition Probability (Pause not at the end): Pause to Pause", #26
-        "Transition Probability (Pause not at the end): Pause to Pause - middle", #27
-        "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #28
-        "Transition Probability (Pause not at the end): Pause to Walking", #29
-        "Transition Probability (Pause not at the end): Pause to Walking - middle", #30
-        "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #31
-        "Transition Probability (Pause not at the end): Walking to Walking", #32
-        "Transition Probability (Pause not at the end): Walking to Walking - middle", #33
-        "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #34
-        "Transition Probability (Pause not at the end): Walking to Pause", #35
-        "Transition Probability (Pause not at the end): Walking to Pause - middle", #36
-        "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #37
+      colnames(ret) = c(
+        "Experimenter", #2
+        "Genotype", #3
+        "Fly Number", #4
+        "Session", #5
+        "Number of Pause", #6
+        "Number of Middle Pause", #7
+        "Percentage Time Active", #8
+        "Percentage Time Active - Pause not at the End", #9
+        "Median Pause Duration",#10
+        "Median Middle Pause Duration", #11    
+        "Max Pause Duration", #12
+        "Max Middle Pause Duration", #13
+        "First Pause Duration", #14
+        "First Middle Pause Duration", #15
+        "Average Moving Speed", #16
+        "Average Moving Speed (excluding pause)", #17
+        "Average Speed When Enter Pause", #18
+        "Average Speed When Exit Pause",#19
+        "Moving Distance",#20
+        "Number of Turns",#21
+        "Number of Middle Turns",#22
+        "Fration of Middle Turns Out of Total Turns",#23
+        "Burstiness (Pause)",#24
+        "Burstiness (Inter Event Time)",#25
+        "Burstiness (Scrambled)",#26
+        "Burstiness (Walking bouts-thresholding)",#27
+        "Burstiness (Walking events-no thres)",#28
+        "Memory of Pause", #29
+        "Memory of Walking", #30
+        "Transition Probability (Pause not at the end): Pause to Pause", #31
+        "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+        "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+        "Transition Probability (Pause not at the end): Pause to Walking", #34
+        "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
+        "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+        "Transition Probability (Pause not at the end): Walking to Walking", #37
+        "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
+        "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+        "Transition Probability (Pause not at the end): Walking to Pause", #40
+        "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
+        "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
       )
       return(ret)
 }
