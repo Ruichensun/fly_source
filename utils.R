@@ -599,6 +599,297 @@ shuffle_is_pause <- function(is_pause) {
   ## unfold
 }
 
+data_filter <- function(filter, fly.info){
+  # filter 1: filtering flies by walking speed
+  if (filter == 1) {
+    ind.include = NULL
+    for (genotype in unique(fly.info$Genotype)) {
+      if (genotype == "CS") {
+        next
+      }
+      else if (genotype == "WT") {
+        ind = fly.info$Genotype %in% c("WT", "CS")
+      }else{
+        ind = fly.info$Genotype == genotype 
+      }
+      fms <- fly.info$Fly.moving.speed[ind]
+      rank_fms = rank(fms)
+      ind.filter =  rank_fms <= length(fms) * 1.0 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
+      ind.include = c(ind.include, which(ind)[ind.filter])
+    }
+  }
+  
+  # filter 2: filtering flies by initial pause
+  if (filter == 2) {
+    ind.include = NULL
+    for (genotype in unique(fly.info$Genotype)) {
+      if (genotype == "CS") {
+        next
+      }
+      else if (genotype == "WT") {
+        ind = fly.info$Genotype %in% c("WT", "CS")
+      }else{
+        ind = fly.info$Genotype == genotype
+      }
+      pause <- fly.info$Fly.pause[ind]
+      ind.filter =  pause <= 0.7
+      ind.include = c(ind.include, which(ind)[ind.filter])
+    }
+  }
+  
+  # filter 3: filtering based on pass_fly_QC code
+  if (filter == 3) {
+    ind.include = NULL
+    session = "E1"
+    for (ind in 1:nrow(fly.info)) {
+      if (fly.info$Genotype[ind] == "WT") {
+        input.file <- paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
+                             fly.info$Fly[ind], "_",session,"_WT",".csv")
+      } else{input.file <- paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
+                                  fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
+      }
+      framerate =	fly.info$Framerate[ind]
+      if (pass_fly_QC(input.file, framerate)) {
+        ind.include = c(ind.include, ind)
+      }
+    }
+  }
+  return(ind.include)
+}
+
+checking_fly_numbers <- function(fly.info, filter, filename){
+  ind.include = data_filter(filter, fly.info)
+  fly.info.include = fly.info[ind.include, ]
+  type_of_mutants = length(unique(fly.info.include$Genotype))
+  names_of_mutants = unique(fly.info.include$Genotype)
+  n = c()
+  n_QCed = c()
+  for (i in 1:type_of_mutants){
+    n[i] = dim(fly.info[fly.info$Genotype==names_of_mutants[i],])[1]
+    n_QCed[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
+  }
+  mutant_info = data.frame(names_of_mutants,n, n_QCed)
+  colnames(mutant_info) = c("Genotype", "Number of Flies", "Number of Flies QCed")
+  write.csv(mutant_info, file = filename , row.names = FALSE)
+}
+
+plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, fly.info.end){
+  metrices =  c(
+    "Type", #1
+    "Experimenter", #2
+    "Genotype", #3
+    "Fly Number", #4
+    "Session", #5
+    "Number of Pause", #6
+    "Number of Middle Pause", #7
+    "Percentage Time Active", #8
+    "Percentage Time Active - Pause not at the End", #9
+    "Median Pause Duration",#10
+    "Median Middle Pause Duration", #11    
+    "Max Pause Duration", #12
+    "Max Middle Pause Duration", #13
+    "First Pause Duration", #14
+    "First Middle Pause Duration", #15
+    "Average Moving Speed", #16
+    "Average Moving Speed (excluding pause)", #17
+    "Average Speed When Enter Pause", #18
+    "Average Speed When Exit Pause",#19
+    "Moving Distance",#20
+    "Number of Turns",#21
+    "Number of Middle Turns",#22
+    "Fration of Middle Turns Out of Total Turns",#23
+    "Burstiness (Pause)",#24
+    "Burstiness (Inter Event Time)",#25
+    "Burstiness (Scrambled)",#26
+    "Burstiness (Walking bouts-thresholding)",#27
+    "Burstiness (Walking events-no thres)",#28
+    "Memory of Pause", #29
+    "Memory of Walking", #30
+    "Transition Probability (Pause not at the end): Pause to Pause", #31
+    "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+    "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+    "Transition Probability (Pause not at the end): Pause to Walking", #34
+    "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
+    "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+    "Transition Probability (Pause not at the end): Walking to Walking", #37
+    "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
+    "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+    "Transition Probability (Pause not at the end): Walking to Pause", #40
+    "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
+    "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+  )
+  
+  if(query.genotype[1] == "WT"){
+    write.table(
+      fly.info.end[((fly.info.end$Genotype == "WT") |
+                      (fly.info.end$Genotype == "CS")), ],
+      "fly_info_include_WT.csv",
+      col.names = T,
+      row.names = F,
+      quote = F,
+      sep = ","
+    )
+    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
+  }else{
+    write.table(
+      fly.info.end[((fly.info.end$Genotype == query.genotype[1])),],
+      paste0("fly_info_include_", query.genotype[1], ".csv"),
+      col.names = T,
+      row.names = F,
+      quote = F,
+      sep = ","
+    )
+    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
+    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+  }
+  
+  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
+      onefile = T, width = 8
+  )
+  
+  for (i in 6:length(metrices)) {
+    metric = data.frame(
+      factor = c(rep("E1-T", length(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i])),
+                 rep("E1-R", length(metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i])),
+                 rep("E1-N", length(metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i])),
+                 rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
+                 rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
+                 rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
+                 rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
+      value = as.numeric(c(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i], 
+                           metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i],
+                           metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i],
+                           metric.df[metric.df$Session=="E1T1E1", ][, i],
+                           metric.df[metric.df$Session=="E1R1E1", ][, i],
+                           metric.df[metric.df$Session=="E1N1E1", ][, i],
+                           metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
+                           metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
+                           metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
+    )
+    colnames(metric) = c("Session", "Value")
+    metric$Session = factor(metric$Session, levels=c("E1-T", "E1-R", "E1-N",
+                                                     "E1T1E1", "E1R1E1", "E1N1E1",
+                                                     "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"))
+    num = as.data.frame(table(metric[!is.na(metric$Value),]$Session))$Freq
+    
+    ## special cases
+    y_text = c()
+    if (i %in% c(6, 7)) {
+      yrange = c(0, 200)
+      y_text = 200
+    }
+    
+    if (i %in% c(8, 9)) {
+      yrange = c(0, 1)
+      y_text = 1
+    }
+    
+    if (i %in% c(10:11)) {
+      yrange = c(0, 50)
+      y_text = 52
+    }
+    
+    if (i %in% c(12:15)) {
+      yrange = c(0, 600)
+      y_text = 610
+    }
+    
+    if (i %in% c(16:19)) {
+      yrange = c(0, 50)
+      y_text = 50.5
+    }
+    
+    if (i == 20) {
+      yrange = c(0, 10000)
+      y_text = 10000
+    }
+    
+    if (i %in% c(21, 22)) {
+      yrange = c(0, 100)
+      y_text = 100
+    }
+    
+    if (i == 23) {
+      yrange = c(0, 1)
+      y_text = 1
+    }
+    if (i %in% c(24:30)) {
+      yrange = c(-1, 1)
+      y_text = 1.1
+    }
+    if (i %in% c(31:33)) {
+      yrange = c(0.8, 1)
+      y_text = 1.1
+    }
+    if (i %in% c(34:36)) {
+      yrange = c(0, 0.2)
+      y_text = 0.22
+    }
+    if (i %in% c(37:42)) {
+      yrange = c(0, 1)
+      y_text = 1.1
+    }
+    
+    col.pool <- c(
+      "indianred3",
+      "light blue",
+      "grey80",
+      "indianred3",
+      "light blue",
+      "grey80",
+      "indianred3",
+      "light blue",
+      "grey80"
+    )
+    boxplot(
+      Value ~ Session,
+      data = metric,
+      ylim = yrange,
+      outline = F,
+      notch = F,
+      lwd = 1,
+      ylab = metrices[i],
+      xlab = "",
+      medlwd = 1,
+      # boxwex = 1,
+      xaxt = "n"
+    )
+    stripchart(
+      Value ~ Session,
+      vertical = TRUE,
+      data = metric,
+      method = "jitter",
+      add = TRUE,
+      pch = 15,
+      cex = 0.5,
+      col =  col.pool
+    )
+    if (any(is.na(yrange)) |
+        any(is.infinite(yrange)) | any(is.nan(yrange))) {
+      yrange = c(-1, 1)
+      ylim = c(-1, 1)
+    }
+    text(x = (1:length(num)) - 0.1,
+         y = y_text,
+         # y_text,
+         num,
+         xpd = T,
+         srt = 0,
+         adj = 0
+    )
+    for (j in c(3, 6)) {
+      lines(c(j, j) + 0.5,
+            c(yrange[1] - 1e3, yrange[1] + 1e3),
+            col = "light grey",
+            lty = 1)
+    }
+  }
+  dev.off()
+  
+}
+
 pass_fly_QC <- function(input_file,
                         framerate = 50,
                         speed_max_thres = 50,
@@ -680,79 +971,9 @@ pass_fly_QC <- function(input_file,
   }
 }
 
-data_filter <- function(filter, fly.info){
-  # filter 1: filtering flies by walking speed
-  if (filter == 1) {
-    ind.include = NULL
-    for (genotype in unique(fly.info$Genotype)) {
-      if (genotype == "CS") {
-        next
-      }
-      else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS")
-      }else{
-        ind = fly.info$Genotype == genotype 
-      }
-      fms <- fly.info$Fly.moving.speed[ind]
-      rank_fms = rank(fms)
-      ind.filter =  rank_fms <= length(fms) * 1.0 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
-      ind.include = c(ind.include, which(ind)[ind.filter])
-    }
-  }
-  
-  # filter 2: filtering flies by initial pause
-  if (filter == 2) {
-    ind.include = NULL
-    for (genotype in unique(fly.info$Genotype)) {
-      if (genotype == "CS") {
-        next
-      }
-      else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS")
-      }else{
-        ind = fly.info$Genotype == genotype
-      }
-      pause <- fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.7
-      ind.include = c(ind.include, which(ind)[ind.filter])
-    }
-  }
-  
-  # filter 3: filtering based on pass_fly_QC code
-  if (filter == 3) {
-    ind.include = NULL
-    session = "E1"
-    for (ind in 1:nrow(fly.info)) {
-      if (fly.info$Genotype[ind] == "WT") {
-        input.file <- paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
-                              fly.info$Fly[ind], "_",session,"_WT",".csv")
-      } else{input.file <- paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
-                                  fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
-      }
-      framerate =	fly.info$Framerate[ind]
-      if (pass_fly_QC(input.file, framerate)) {
-        ind.include = c(ind.include, ind)
-      }
-    }
-  }
-  return(ind.include)
-}
 
-checking_fly_numbers <- function(fly.info, filter, filename){
-  ind.include = data_filter(filter, fly.info)
-  fly.info.include = fly.info[ind.include, ]
-  type_of_mutants = length(unique(fly.info.include$Genotype))
-  names_of_mutants = unique(fly.info.include$Genotype)
-  n = c()
-  n_QCed = c()
-  for (i in 1:type_of_mutants){
-    n[i] = dim(fly.info[fly.info$Genotype==names_of_mutants[i],])[1]
-    n_QCed[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
-  }
-  mutant_info = data.frame(names_of_mutants,n, n_QCed)
-  colnames(mutant_info) = c("Genotype", "Number of Flies", "Number of Flies QCed")
-  write.csv(mutant_info, file = filename , row.names = FALSE)
-}
+
+
 
 one_fly_laser_statistics <- function(input_file, framerate){
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
@@ -1155,196 +1376,12 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
   return(input.y.df.pre)
 }
 
-initial_condition <- function(metric.ind, query.genotype, query.fly, query.experimenter){
-  
-  fly_genotype = query.genotype
-  if (query.genotype == c("CS")){
-    query.genotype = c("WT", "CS")
-  }
-  
-  input.file = paste0("metrics/metric_", metric.ind, ".csv")
-  if (!file.exists(input.file)) {
-    next
-  }
-  metric.df = read.csv(input.file)
-  ## covariates of interest: genotype, session
-  y = list()
-  ## E1 data
-  session = "E1"
-  for (category in c("T", "R", "N")) {
-    query.session = gsub("X", category, session)
-    ind.E1 <- metric.df$Session == "E1" &
-      metric.df$Genotype %in% query.genotype &
-      metric.df$Category == category &
-      metric.df$Fly %in% query.fly &
-      metric.df$Experimenter  %in%  query.experimenter
-    z = metric.df[ind.E1,"Value"]
-    # z = - (metric.df[ind.E1,"Value"] - metric.df[ind,"Value"]) /metric.df[ind.E1,"Value"]
-    # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
-    y = append(y, list(na.omit(z)))
-  }
-  
-  
-  ## special cases
-  input.y = list(y[[1]], y[[2]], y[[3]])
-  
-  yy.T = rep(paste0("T_", query.genotype[1]), length(input.y[[1]]))
-  yy.R = rep(paste0("R_", query.genotype[1]), length(input.y[[2]]))
-  yy.N = rep(paste0("N_", query.genotype[1]), length(input.y[[3]]))
-  
-  yy.label = c(yy.T, yy.R, yy.N)
-  # yy.label = c(yy.3T, yy.3R)
-  
-  input.y_T = as.numeric(input.y[[1]])
-  input.y_R = as.numeric(input.y[[2]])
-  input.y_N = as.numeric(input.y[[3]])
-  
-  input.yy = c(
-    input.y_T,
-    input.y_R,
-    input.y_N
-  )
-  input.y.df.pre = data.frame(input.yy, yy.label)
-  return(input.y.df.pre)
-}
-
-test_initial_condition = function(metric.ind, query.list){
-  input.y.df = data.frame()
-  query.fly = get_query_info(query.list[1])[[1]]
-  query.experimenter = get_query_info(query.list[1])[[2]]
-  input.y.df.pre = initial_condition(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
-  colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
-  a = dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
-  return (a)
-}
-
-after_training <- function(metric.ind, query.genotype, query.fly, query.experimenter){
-  
-  fly_genotype = query.genotype
-  if (query.genotype == c("CS") || query.genotype == c("WT")){
-    query.genotype = c("WT", "CS")
-  }
-  
-  input.file = paste0("metrics/metric_", metric.ind, ".csv")
-  if (!file.exists(input.file)) {
-    next
-  }
-  metric.df = read.csv(input.file)
-  ## covariates of interest: genotype, session
-  y = list()
-  sessions = c(
-                "E1T1E1T1E1",
-                "E1R1E1R1E1", 
-                "E1N1E1N1E1" 
-                )
-  
-  for (session in sessions) {
-    if (grepl("T", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "T" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "T" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      z = metric.df[ind,"Value"]
-  
-    }
-    if (grepl("R", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "R" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "R" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      z = metric.df[ind,"Value"]
-
-    }
-    if (grepl("N", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "N" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == "N" &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      z = metric.df[ind,"Value"]
-    }
-    y = append(y, list(na.omit(z)))
-  }
-  
-  ## special cases
-  input.y = list(y[[1]], y[[2]], y[[3]])
-  
-  yy.T = rep(paste0("T_", query.genotype[1]), length(input.y[[1]]))
-  yy.R = rep(paste0("R_", query.genotype[1]), length(input.y[[2]]))
-  yy.N = rep(paste0("N_", query.genotype[1]), length(input.y[[3]]))
-  
-  yy.label = c(yy.T, yy.R, yy.N)
-  # yy.label = c(yy.3T, yy.3R)
-  
-  input.y_T = as.numeric(input.y[[1]])
-  input.y_R = as.numeric(input.y[[2]])
-  input.y_N = as.numeric(input.y[[3]])
-  
-  input.yy = c(
-    input.y_T,
-    input.y_R,
-    input.y_N
-  )
-  input.y.df.pre = data.frame(input.yy, yy.label)
-  return(input.y.df.pre)
-}
-
-test_after_training = function(metric.ind, query.list){
-  input.y.df = data.frame()
-  query.fly = get_query_info(query.list[1])[[1]]
-  query.experimenter = get_query_info(query.list[1])[[2]]
-  input.y.df.pre = after_training(metric.ind, query.list[1], query.fly=query.fly, query.experimenter=query.experimenter)
-  colnames(input.y.df.pre) <- c("Value", "Genotype_Sessions")
-  a = dunn.test(x = input.y.df.pre$Value, g = input.y.df.pre$Genotype_Sessions, method = c("bonferroni"))
-  return(a)
-  
-}
-
 get_query_info<-function(query.genotype){
   if(query.genotype %in% c("CS", "WT")){
     query.fly = fly.info.end[((fly.info.end$Genotype == "WT") |
                                     (fly.info.end$Genotype == "CS")), ]$Fly
     query.experimenter = fly.info.end[((fly.info.end$Genotype == "WT") |
                                              (fly.info.end$Genotype == "CS")), ]$Experimenter
-    write.table(
-      fly.info.end[((fly.info.end$Genotype == "WT") |(fly.info.end$Genotype == "CS")), ],
-      "fly_info_include_WT.csv",
-      col.names = T,
-      row.names = F,
-      quote = F,
-      sep = ","
-    )
-  }else if(query.genotype=="SUN1"){
-    query.genotype <- c("SUN1")
-    query.fly = fly.info.end[(fly.info.end$Genotype == "SUN1"), ]$Fly
-    
-    query.experimenter = fly.info.end[(fly.info.end$Genotype == "SUN1"), ]$experimenter
-    write.table(
-      fly.info.end[((fly.info.end$Genotype == "SUN1")) &
-                         (fly.info.end$Experimenter!="SW"), ],
-      "fly_info_include_SUN1.csv",
-      col.names = T,
-      row.names = F,
-      quote = F,
-      sep = ","
-    )
   }else{
     query.fly = fly.info.end[(fly.info.end$Genotype == query.genotype), ]$Fly
     query.experimenter = fly.info.end[(fly.info.end$Genotype == query.genotype), ]$Experimenter
@@ -1357,12 +1394,55 @@ get_query_info<-function(query.genotype){
       sep = ","
     )
   }
-  
-  return(list(query.fly, 
+  return(data.frame(query.fly, 
               query.experimenter))
 }    
 
-plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, fly.info.end){
+test_initial_condition <- function(i, query.genotype){
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
+  }else{
+    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
+    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+  }
+  metric = data.frame(
+    factor = c(rep("E1-T", length(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i])),
+               rep("E1-R", length(metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i])),
+               rep("E1-N", length(metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i]))),
+    value = as.numeric(c(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i], 
+                         metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i],
+                         metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i]))
+    )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c("E1-T", "E1-R", "E1-N"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return (a)
+}
+
+test_after_training <- function(i, query.genotype, normalization = F){
+  if (normalization == F){
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
+  } else{
+    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
+    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+  }
+  metric = data.frame(
+    factor = c(rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
+               rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
+               rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
+    value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
+                         metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
+                         metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c("E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+  }else{return(NULL)}
+}
+
+hypothesis_testing_E1 <- function(i, fly.info){
   metrices =  c(
     "Type", #1
     "Experimenter", #2
@@ -1407,180 +1487,27 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
     "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
   )
-
-  if(query.genotype[1] == "WT"){
-    write.table(
-      fly.info.end[((fly.info.end$Genotype == "WT") |
-                          (fly.info.end$Genotype == "CS")), ],
-      "fly_info_include_WT.csv",
-      col.names = T,
-      row.names = F,
-      quote = F,
-      sep = ","
-    )
-    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
-  }else{
-    write.table(
-      fly.info.end[((fly.info.end$Genotype == query.genotype[1])),],
-      paste0("fly_info_include_", query.genotype[1], ".csv"),
-      col.names = T,
-      row.names = F,
-      quote = F,
-      sep = ","
-    )
-    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
-    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
-  }
-
-  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
-      onefile = T, width = 8
-  )
   
-  for (i in 6:length(metrices)) {
-    metric = data.frame(
-      factor = c(rep("E1-T", length(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i])),
-                 rep("E1-R", length(metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i])),
-                 rep("E1-N", length(metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i])),
-                 rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
-                 rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
-                 rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i])),
-                 rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
-                 rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
-                 rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
-      value = as.numeric(c(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i], 
-                metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i],
-                metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i],
-                metric.df[metric.df$Session=="E1T1E1", ][, i],
-                metric.df[metric.df$Session=="E1R1E1", ][, i],
-                metric.df[metric.df$Session=="E1N1E1", ][, i],
-                metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
-                metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
-                metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
-    )
-    colnames(metric) = c("Session", "Value")
-    metric$Session = factor(metric$Session, levels=c("E1-T", "E1-R", "E1-N",
-                                                   "E1T1E1", "E1R1E1", "E1N1E1",
-                                                   "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"))
-    num = as.data.frame(table(metric[!is.na(metric$Value),]$Session))$Freq
-
-    ## special cases
-    y_text = c()
-    if (i %in% c(6, 7)) {
-      yrange = c(0, 200)
-      y_text = 200
-    }
-    
-    if (i %in% c(8, 9)) {
-      yrange = c(0, 1)
-      y_text = 1
-    }
-    
-    if (i %in% c(10:11)) {
-      yrange = c(0, 50)
-      y_text = 52
-    }
-    
-    if (i %in% c(12:15)) {
-      yrange = c(0, 600)
-      y_text = 610
-    }
- 
-    if (i %in% c(16:19)) {
-      yrange = c(0, 50)
-      y_text = 50.5
-    }
- 
-    if (i == 20) {
-      yrange = c(0, 10000)
-      y_text = 10000
-    }
-    
-    if (i %in% c(21, 22)) {
-      yrange = c(0, 100)
-      y_text = 100
-    }
-
-    if (i == 23) {
-      yrange = c(0, 1)
-      y_text = 1
-    }
-    if (i %in% c(24:30)) {
-      yrange = c(-1, 1)
-      y_text = 1.1
-    }
-    if (i %in% c(31:33)) {
-      yrange = c(0.8, 1)
-      y_text = 1.1
-    }
-    if (i %in% c(34:36)) {
-      yrange = c(0, 0.2)
-      y_text = 0.22
-    }
-    if (i %in% c(37:42)) {
-      yrange = c(0, 1)
-      y_text = 1.1
-    }
-
-    col.pool <- c(
-      "indianred3",
-      "light blue",
-      "grey80",
-      "indianred3",
-      "light blue",
-      "grey80",
-      "indianred3",
-      "light blue",
-      "grey80"
-    )
-    
-    boxplot(
-      Value ~ Session,
-      data = metric,
-      ylim = yrange,
-      outline = F,
-      notch = F,
-      lwd = 1,
-      ylab = metrices[i],
-      xlab = "",
-      medlwd = 1,
-      # boxwex = 1,
-      xaxt = "n"
-      # col = "grey80"
-    )
-    stripchart(
-      Value ~ Session,
-      vertical = TRUE,
-      data = metric,
-      method = "jitter",
-      add = TRUE,
-      pch = 15,
-      cex = 0.5,
-      col =  col.pool
-    )
-    
-    if (any(is.na(yrange)) |
-        any(is.infinite(yrange)) | any(is.nan(yrange))) {
-      yrange = c(-1, 1)
-      ylim = c(-1, 1)
-    }
-    
-    text(x = (1:length(num)) - 0.1,
-         y = y_text,
-         # y_text,
-         num,
-         xpd = T,
-         srt = 0,
-         adj = 0
-    )
-    
-    
-    for (j in c(3, 6)) {
-      lines(c(j, j) + 0.5,
-            c(yrange[1] - 1e3, yrange[1] + 1e3),
-            col = "light grey",
-            lty = 1)
-    }
-  }
-  dev.off()
+  metric_name = metrices[i]
   
+  E1_tests = data.frame()
+  
+  query.genotype = "WT"
+  result = test_initial_condition(i, query.genotype)
+  result = result$P.adjusted
+  name_results = c(paste0("WT: ", "R-N"), paste0("WT: ", "T-N"), paste0("WT: ", "T-R"))
+  E1_tests = data.frame(factor = name_results, value = as.numeric(result))
+  
+  for (j in unique(fly.info$Genotype)){
+    query.genotype = j
+    print(query.genotype)
+    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] != 0) {
+    result = test_initial_condition(i, query.genotype)
+    result = result$P.adjusted
+    name_results =  c(paste0(query.genotype, ": R-N"), paste0(query.genotype, ": T-N"), paste0(query.genotype, ": T-R"))
+    temp = data.frame(factor = name_results, value = as.numeric(result))
+    E1_tests = rbind(E1_tests, temp)
+    }else{next}
+    }
+  return(E1_tests)
 }

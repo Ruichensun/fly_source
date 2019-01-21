@@ -1,4 +1,6 @@
 #This script is for plotting all metrics relevant after fit_lm_data_cleaning.R
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+load('all_ofs.Rdata')
 
 # WT flies
 query.genotype <- c("WT")
