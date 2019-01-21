@@ -124,7 +124,6 @@ fly.info.include = fly.info[ind.include,]
 
 ind.filtered = data_filter(2, fly.info.include) 
 fly.info.end = fly.info.include[ind.filtered, ]
-# fly.info.end = fly.info.include
 
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
 

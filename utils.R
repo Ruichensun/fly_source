@@ -72,9 +72,7 @@ one_fly_statistics <- function(input_file,
       fly_num = as.integer(unlist((strsplit(file_name[2], "Fly")))[2])
   
   # Load data
-      
-  
-    
+
       tryCatch({
         x = read.table(input_file, header = T, sep = ",", stringsAsFactors = F)
       }, error = function(e) {
@@ -253,6 +251,7 @@ one_fly_statistics <- function(input_file,
       dist = tot_moving_dist * 47 / 768 
       
   # 3rd Metric Group: Turns
+      
       # Step 0 - smoothing
       ma <- function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
       bin_size = 150
@@ -287,6 +286,7 @@ one_fly_statistics <- function(input_file,
       }
 
   # 4th Metric Group: Burstiness
+      
       # inter-event time is pause defined previously #
       PD = mid_pause_df$Pause_Duration
       
@@ -335,6 +335,7 @@ one_fly_statistics <- function(input_file,
       }
 
   # 5th Metric Group: Memory
+      
       # inter_event_time is the unfiltered ones and zeros (rasterplot) versions of fly_pos
       # When walking bout is an event
       memory <- 0
@@ -367,6 +368,7 @@ one_fly_statistics <- function(input_file,
       }
       
   # 6th Metric Group: Behavioral States
+      
       # Get Behavioral State
       p_to_p = sum(pause_df$Pause_Duration - 1)
       if (num_pause < 2) {w_to_w = 0
@@ -470,49 +472,50 @@ one_fly_statistics <- function(input_file,
       }
 
   #7th: Return output
+      
       ret = data.frame(cbind(
-        Experimenter,
-        genotype,
-        fly_num,
-        file_session,
-        num_pause,
-        num_mid_pause,
-        1 - frac_pause, #unit: percentage
-        1 - frac_pause_middle,
-        md_pause_dur, 
-        md_pause_middle_dur, 
-        max_pause,
-        max_pause_middle,
-        first_pause,
-        first_pause_middle,
-        avg_speed,
-        avg_speed_moving,
-        avg_speed_enter,
-        avg_speed_exit,
-        dist,
-        num_turns,
-        num_mid_turns,
-        frac_mid_turns,
-        B_pause,    
-        Burst_inter_event,
-        B_scrambled,
-        w_burstiness,
-        m_burstiness,
-        memory,
-        memory_w,
-        p_p2p,
-        p_p2pm,
-        p_p2p_middle,
-        p_p2w,
-        p_p2wm,
-        p_p2w_middle,
-        p_w2w,
-        p_w2wm,
-        p_w2w_middle,
-        p_w2p,
-        p_w2pm,
-        p_w2p_middle
-      ), stringsAsFactors=FALSE)
+                              Experimenter,
+                              genotype,
+                              fly_num,
+                              file_session,
+                              num_pause,
+                              num_mid_pause,
+                              1 - frac_pause, #unit: percentage
+                              1 - frac_pause_middle,
+                              md_pause_dur, 
+                              md_pause_middle_dur, 
+                              max_pause,
+                              max_pause_middle,
+                              first_pause,
+                              first_pause_middle,
+                              avg_speed,
+                              avg_speed_moving,
+                              avg_speed_enter,
+                              avg_speed_exit,
+                              dist,
+                              num_turns,
+                              num_mid_turns,
+                              frac_mid_turns,
+                              B_pause,    
+                              Burst_inter_event,
+                              B_scrambled,
+                              w_burstiness,
+                              m_burstiness,
+                              memory,
+                              memory_w,
+                              p_p2p,
+                              p_p2pm,
+                              p_p2p_middle,
+                              p_p2w,
+                              p_p2wm,
+                              p_p2w_middle,
+                              p_w2w,
+                              p_w2wm,
+                              p_w2w_middle,
+                              p_w2p,
+                              p_w2pm,
+                              p_w2p_middle
+                            ), stringsAsFactors=FALSE)
   
       colnames(ret) = c(
         "Experimenter", #2
@@ -967,7 +970,7 @@ total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.moveme
 fly_pos_to_moving_status = function(fly_pos){ 
   # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% 
   # corresponds to 28.6
-  speed_threshold = 28 
+  speed_threshold = 50 
   fly_moving_status = diff(fly_pos)
   # Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than 
   # a speed threshold
@@ -986,7 +989,7 @@ moving_status = function(input_file) {
   }else{
     fly_pos = a$fly_pos.framerate.50
     fly_moving_status = fly_pos_to_moving_status(fly_pos)
-    starting_point = 21
+    starting_point = 31
     fly_moving_status = fly_moving_status[(starting_point-1):length(fly_moving_status)]
     return(cumsum(fly_moving_status))
   }
@@ -1360,7 +1363,51 @@ get_query_info<-function(query.genotype){
 }    
 
 plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, fly.info.end){
-  
+  metrices =  c(
+    "Type", #1
+    "Experimenter", #2
+    "Genotype", #3
+    "Fly Number", #4
+    "Session", #5
+    "Number of Pause", #6
+    "Number of Middle Pause", #7
+    "Percentage Time Active", #8
+    "Percentage Time Active - Pause not at the End", #9
+    "Median Pause Duration",#10
+    "Median Middle Pause Duration", #11    
+    "Max Pause Duration", #12
+    "Max Middle Pause Duration", #13
+    "First Pause Duration", #14
+    "First Middle Pause Duration", #15
+    "Average Moving Speed", #16
+    "Average Moving Speed (excluding pause)", #17
+    "Average Speed When Enter Pause", #18
+    "Average Speed When Exit Pause",#19
+    "Moving Distance",#20
+    "Number of Turns",#21
+    "Number of Middle Turns",#22
+    "Fration of Middle Turns Out of Total Turns",#23
+    "Burstiness (Pause)",#24
+    "Burstiness (Inter Event Time)",#25
+    "Burstiness (Scrambled)",#26
+    "Burstiness (Walking bouts-thresholding)",#27
+    "Burstiness (Walking events-no thres)",#28
+    "Memory of Pause", #29
+    "Memory of Walking", #30
+    "Transition Probability (Pause not at the end): Pause to Pause", #31
+    "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+    "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+    "Transition Probability (Pause not at the end): Pause to Walking", #34
+    "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
+    "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+    "Transition Probability (Pause not at the end): Walking to Walking", #37
+    "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
+    "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+    "Transition Probability (Pause not at the end): Walking to Pause", #40
+    "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
+    "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+  )
+
   if(query.genotype[1] == "WT"){
     write.table(
       fly.info.end[((fly.info.end$Genotype == "WT") |
@@ -1371,6 +1418,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       quote = F,
       sep = ","
     )
+    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
   }else{
     write.table(
       fly.info.end[((fly.info.end$Genotype == query.genotype[1])),],
@@ -1380,136 +1428,99 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       quote = F,
       sep = ","
     )
+    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
+    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
   }
-  metrices <- read.table("metrics/list_metrices.csv",
-                         stringsAsFactors = F,
-                         sep = "\t")[, 1]
-  sessions <- c(
-    "E1T1E1",
-    "E1R1E1",
-    "E1N1E1",
-    "E1T1E1T1E1",
-    "E1R1E1R1E1",
-    "E1N1E1N1E1"
-  )
-  
+
   pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )
   
-  for (metric.ind in 1:length(metrices)) {
-    input.file = paste0("metrics/metric_", metric.ind, ".csv")
-    if (!file.exists(input.file)) {
-      next
-    }
-    
-    metric.df = read.csv(input.file)
-    y = list()
-    
-    ## E1 data
-    session = "E1"
-    for (category in c("T", "R", "N")) {
-      query.session = gsub("X", category, session)
-      ind <- metric.df$Session == query.session &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Category == category &
-        metric.df$Fly %in% query.fly &
-        metric.df$Experimenter  %in%  query.experimenter
-      z = metric.df[ind, "Value"]
-      y = append(y, list(na.omit(z)))
-    }
-    
-    ## input sessions data
-    
-    for (session in sessions) {
-      ind <- metric.df$Session == session &
-        metric.df$Genotype %in% query.genotype &
-        metric.df$Fly %in% query.fly&
-        metric.df$Experimenter  %in%  query.experimenter
-      z = metric.df[ind, "Value"]
-      
-      y = append(y, list(na.omit(z)))
-    }
-    y.1 = y
+  for (i in 6:length(metrices)) {
+    metric = data.frame(
+      factor = c(rep("E1-T", length(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i])),
+                 rep("E1-R", length(metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i])),
+                 rep("E1-N", length(metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i])),
+                 rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
+                 rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
+                 rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
+                 rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
+      value = as.numeric(c(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i], 
+                metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i],
+                metric.df[metric.df$Type=="N" & metric.df$Session=="E1", ][, i],
+                metric.df[metric.df$Session=="E1T1E1", ][, i],
+                metric.df[metric.df$Session=="E1R1E1", ][, i],
+                metric.df[metric.df$Session=="E1N1E1", ][, i],
+                metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
+                metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
+                metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
+    )
+    colnames(metric) = c("Session", "Value")
+    metric$Session = factor(metric$Session, levels=c("E1-T", "E1-R", "E1-N",
+                                                   "E1T1E1", "E1R1E1", "E1N1E1",
+                                                   "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"))
+    num = as.data.frame(table(metric[!is.na(metric$Value),]$Session))$Freq
+
     ## special cases
     y_text = c()
-    if (metric.ind %in% c(1, 2)) {
+    if (i %in% c(6, 7)) {
       yrange = c(0, 200)
-      y_text = 610
+      y_text = 200
     }
     
-    if (metric.ind %in% c(3, 4)) {
+    if (i %in% c(8, 9)) {
       yrange = c(0, 1)
-      y_text = 1.1
+      y_text = 1
     }
     
-    if (metric.ind %in% c(5:10)) {
+    if (i %in% c(10:11)) {
+      yrange = c(0, 50)
+      y_text = 52
+    }
+    
+    if (i %in% c(12:15)) {
       yrange = c(0, 600)
       y_text = 610
     }
  
-    if (metric.ind %in% c(11:14)) {
-      yrange = c(0, 10)
-      y_text = 10.5
+    if (i %in% c(16:19)) {
+      yrange = c(0, 50)
+      y_text = 50.5
     }
  
-    if (metric.ind == 15) {
-      yrange = c(0, 60000)
-      y_text = 60000
+    if (i == 20) {
+      yrange = c(0, 10000)
+      y_text = 10000
     }
     
-    if (metric.ind %in% c(16, 17)) {
+    if (i %in% c(21, 22)) {
       yrange = c(0, 100)
       y_text = 100
     }
 
-    if (metric.ind == 18) {
+    if (i == 23) {
       yrange = c(0, 1)
       y_text = 1
     }
-    if (metric.ind %in% c(19:25)) {
+    if (i %in% c(24:30)) {
       yrange = c(-1, 1)
       y_text = 1.1
     }
-    if (metric.ind %in% c(26:37)) {
+    if (i %in% c(31:33)) {
+      yrange = c(0.8, 1)
+      y_text = 1.1
+    }
+    if (i %in% c(34:36)) {
+      yrange = c(0, 0.2)
+      y_text = 0.22
+    }
+    if (i %in% c(37:42)) {
       yrange = c(0, 1)
       y_text = 1.1
     }
-    input.y = y.1[1:9]
-    yy.1T = rep("1stE1_1", length(input.y[[1]]))
-    yy.1R = rep("1stE1_2", length(input.y[[2]]))
-    yy.1N = rep("1stE1_3", length(input.y[[3]]))
-    yy.2T = rep("2ndE1_1", length(input.y[[4]]))
-    yy.2R = rep("2ndE1_2", length(input.y[[5]]))
-    yy.2N = rep("2ndE1_3", length(input.y[[6]]))
-    yy.3T = rep("3rdE1_1", length(input.y[[7]]))
-    yy.3R = rep("3rdE1_2", length(input.y[[8]]))
-    yy.3N = rep("3rdE1_3", length(input.y[[9]]))
-    yy.label = c(yy.1T, yy.1R, yy.1N, yy.2T, yy.2R, yy.2N, yy.3T, yy.3R, yy.3N)
-    
-    input.y_1T = as.numeric(input.y[[1]])
-    input.y_1R = as.numeric(input.y[[2]])
-    input.y_1N = as.numeric(input.y[[3]])
-    input.y_2T = as.numeric(input.y[[4]])
-    input.y_2R = as.numeric(input.y[[5]])
-    input.y_2N = as.numeric(input.y[[6]])
-    input.y_3T = as.numeric(input.y[[7]])
-    input.y_3R = as.numeric(input.y[[8]])
-    input.y_3N = as.numeric(input.y[[9]])
-    input.yy = c(
-      input.y_1T,
-      input.y_1R,
-      input.y_1N,
-      input.y_2T,
-      input.y_2R,
-      input.y_2N,
-      input.y_3T,
-      input.y_3R,
-      input.y_3N
-    )
-    
-    input.y.df = data.frame(input.yy, yy.label)
-    colnames(input.y.df) <- c("Value", "Sessions")
+
     col.pool <- c(
       "indianred3",
       "light blue",
@@ -1523,23 +1534,23 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     )
     
     boxplot(
-      Value ~ Sessions,
-      data = input.y.df,
+      Value ~ Session,
+      data = metric,
       ylim = yrange,
       outline = F,
       notch = F,
       lwd = 1,
-      # width = proportion ,
-      ylab = metrices[metric.ind],
+      ylab = metrices[i],
       xlab = "",
       medlwd = 1,
+      # boxwex = 1,
       xaxt = "n"
       # col = "grey80"
     )
     stripchart(
-      Value ~ Sessions,
+      Value ~ Session,
       vertical = TRUE,
-      data = input.y.df,
+      data = metric,
       method = "jitter",
       add = TRUE,
       pch = 15,
@@ -1553,19 +1564,18 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       ylim = c(-1, 1)
     }
     
-    text((1:length(input.y)) - 0.1,
-         # yrange[2]*0.6,
-         y_text,
-         paste0(sapply(input.y, length)),
+    text(x = (1:length(num)) - 0.1,
+         y = y_text,
+         # y_text,
+         num,
          xpd = T,
          srt = 0,
          adj = 0
     )
     
-    n = length(input.y) / length(sessions)
     
-    for (i in c(3, 6)) {
-      lines(c(i, i) + 0.5,
+    for (j in c(3, 6)) {
+      lines(c(j, j) + 0.5,
             c(yrange[1] - 1e3, yrange[1] + 1e3),
             col = "light grey",
             lty = 1)
