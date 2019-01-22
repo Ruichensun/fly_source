@@ -1498,7 +1498,11 @@ hypothesis_testing_E1 <- function(i, fly.info){
   name_results = c(paste0("WT: ", "R-N"), paste0("WT: ", "T-N"), paste0("WT: ", "T-R"))
   E1_tests = data.frame(factor = name_results, value = as.numeric(result))
   
-  for (j in unique(fly.info$Genotype)){
+  genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
+                    "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
+                    "108151 x 51636", "SUN1 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
+  
+  for (j in genotype_list){
     query.genotype = j
     print(query.genotype)
     if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] != 0) {
@@ -1510,4 +1514,80 @@ hypothesis_testing_E1 <- function(i, fly.info){
     }else{next}
     }
   return(E1_tests)
+}
+
+
+hypothesis_testing_3rdE1 <- function(i, fly.info){
+  metrices =  c(
+    "Type", #1
+    "Experimenter", #2
+    "Genotype", #3
+    "Fly Number", #4
+    "Session", #5
+    "Number of Pause", #6
+    "Number of Middle Pause", #7
+    "Percentage Time Active", #8
+    "Percentage Time Active - Pause not at the End", #9
+    "Median Pause Duration",#10
+    "Median Middle Pause Duration", #11    
+    "Max Pause Duration", #12
+    "Max Middle Pause Duration", #13
+    "First Pause Duration", #14
+    "First Middle Pause Duration", #15
+    "Average Moving Speed", #16
+    "Average Moving Speed (excluding pause)", #17
+    "Average Speed When Enter Pause", #18
+    "Average Speed When Exit Pause",#19
+    "Moving Distance",#20
+    "Number of Turns",#21
+    "Number of Middle Turns",#22
+    "Fration of Middle Turns Out of Total Turns",#23
+    "Burstiness (Pause)",#24
+    "Burstiness (Inter Event Time)",#25
+    "Burstiness (Scrambled)",#26
+    "Burstiness (Walking bouts-thresholding)",#27
+    "Burstiness (Walking events-no thres)",#28
+    "Memory of Pause", #29
+    "Memory of Walking", #30
+    "Transition Probability (Pause not at the end): Pause to Pause", #31
+    "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+    "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+    "Transition Probability (Pause not at the end): Pause to Walking", #34
+    "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
+    "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+    "Transition Probability (Pause not at the end): Walking to Walking", #37
+    "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
+    "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+    "Transition Probability (Pause not at the end): Walking to Pause", #40
+    "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
+    "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+  )
+  
+  metric_name = metrices[i]
+  
+  E5_tests = data.frame()
+  
+  query.genotype = "WT"
+  result = test_after_training(i, query.genotype)
+  result = result$P.adjusted
+  name_results = c(paste0("WT: ", "R-N"), paste0("WT: ", "T-N"), paste0("WT: ", "T-R"))
+  E5_tests = data.frame(factor = name_results, value = as.numeric(result))
+  
+  genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
+                    "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
+                    "108151 x 51636", "SUN1 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
+  
+  for (j in genotype_list){
+    query.genotype = j
+    print(query.genotype)
+    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] != 0) {
+      result = test_after_training(i, query.genotype)
+      result = result$P.adjusted
+      name_results =  c(paste0(query.genotype, ": R-N"), paste0(query.genotype, ": T-N"), paste0(query.genotype, ": T-R"))
+      temp = data.frame(factor = name_results, value = as.numeric(result))
+      E5_tests = rbind(E5_tests, temp)
+    }else{next}
+  }
+  E5_tests = cbind(E5_tests, E5_tests$value<0.05)
+  return(E5_tests)
 }
