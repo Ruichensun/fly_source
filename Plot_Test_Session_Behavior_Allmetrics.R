@@ -2,6 +2,7 @@
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 load('all_ofs.Rdata')
 
+# Plotting
 # WT flies
 query.genotype <- c("WT")
 query.fly = fly.info$Fly
@@ -18,4 +19,10 @@ for (i in 1:length(unique(fly.info.mutants$Genotype))){
   plot_all_raw_metrics(query.genotype, query.fly, query.experimenter, fly.info.mutants)
 }
 
+# Hypothesis Testing
 
+# 9: Percentage Time Active 
+hypothesis_testing_E1(8, fly.info.mutants)
+hypothesis_testing_3rdE1(8, fly.info.mutants)
+
+a

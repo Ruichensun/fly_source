@@ -4,7 +4,7 @@ library(boot)
 library(dunn.test)
 
 # For data preprocessing: combining all fly info into one document
-combine_flyCSV <- function(experimenter, type){
+combine_flyCSV = function(experimenter, type){
   all_info = NULL;
   input_files = c()
   for (i in 1:length(experimenter)){
@@ -25,15 +25,15 @@ combine_flyCSV <- function(experimenter, type){
               quote=F,row.names=F,col.names=T,sep=",")  
 }
 
-get_fly_moving_speed <- function(x, framerate) {
+get_fly_moving_speed = function(x, framerate) {
   data_start = 21 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   tot_moving_dist = sum(abs(diff(fly_pos)))
-  return(tot_moving_dist / experiment_time)
+  return(tot_moving_dist * (47 / 768) / experiment_time)
 }
 
-get_fly_initial_pause <- function(x, framerate){
+get_fly_initial_pause = function(x, framerate){
   data_start = 21
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
@@ -42,9 +42,9 @@ get_fly_initial_pause <- function(x, framerate){
   return(pause / experiment_time)
 }
 
-one_fly_statistics <- function(input_file,
+one_fly_statistics = function(input_file,
                                framerate = 50,
-                               speed_max_thres = 90, #updated from 20 to 30 on Jan 31, 2018, #updated from 30 to 28 on May 14,2018
+                               speed_max_thres = 90,
                                speed_zero_thres = 1e-2,
                                pause_frame_thres = 25,
                                chamber_end_thres = 60,
@@ -185,25 +185,25 @@ one_fly_statistics <- function(input_file,
       # Real pause is the pauses with duration longer than pause_frame_thres
       real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
   
-      # Pauses not at the end: pause position is between [chamber_left, chamber_right]
+      # Pauses not at the end
       mid_pause_df = subset(real_pause_df, (Start_Position >= chamber_end_thres) & (Start_Position <= 767 - chamber_end_thres))
-      pause_middle_dur <- mid_pause_df$Pause_Duration
+      pause_middle_dur = mid_pause_df$Pause_Duration
       
       num_pause = length(real_pause_df$Start_Index)
       num_mid_pause = length(mid_pause_df$Start_Index)
       
-      md_pause_dur <- median(real_pause_df$Pause_Duration) / framerate
-      md_pause_middle_dur <- (median(pause_middle_dur)) / framerate
+      md_pause_dur = median(real_pause_df$Pause_Duration) / framerate
+      md_pause_middle_dur = (median(pause_middle_dur)) / framerate
       
-      frac_pause <- sum(real_pause_df$Pause_Duration) / experiment_time 
-      frac_pause_middle <- (sum(pause_middle_dur)) / experiment_time
+      frac_pause = sum(real_pause_df$Pause_Duration) / experiment_time 
+      frac_pause_middle = (sum(pause_middle_dur)) / experiment_time
       
-      max_pause <- max(real_pause_df$Pause_Duration) / framerate
-      max_pause_middle <- (max(pause_middle_dur)) / framerate
+      max_pause = max(real_pause_df$Pause_Duration) / framerate
+      max_pause_middle = (max(pause_middle_dur)) / framerate
       
       # First_pause_duration: first real pause or first real pause not at the end
       first_pause = real_pause_df$Pause_Duration[1] / framerate
-      first_pause_middle <- (pause_middle_dur[1]) / framerate
+      first_pause_middle = (pause_middle_dur[1]) / framerate
       
   # 2nd Metric Group: Speed
       
@@ -253,7 +253,7 @@ one_fly_statistics <- function(input_file,
   # 3rd Metric Group: Turns
       
       # Step 0 - smoothing
-      ma <- function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
+      ma = function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
       bin_size = 150
       fly_pos_sm = ma(fly_pos, bin_size)
       fly_speed_sm = diff(fly_pos_sm)
@@ -295,8 +295,8 @@ one_fly_statistics <- function(input_file,
       }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
       
       ## inter-event time is frames with zero velocity #
-      b_inter_event <- replace(abs(fly_speed), abs(fly_speed) > 0, 1)
-      inter_event_time <- rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
+      b_inter_event = replace(abs(fly_speed), abs(fly_speed) > 0, 1)
+      inter_event_time = rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
       if (length(inter_event_time) <= 3) {
         Burst_inter_event = 1
       }else{
@@ -305,9 +305,9 @@ one_fly_statistics <- function(input_file,
       }
       
       # scrambled burstiness 
-      b_scrambled <- sample(b_inter_event)
-      t_scrambled <-rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
-      B_scrambled <- c()
+      b_scrambled = sample(b_inter_event)
+      t_scrambled =rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
+      B_scrambled = c()
       if (length(t_scrambled) <= 3) {B_scrambled = 1
       } else{
         B_scrambled = (sd((t_scrambled), na.rm = T) - mean((t_scrambled), na.rm = T)) / 
@@ -318,16 +318,16 @@ one_fly_statistics <- function(input_file,
       if (num_mid_pause <= 3) {
         w_burstiness = 1
       } else{
-        walk_end <- mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
-        walk_start <- mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
+        walk_end = mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
+        walk_start = mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
         walks_dur = walk_end - walk_start
         w_burstiness = (sd(walks_dur) - mean(walks_dur)) / (sd(walks_dur) + mean(walks_dur))
       }
       
       ## inter event is walking (no thresholding)
-      burstiness_m_inverted <- rep(0, length(b_inter_event))
-      burstiness_m_inverted <- replace(burstiness_m_inverted, b_inter_event == 0, 1)
-      m_inverted <-rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
+      burstiness_m_inverted = rep(0, length(b_inter_event))
+      burstiness_m_inverted = replace(burstiness_m_inverted, b_inter_event == 0, 1)
+      m_inverted =rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
       if (length(m_inverted) <= 3) {m_burstiness = 1
       } else{
         m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / 
@@ -338,33 +338,33 @@ one_fly_statistics <- function(input_file,
       
       # inter_event_time is the unfiltered ones and zeros (rasterplot) versions of fly_pos
       # When walking bout is an event
-      memory <- 0
+      memory = 0
       if (length(inter_event_time) < 2) {
         memory = NA
       } else{
         m1 = mean(inter_event_time[1:(length(inter_event_time) - 1)]) #mean of inter-event time from 1 to n-1
         m2 = mean(inter_event_time[2:(length(inter_event_time))]) #mean of inter-event time from 2 to n
-        std1 <- sd(inter_event_time[1:(length(inter_event_time) - 1)])
-        std2 <- sd(inter_event_time[2:(length(inter_event_time))])
+        std1 = sd(inter_event_time[1:(length(inter_event_time) - 1)])
+        std2 = sd(inter_event_time[2:(length(inter_event_time))])
         for (i in 1:(length(inter_event_time) - 1)) {
-          memory <- memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /(std1 * std2))
+          memory = memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /(std1 * std2))
         }
         memory = (1 / (length(inter_event_time) - 1)) * memory
       }
       
       # When pause is an event (inter event is walking)
-      memory_w <- 0
+      memory_w = 0
       if (length(m_inverted) < 2) {
         memory_w = NA
       } else{
-        m3 <- mean(m_inverted[1:(length(m_inverted) - 1)])
-        m4 <- mean(m_inverted[2:(length(m_inverted))])
-        std3 <- sd(m_inverted[1:(length(m_inverted) - 1)])
-        std4 <- sd(m_inverted[2:(length(m_inverted))])
+        m3 = mean(m_inverted[1:(length(m_inverted) - 1)])
+        m4 = mean(m_inverted[2:(length(m_inverted))])
+        std3 = sd(m_inverted[1:(length(m_inverted) - 1)])
+        std4 = sd(m_inverted[2:(length(m_inverted))])
         for (i in 1:(length(m_inverted) - 1)) {
-          memory_w <- memory_w + ((m_inverted[i] - m3) * (m_inverted[i + 1] - m4) / (std3 * std4))
+          memory_w = memory_w + ((m_inverted[i] - m3) * (m_inverted[i + 1] - m4) / (std3 * std4))
         }
-        memory_w <- (1 / (length(m_inverted) - 1)) * memory_w
+        memory_w = (1 / (length(m_inverted) - 1)) * memory_w
       }
       
   # 6th Metric Group: Behavioral States
@@ -563,22 +563,22 @@ one_fly_statistics <- function(input_file,
       return(ret)
 }
 
-find_intersect_points <- function(x1, x2){
+find_intersect_points = function(x1, x2){
   ##Adapted from code by nograpes
   ##http://stackoverflow.com/questions/20519431/finding-point-of-intersection-in-r
   ## Find points where x1 is above x2.
-  above <- x1 > x2
+  above = x1 > x2
   ## Points always intersect when above=TRUE, then FALSE or reverse
-  intersect.points <- which(diff(above) != 0)
+  intersect.points = which(diff(above) != 0)
   ## Find the slopes for each line segment.
-  x1.slopes <- x1[intersect.points + 1] - x1[intersect.points]
-  x2.slopes <- x2[intersect.points + 1] - x2[intersect.points]
+  x1.slopes = x1[intersect.points + 1] - x1[intersect.points]
+  x2.slopes = x2[intersect.points + 1] - x2[intersect.points]
   ## Find the intersection for each segment.
-  x.points <- intersect.points + ((x2[intersect.points] - x1[intersect.points]) / (x1.slopes - x2.slopes))
+  x.points = intersect.points + ((x2[intersect.points] - x1[intersect.points]) / (x1.slopes - x2.slopes))
   return(x.points)
 }
 
-shuffle_is_pause <- function(is_pause) {
+shuffle_is_pause = function(is_pause) {
   if (max(is_pause) == 0) {
     return(is_pause)
   }
@@ -599,7 +599,7 @@ shuffle_is_pause <- function(is_pause) {
   ## unfold
 }
 
-data_filter <- function(filter, fly.info){
+data_filter = function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
     ind.include = NULL
@@ -612,7 +612,7 @@ data_filter <- function(filter, fly.info){
       }else{
         ind = fly.info$Genotype == genotype 
       }
-      fms <- fly.info$Fly.moving.speed[ind]
+      fms = fly.info$Fly.moving.speed[ind]
       rank_fms = rank(fms)
       ind.filter =  rank_fms <= length(fms) * 1.0 & rank_fms >= length(fms) * 0.0 # changed from 0.3 to 0.0
       ind.include = c(ind.include, which(ind)[ind.filter])
@@ -631,7 +631,7 @@ data_filter <- function(filter, fly.info){
       }else{
         ind = fly.info$Genotype == genotype
       }
-      pause <- fly.info$Fly.pause[ind]
+      pause = fly.info$Fly.pause[ind]
       ind.filter =  pause <= 0.7
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
@@ -643,9 +643,9 @@ data_filter <- function(filter, fly.info){
     session = "E1"
     for (ind in 1:nrow(fly.info)) {
       if (fly.info$Genotype[ind] == "WT") {
-        input.file <- paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
+        input.file = paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
                              fly.info$Fly[ind], "_",session,"_WT",".csv")
-      } else{input.file <- paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
+      } else{input.file = paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
                                   fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
       }
       framerate =	fly.info$Framerate[ind]
@@ -657,7 +657,7 @@ data_filter <- function(filter, fly.info){
   return(ind.include)
 }
 
-checking_fly_numbers <- function(fly.info, filter, filename){
+checking_fly_numbers = function(fly.info, filter, filename){
   ind.include = data_filter(filter, fly.info)
   fly.info.include = fly.info[ind.include, ]
   type_of_mutants = length(unique(fly.info.include$Genotype))
@@ -832,7 +832,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       y_text = 1.1
     }
     
-    col.pool <- c(
+    col.pool = c(
       "indianred3",
       "light blue",
       "grey80",
@@ -890,7 +890,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
   
 }
 
-pass_fly_QC <- function(input_file,
+pass_fly_QC = function(input_file,
                         framerate = 50,
                         speed_max_thres = 50,
                         speed_zero_thres = 1e-2,
@@ -975,7 +975,7 @@ pass_fly_QC <- function(input_file,
 
 
 
-one_fly_laser_statistics <- function(input_file, framerate){
+one_fly_laser_statistics = function(input_file, framerate){
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
   fly.position.raw = as.numeric(fly.file[[1]])
   fly.laser.raw = as.numeric(fly.file[[2]])
@@ -1095,18 +1095,18 @@ Delay_of_Laser_On_Off = function(input_file){
 }
 
 #Quantify the delay on/off of laser of all flies
-Laser_Delay <- function(file_name_filter, fly.info.movement) {
+Laser_Delay = function(file_name_filter, fly.info.movement) {
   laser_delays = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
     if(fly.info.movement$Genotype[ind]=="WT"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
     }
     if(fly.info.movement$Genotype[ind]=="CS"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
@@ -1165,18 +1165,18 @@ chance_of_being_hit_by_laser = function(input_file){
 }
 
 #Calculating all the flies' chance of being hit by types (T/R)
-total_chance_of_being_hit_by_laser <- function(file_name_filter, fly.info.movement) {
+total_chance_of_being_hit_by_laser = function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
     if(fly.info.movement$Genotype[ind]=="WT"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/",fly.info.movement$experimenter[ind],"/CS/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
     }
     if(fly.info.movement$Genotype[ind]=="CS"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
@@ -1217,17 +1217,17 @@ moving_status = function(input_file) {
 }
 
 ###Get all CS flies' cumulated moving status grouped by types (T/R/N)
-get_sequence_length <- function(file_name) {
+get_sequence_length = function(file_name) {
   if (sum(is.na(moving_status(file_name)))==0){
     return (length(moving_status(file_name)))
   }else{return(NA)}
 }
 
-get_cumsums_total <- function(file_name_filter, fly.info.movement) {
+get_cumsums_total = function(file_name_filter, fly.info.movement) {
   file_names = c()
   for (ind in 1:nrow(fly.info.movement)) {
     if(fly.info.movement$Genotype[ind]=="WT"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
                          file_name_filter, "_WT", ".csv"),
@@ -1235,7 +1235,7 @@ get_cumsums_total <- function(file_name_filter, fly.info.movement) {
       )
     }
     if(fly.info.movement$Genotype[ind]=="CS"){
-      input.file <- list.files(
+      input.file = list.files(
         path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
@@ -1269,7 +1269,7 @@ get_Wald_CI = function(data){
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
 
-learning_score <- function(metric.ind, query.genotype, query.fly, query.experimenter){
+learning_score = function(metric.ind, query.genotype, query.fly, query.experimenter){
   
   fly_genotype = query.genotype
   if (query.genotype == c("CS")){
@@ -1287,12 +1287,12 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
   session = "E1"
   for (category in c("T", "R", "N")) {
     query.session = gsub("X", category, session)
-    ind <- metric.df$Session == query.session &
+    ind = metric.df$Session == query.session &
       metric.df$Genotype %in% query.genotype &
       metric.df$Category == category &
       metric.df$Fly %in% query.fly &
       metric.df$Experimenter  %in%  query.experimenter
-    ind.E1 <- metric.df$Session == "E1" &
+    ind.E1 = metric.df$Session == "E1" &
       metric.df$Genotype %in% query.genotype &
       metric.df$Category == category &
       metric.df$Fly %in% query.fly &
@@ -1306,12 +1306,12 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
   ## input sessions data
   for (session in sessions) {
     if (grepl("T", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
+      ind.E1 = metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "T" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
+      ind = metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "T" &
         metric.df$Fly %in% query.fly &
@@ -1321,12 +1321,12 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
       # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("R", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
+      ind.E1 = metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "R" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
+      ind = metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "R" &
         metric.df$Fly %in% query.fly &
@@ -1336,12 +1336,12 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
       # z = (metric.df[ind,"Value"]) / (metric.df[ind.E1,"Value"])
       }
     if (grepl("N", session) == T) {
-      ind.E1 <- metric.df$Session == "E1" &
+      ind.E1 = metric.df$Session == "E1" &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "N" &
         metric.df$Fly %in% query.fly &
         metric.df$Experimenter  %in%  query.experimenter
-      ind <- metric.df$Session == session &
+      ind = metric.df$Session == session &
         metric.df$Genotype %in% query.genotype &
         metric.df$Category == "N" &
         metric.df$Fly %in% query.fly &
@@ -1376,7 +1376,7 @@ learning_score <- function(metric.ind, query.genotype, query.fly, query.experime
   return(input.y.df.pre)
 }
 
-get_query_info<-function(query.genotype){
+get_query_info=function(query.genotype){
   if(query.genotype %in% c("CS", "WT")){
     query.fly = fly.info.end[((fly.info.end$Genotype == "WT") |
                                     (fly.info.end$Genotype == "CS")), ]$Fly
@@ -1398,7 +1398,7 @@ get_query_info<-function(query.genotype){
               query.experimenter))
 }    
 
-test_initial_condition <- function(i, query.genotype){
+test_initial_condition = function(i, query.genotype){
   if (query.genotype == c("CS") || query.genotype == c("WT")){
     metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
   }else{
@@ -1419,7 +1419,7 @@ test_initial_condition <- function(i, query.genotype){
   return (a)
 }
 
-test_after_training <- function(i, query.genotype, normalization = F){
+test_after_training = function(i, query.genotype, normalization = F){
   if (normalization == F){
   if (query.genotype == c("CS") || query.genotype == c("WT")){
     metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
@@ -1442,7 +1442,7 @@ test_after_training <- function(i, query.genotype, normalization = F){
   }else{return(NULL)}
 }
 
-hypothesis_testing_E1 <- function(i, fly.info){
+hypothesis_testing_E1 = function(i, fly.info){
   metrices =  c(
     "Type", #1
     "Experimenter", #2
@@ -1512,12 +1512,13 @@ hypothesis_testing_E1 <- function(i, fly.info){
     temp = data.frame(factor = name_results, value = as.numeric(result))
     E1_tests = rbind(E1_tests, temp)
     }else{next}
-    }
+  }
+  E1_tests = cbind(E1_tests, E1_tests$value<0.05)
   return(E1_tests)
 }
 
 
-hypothesis_testing_3rdE1 <- function(i, fly.info){
+hypothesis_testing_3rdE1 = function(i, fly.info){
   metrices =  c(
     "Type", #1
     "Experimenter", #2
@@ -1562,21 +1563,16 @@ hypothesis_testing_3rdE1 <- function(i, fly.info){
     "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
     "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
   )
-  
   metric_name = metrices[i]
-  
   E5_tests = data.frame()
-  
   query.genotype = "WT"
   result = test_after_training(i, query.genotype)
   result = result$P.adjusted
   name_results = c(paste0("WT: ", "R-N"), paste0("WT: ", "T-N"), paste0("WT: ", "T-R"))
   E5_tests = data.frame(factor = name_results, value = as.numeric(result))
-  
   genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
                     "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
                     "108151 x 51636", "SUN1 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
-  
   for (j in genotype_list){
     query.genotype = j
     print(query.genotype)
