@@ -505,16 +505,16 @@ one_fly_statistics = function(input_file,
                               memory_w,
                               p_p2p,
                               p_p2pm,
-                              p_p2p_middle,
+                              # p_p2p_middle,
                               p_p2w,
                               p_p2wm,
-                              p_p2w_middle,
+                              # p_p2w_middle,
                               p_w2w,
                               p_w2wm,
-                              p_w2w_middle,
+                              # p_w2w_middle,
                               p_w2p,
-                              p_w2pm,
-                              p_w2p_middle
+                              p_w2pm
+                              # p_w2p_middle
                             ), stringsAsFactors=FALSE)
   
       colnames(ret) = c(
@@ -539,7 +539,7 @@ one_fly_statistics = function(input_file,
         "Moving Distance",#20
         "Number of Turns",#21
         "Number of Middle Turns",#22
-        "Fration of Middle Turns Out of Total Turns",#23
+        "Fraction of Middle Turns Out of Total Turns",#23
         "Burstiness (Pause)",#24
         "Burstiness (Inter Event Time)",#25
         "Burstiness (Scrambled)",#26
@@ -549,16 +549,16 @@ one_fly_statistics = function(input_file,
         "Memory of Walking", #30
         "Transition Probability (Pause not at the end): Pause to Pause", #31
         "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-        "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+        # "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
         "Transition Probability (Pause not at the end): Pause to Walking", #34
         "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
-        "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+        # "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
         "Transition Probability (Pause not at the end): Walking to Walking", #37
         "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
-        "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
-        "Transition Probability (Pause not at the end): Walking to Pause", #40
-        "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
-        "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+        # "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+        "Transition Probability (Pause not at the end): Walking to Pause", # 
+        "Transition Probability (Pause not at the end): Walking to Pause - middle" #41
+        # "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
       )
       return(ret)
 }
@@ -970,10 +970,6 @@ pass_fly_QC = function(input_file,
     return(TRUE)
   }
 }
-
-
-
-
 
 one_fly_laser_statistics = function(input_file, framerate){
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
