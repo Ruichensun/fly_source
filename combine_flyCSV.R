@@ -3,7 +3,7 @@ source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils
 
 #Mutants
 type = c("Mutants","Mutants", "mutants")
-experimenter <- c("JD", "SW", "JG", "ES", "XC", "RS", "LW")
+experimenter <- c("JD", "SW", "ES", "XC", "RS", "LW")
 combine_flyCSV(experimenter, type)
 
 #CS
