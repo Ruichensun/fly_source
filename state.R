@@ -103,14 +103,17 @@ state_matrix_all = function(states_df, span){
   p22_lst = c()
   
   for (i in 1:r){
-    m = state_matrix(as.numeric(states_df[1, ]))
+    m = state_matrix(as.numeric(states_df[i, ]))
+    # print(m)
     p11_lst = c(p11_lst, m[1, 1])
     p12_lst = c(p12_lst, m[1, 2])
     p21_lst = c(p21_lst, m[2, 1])
     p22_lst = c(p22_lst, m[2, 2])
   }
-  median_matrix = rbind(c(median(p11_lst), median(p12_lst)), c(median(p21_lst), median(p22_lst)))
-  mean_matrix = rbind(c(mean(p11_lst), mean(p12_lst)), c(mean(p21_lst), mean(p22_lst)))
+  median_matrix = rbind(c(median(p11_lst, na.rm = T), median(p12_lst, na.rm = T)), c(median(p21_lst, na.rm = T), median(p22_lst, na.rm = T)))
+  # print(median_matrix)
+  mean_matrix = rbind(c(mean(p11_lst, na.rm = T), mean(p12_lst, na.rm = T)), c(mean(p21_lst, na.rm = T), mean(p22_lst, na.rm = T)))
+  # print(mean_matrix)
   matrix = list(median_matrix, mean_matrix)
-  return (matrix())
+  return (matrix)
 }
