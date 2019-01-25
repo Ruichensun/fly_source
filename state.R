@@ -38,34 +38,29 @@ behavioral_state = function(input.file,  span){
   return (states)
 }
 
-
-## WT
-states_WT = data.frame()
-fly.info = fly.info.end[fly.info.end$Genotype %in% c("WT", "CS"),]
-
-for(ind in 1:nrow(fly.info)){
-  # print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
-  for(ind.session in 1:length(query.sessions)){
+get_all_states_WT = function(session, fly.info){
+  states_WT = data.frame()
+  for(ind in 1:nrow(fly.info)){
     input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
+                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",session, "_WT",".csv"),
                              full.names=T)
-    if(length(input.file) == 0){next
+    if(length(input.file) == 0){
+      next
     }else{
       framerate = fly.info$Framerate[ind]        
       states = behavioral_state(input.file, span=framerate)
-      Type = fly.info$Category[ind]
       if (length(states)<550){
         print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
         next
       }else{
-        states = cbind(Type, states[1:550])
-        states_WT = rbind(states_WT, states)
-        }
+        states = states[1:550]
+        states_WT = data.frame(rbind(states_WT, states))
+      }
     }
   }
+  colnames(states_WT) =  c(1:550)
+  return(states_WT)
 }
-
-
 
 state_matrix = function(states){
   p11 = 0
@@ -97,4 +92,25 @@ matrix.power <- function(A, n) {   # only works for diagonalizable matrices
   M <- e$vectors   # matrix for changing basis
   d <- e$values    # eigen values
   return(M %*% diag(d^n) %*% solve(M))
+}
+
+state_matrix_all = function(states_df, span){
+  r = nrow(states_df)
+  bin = 550
+  p11_lst = c()
+  p12_lst = c()
+  p21_lst = c()
+  p22_lst = c()
+  
+  for (i in 1:r){
+    m = state_matrix(as.numeric(states_df[1, ]))
+    p11_lst = c(p11_lst, m[1, 1])
+    p12_lst = c(p12_lst, m[1, 2])
+    p21_lst = c(p21_lst, m[2, 1])
+    p22_lst = c(p22_lst, m[2, 2])
+  }
+  median_matrix = rbind(c(median(p11_lst), median(p12_lst)), c(median(p21_lst), median(p22_lst)))
+  mean_matrix = rbind(c(mean(p11_lst), mean(p12_lst)), c(mean(p21_lst), mean(p22_lst)))
+  matrix = list(median_matrix, mean_matrix)
+  return (matrix())
 }
