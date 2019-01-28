@@ -34,6 +34,9 @@ IEI_survival = function(input.file,  speed_max_thres = 90){
   cs = cumsum(IE)
   s = length(cs)
   cs = 1 + log(1 - (cs/s))
+  # cs = cs/s
+  # cs = log(1 - (cs/s))
+  # cs = 1 - (cs/s)
   return(cs)
 }
 
@@ -55,8 +58,23 @@ get_all_survival_WT = function(session, fly.info){
 }
 
 plot_all_survival_WT = function(survivals){
-  plot(1, type="n", xlab="", ylab="", xlim=c(0, 30000), ylim=c(0, 1))
-  for (i in (1:length(survivals))){
+  # plot(1, type="n", xlab="", ylab="", xlim=c(0, 30000), ylim=c(0, 1))
+  plot(x = c(1:length(survivals[[1]])), y = survivals[[1]], log = "y",  ylim=c(0.000001, 1))
+  for (i in (2:length(survivals))){
     lines(survivals[[i]])
   }
 }
+
+
+# E1_survivals = get_all_survival_WT("E1", fly.info)
+# plot_all_survival_WT(E1_survivals)
+# 
+# 
+# E1T1E1T1E1_survivals = get_all_survival_WT("E1T1E1T1E1", fly.info)
+# plot_all_survival_WT(E1T1E1T1E1_survivals)
+# 
+# E1N1E1N1E1_survivals = get_all_survival_WT("E1N1E1N1E1", fly.info)
+# plot_all_survival_WT(E1N1E1N1E1_survivals)
+# 
+# E1R1E1R1E1_survivals = get_all_survival_WT("E1R1E1R1E1", fly.info)
+# plot_all_survival_WT(E1R1E1R1E1_survivals)
