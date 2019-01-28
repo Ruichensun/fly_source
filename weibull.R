@@ -10,7 +10,7 @@ input.file6 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/C
 
 # Some metrics from the Kottler paper: minimal IBI is 0.2 sec (which in my case will be equivalent of 10 frames)
 
-IEI_survival = function(input.file,  speed_max_thres = 90){
+IEI_survival = function(input.file,  speed_max_thres = 90, framerate = 50){
   tryCatch({
     x = read.table(input.file, header = T, sep = ",", stringsAsFactors = F)
   }, error = function(e) {
@@ -29,15 +29,14 @@ IEI_survival = function(input.file,  speed_max_thres = 90){
       fly_speed[i] = 0
     }
   }
-  
-  IE = replace(abs(fly_speed), abs(fly_speed) > 0, 1)
-  cs = cumsum(IE)
-  s = length(cs)
-  cs = 1 + log(1 - (cs/s))
-  # cs = cs/s
-  # cs = log(1 - (cs/s))
-  # cs = 1 - (cs/s)
-  return(cs)
+  pause_df = get_pause_df(fly_speed)
+  cdf = ecdf(pause_df$Pause_Duration/framerate)
+  len_cdf = dim(pause_df)[1]
+  surv = c()
+  for (i in 1:len_cdf){
+    surv = c(surv, 1-cdf(i))
+  }
+  return(surv)
 }
 
 get_all_survival_WT = function(session, fly.info){
@@ -50,7 +49,7 @@ get_all_survival_WT = function(session, fly.info){
       next
     }else{
       framerate = fly.info$Framerate[ind]
-      survival = IEI_survival(input.file, speed_max_thres = 90)
+      survival = IEI_survival(input.file, speed_max_thres = 90, framerate = framerate)
       survivals = append(survivals, list(survival))
     }
   }
@@ -59,7 +58,10 @@ get_all_survival_WT = function(session, fly.info){
 
 plot_all_survival_WT = function(survivals){
   # plot(1, type="n", xlab="", ylab="", xlim=c(0, 30000), ylim=c(0, 1))
-  plot(x = c(1:length(survivals[[1]])), y = survivals[[1]], log = "y",  ylim=c(0.000001, 1))
+  plot(x = c(1:length(survivals[[1]])), y = survivals[[1]]
+       # log = "y",  
+       # ylim=c(0.000001, 1)
+       )
   for (i in (2:length(survivals))){
     lines(survivals[[i]])
   }

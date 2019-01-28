@@ -42,6 +42,95 @@ get_fly_initial_pause = function(x, framerate){
   return(pause / experiment_time)
 }
 
+get_pause_df = function(fly_pos){
+  label_for_pause = rep(0, length(fly_pos))
+  for (i in 2:length(label_for_pause)) {
+    if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
+    else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 2}
+    else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 3}
+    else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {label_for_pause[i] = 4}
+  }
+  
+  # Getting the index for the pause start and ends #
+  starts = c()
+  ends = c()
+  is_start = 1
+  if (fly_speed[1] == 0){
+    starts = c(starts, 1)
+    is_start = 0
+  }
+  
+  for (i in 1:length(label_for_pause)) {
+    if (label_for_pause[i] != 0) {
+      if (is_start == 1) {
+        if ((label_for_pause[i] == 1) | (label_for_pause[i] == 4)) {
+          starts = c(starts, i)
+          is_start = 0
+        }
+      }
+      else{
+        ends = c(ends, i)
+        is_start = 1
+      }
+    }
+  }
+  
+  if (length(starts) < 1) {
+    starts = 1
+  }
+  pause_df = data.frame()
+  
+  if (length(ends) < 1) {
+    start_type = label_for_pause[starts]
+    start_position = fly_pos[starts - 1]
+    ends = length(fly_pos)
+    end_position = fly_pos[ends]
+    end_type = label_for_pause[ends]
+    pause_df = data.frame(
+      starts[1:length(ends)] - 1,
+      start_position[1:length(ends)],
+      start_type[1:length(ends)],
+      ends,
+      end_position,
+      end_type,
+      ends - starts[1:length(ends)]
+    )
+  } else{
+    if (length(starts) - length(ends) == 1){
+      ends = c(ends, experiment_time)
+    }
+    end_type = label_for_pause[ends]
+    start_type = label_for_pause[starts]
+    if (starts[1] == 1){
+      start_position = fly_pos[starts]
+      startindex = starts[1:length(ends)]
+    }else{
+      start_position = fly_pos[starts - 1]
+      startindex = starts[1:length(ends)] - 1
+    }
+    end_position = fly_pos[ends]
+    pause_df = data.frame(
+      startindex,
+      start_position[1:length(ends)],
+      start_type[1:length(ends)],
+      ends - 1,
+      end_position,
+      end_type,
+      ends - starts[1:length(ends)]
+    )
+  }
+  colnames(pause_df) = c(
+    "Start_Index",
+    "Start_Position",
+    "Start_Type",
+    "End_Index",
+    "End_Position",
+    "End_Type",
+    "Pause_Duration"
+  )
+  return(pause_df)
+}
+
 one_fly_statistics = function(input_file,
                                framerate = 50,
                                speed_max_thres = 90,
@@ -94,94 +183,8 @@ one_fly_statistics = function(input_file,
       }
 
   # 1st Metric Group: Pause #
+      pause_df = get_pause_df(fly_speed)
       
-      # Two types of pauses (fly walking left/right). Each types of pause has two ends (start/end) 
-      label_for_pause = rep(0, length(fly_pos))
-      for (i in 2:length(label_for_pause)) {
-        if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
-        else if ((fly_speed[i] > 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 2}
-        else if ((fly_speed[i] < 0) & (fly_speed[i - 1] == 0)) {label_for_pause[i] = 3}
-        else if ((fly_speed[i] == 0) & (fly_speed[i - 1] < 0)) {label_for_pause[i] = 4}
-      }
-      
-      # Getting the index for the pause start and ends #
-      starts = c()
-      ends = c()
-      is_start = 1
-      if (fly_speed[1] == 0){
-        starts = c(starts, 1)
-        is_start = 0
-      }
-        
-      for (i in 1:length(label_for_pause)) {
-        if (label_for_pause[i] != 0) {
-          if (is_start == 1) {
-            if ((label_for_pause[i] == 1) | (label_for_pause[i] == 4)) {
-              starts = c(starts, i)
-              is_start = 0
-            }
-          }
-          else{
-            ends = c(ends, i)
-            is_start = 1
-          }
-        }
-      }
-      
-      if (length(starts) < 1) {
-        starts = 1
-      }
-      pause_df = data.frame()
-
-      if (length(ends) < 1) {
-        start_type = label_for_pause[starts]
-        start_position = fly_pos[starts - 1]
-        ends = length(fly_pos)
-        end_position = fly_pos[ends]
-        end_type = label_for_pause[ends]
-        pause_df = data.frame(
-          starts[1:length(ends)] - 1,
-          start_position[1:length(ends)],
-          start_type[1:length(ends)],
-          ends,
-          end_position,
-          end_type,
-          ends - starts[1:length(ends)]
-        )
-      } else{
-        if (length(starts) - length(ends) == 1){
-          ends = c(ends, experiment_time)
-        }
-        end_type = label_for_pause[ends]
-        start_type = label_for_pause[starts]
-        if (starts[1] == 1){
-          start_position = fly_pos[starts]
-          startindex = starts[1:length(ends)]
-        }else{
-          start_position = fly_pos[starts - 1]
-          startindex = starts[1:length(ends)] - 1
-        }
-        end_position = fly_pos[ends]
-        pause_df = data.frame(
-          startindex,
-          start_position[1:length(ends)],
-          start_type[1:length(ends)],
-          ends - 1,
-          end_position,
-          end_type,
-          ends - starts[1:length(ends)]
-        )
-      }
-      colnames(pause_df) = c(
-        "Start_Index",
-        "Start_Position",
-        "Start_Type",
-        "End_Index",
-        "End_Position",
-        "End_Type",
-        "Pause_Duration"
-      )
-
       # Real pause is the pauses with duration longer than pause_frame_thres
       real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
   
