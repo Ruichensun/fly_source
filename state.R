@@ -1,13 +1,6 @@
 # Behavior states analysis - preliminary code
 library(markovchain)
-
-input.file = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1_WT.csv"
-input.file2 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1N1E1_WT.csv"
-input.file3 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1N1E1N1E1_WT.csv"
-
-input.file4 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1_WT.csv"
-input.file5 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1T1E1_WT.csv"
-input.file6 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1T1E1T1E1_WT.csv"
+source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 
 behavioral_state = function(input.file,  span){
@@ -41,16 +34,25 @@ behavioral_state = function(input.file,  span){
 get_all_states_WT = function(session, fly.info){
   states_WT = data.frame()
   for(ind in 1:nrow(fly.info)){
-    input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",session, "_WT",".csv"),
-                             full.names=T)
+    if(fly.info$Genotype[ind]=="WT"){
+      input.file = list.files(
+        path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),
+        pattern = paste0("ProcessedData_Fly", fly.info$Fly[ind], "_", session, "_WT", ".csv"),
+        full.names = T
+      )
+    }
+    if(fly.info$Genotype[ind]=="CS"){
+      input.file = list.files(path = paste0("data/", fly.info$Experimenter[ind], "/mutants/"),
+                              pattern = paste0("ProcessedData_Fly", fly.info$Fly[ind], "_", session, "_CS", ".csv"),
+                              full.names = T)
+    }
     if(length(input.file) == 0){
       next
     }else{
       framerate = fly.info$Framerate[ind]        
       states = behavioral_state(input.file, span=framerate)
       if (length(states)<550){
-        print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
+        print(input.file)
         next
       }else{
         states = states[1:550]
@@ -86,7 +88,6 @@ state_matrix = function(states){
 }
 
 # count the number of 01, 11, 10, and 00.
-
 matrix.power <- function(A, n) {   # only works for diagonalizable matrices
   e <- eigen(A)
   M <- e$vectors   # matrix for changing basis
@@ -104,7 +105,6 @@ state_matrix_all = function(states_df, span){
   
   for (i in 1:r){
     m = state_matrix(as.numeric(states_df[i, ]))
-    # print(m)
     p11_lst = c(p11_lst, m[1, 1])
     p12_lst = c(p12_lst, m[1, 2])
     p21_lst = c(p21_lst, m[2, 1])
