@@ -97,7 +97,7 @@ get_pause_df = function(fly_pos, fly_speed){
     )
   } else{
     if (length(starts) - length(ends) == 1){
-      ends = c(ends, experiment_time)
+      ends = c(ends, length(fly_pos))
     }
     end_type = label_for_pause[ends]
     start_type = label_for_pause[starts]
@@ -138,7 +138,8 @@ one_fly_statistics = function(input_file,
                                pause_frame_thres = 25,
                                chamber_end_thres = 60,
                                chamber_left = 21,
-                               chamber_right = 752){
+                               chamber_right = 752,
+                               special_case = F){
   #  pause_frame_thres - Least of number of frames in a pause
   #  speed_zero_thres - How small the speed is to be treated as not moving (i.e. zero)
   #  speed_max_thres - Maximum speed allowed (The setting for this threshold is as follows:
@@ -153,12 +154,19 @@ one_fly_statistics = function(input_file,
   #  chamber_end_thres - How close (in ) a position to one end of the chamber to be treated as part of the end
   
   # Get File Info
+  if (special_case == F){
       file_path = unlist(strsplit(input_file, "/"))
       Experimenter = file_path[2]
       file_name = unlist(strsplit(file_path[4], "_"))
       file_session = file_name[3]
       genotype = unlist(strsplit(file_name[4],".csv"))[1]
       fly_num = as.integer(unlist((strsplit(file_name[2], "Fly")))[2])
+  }else if(special_case == T){
+      Experimenter = "JGLNRS"
+      file_session = unlist(strsplit(input_file, "_"))[3]
+      genotype = "WT"
+      fly_num = as.integer(unlist(strsplit(unlist(strsplit(input_file, "_"))[2], "Fly"))[2])
+  }
   
   # Load data
 
@@ -622,7 +630,7 @@ data_filter = function(filter, fly.info){
     }
   }
   
-  # filter 2: filtering flies by initial pause
+  # filter 2: filtering flies by pause
   if (filter == 2) {
     ind.include = NULL
     for (genotype in unique(fly.info$Genotype)) {
@@ -635,7 +643,7 @@ data_filter = function(filter, fly.info){
         ind = fly.info$Genotype == genotype
       }
       pause = fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.7
+      ind.filter =  pause <= 0.6
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
@@ -1499,7 +1507,7 @@ hypothesis_testing_E1 = function(i, fly.info){
   
   genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
                     "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
-                    "108151 x 51636", "SUN1 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
+                    "108151 x 51636", "SUN1 x CS", "SUN2 x CS", "SUN3 x CS","Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
   
   for (j in genotype_list){
     query.genotype = j
@@ -1571,7 +1579,7 @@ hypothesis_testing_3rdE1 = function(i, fly.info){
   E5_tests = data.frame(factor = name_results, value = as.numeric(result))
   genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
                     "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
-                    "108151 x 51636", "SUN1 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
+                    "108151 x 51636",  "SUN1 x CS", "SUN2 x CS", "SUN3 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
   for (j in genotype_list){
     query.genotype = j
     print(query.genotype)

@@ -22,8 +22,8 @@ for (i in 1:length(unique(fly.info.mutants$Genotype))){
 # Hypothesis Testing
 
 # 9: Percentage Time Active - Middle Pause
-hypothesis_testing_E1(9, fly.info.mutants)
-hypothesis_testing_3rdE1(9, fly.info.mutants)
+E1 = hypothesis_testing_E1(8, fly.info.mutants)
+E5 = hypothesis_testing_3rdE1(8, fly.info.mutants)
 
 # Some backup codes
 
