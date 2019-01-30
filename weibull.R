@@ -20,7 +20,7 @@ IEI_survival = function(input.file,  speed_max_thres = 90, framerate = 50){
       fly_speed[i] = 0
     }
   }
-  pause_df = get_pause_df(fly_speed)
+  pause_df = get_pause_df(fly_pos, fly_speed)
   real_pause_df = pause_df[pause_df$Pause_Duration>=25,]
   cdf = ecdf(real_pause_df$Pause_Duration/framerate)
   len_cdf = dim(real_pause_df)[1]

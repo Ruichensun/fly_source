@@ -42,7 +42,7 @@ get_fly_initial_pause = function(x, framerate){
   return(pause / experiment_time)
 }
 
-get_pause_df = function(fly_pos){
+get_pause_df = function(fly_pos, fly_speed){
   label_for_pause = rep(0, length(fly_pos))
   for (i in 2:length(label_for_pause)) {
     if ((fly_speed[i] == 0) & (fly_speed[i - 1] > 0)) {label_for_pause[i] = 1}
@@ -183,7 +183,7 @@ one_fly_statistics = function(input_file,
       }
 
   # 1st Metric Group: Pause #
-      pause_df = get_pause_df(fly_speed)
+      pause_df = get_pause_df(fly_pos, fly_speed)
       
       # Real pause is the pauses with duration longer than pause_frame_thres
       real_pause_df = subset(pause_df, Pause_Duration >= pause_frame_thres)
