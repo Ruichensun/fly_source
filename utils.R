@@ -26,7 +26,7 @@ combine_flyCSV = function(experimenter, type){
 }
 
 get_fly_moving_speed = function(x, framerate) {
-  data_start = 21 #changed it to 20 from 10 on Oct 5, 2016
+  data_start = 31 #changed it to 20 from 10 on Oct 5, 2016
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   tot_moving_dist = sum(abs(diff(fly_pos)))
@@ -34,7 +34,7 @@ get_fly_moving_speed = function(x, framerate) {
 }
 
 get_fly_initial_pause = function(x, framerate){
-  data_start = 21
+  data_start = 31
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos) / framerate
   fly_speed = diff(c(x[data_start - 1], fly_pos))
@@ -710,16 +710,16 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     "Memory of Walking", #30
     "Transition Probability (Pause not at the end): Pause to Pause", #31
     "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-    "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
+    # "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
     "Transition Probability (Pause not at the end): Pause to Walking", #34
     "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
-    "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
+    # "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
     "Transition Probability (Pause not at the end): Walking to Walking", #37
     "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
-    "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
+    # "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
     "Transition Probability (Pause not at the end): Walking to Pause", #40
-    "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
-    "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+    "Transition Probability (Pause not at the end): Walking to Pause - middle" #41
+    # "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
   )
   
   if(query.genotype[1] == "WT"){
@@ -822,15 +822,15 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       yrange = c(-1, 1)
       y_text = 1.1
     }
-    if (i %in% c(31:33)) {
+    if (i %in% c(31:32)) {
       yrange = c(0.8, 1)
       y_text = 1.1
     }
-    if (i %in% c(34:36)) {
+    if (i %in% c(33:34)) {
       yrange = c(0, 0.2)
       y_text = 0.22
     }
-    if (i %in% c(37:42)) {
+    if (i %in% c(35:38)) {
       yrange = c(0, 1)
       y_text = 1.1
     }
@@ -926,7 +926,7 @@ pass_fly_QC = function(input_file,
   x = as.numeric(x[, 1])
   fly_num = sapply(strsplit(input_file, "_"), function(x)
     return(gsub("Fly", "", x[2])))
-  data_start = 21 
+  data_start = 31 
   fly_pos = x[data_start:min(600 * framerate, length(x))]
   experiment_time = length(fly_pos)
   ##Get the transient speed
@@ -986,7 +986,7 @@ one_fly_laser_statistics = function(input_file, framerate){
     )
     names(ret) = c("Number of Laser Punishments", "Total Laser Exposure in Seconds")
   }else{
-    data_start = 21
+    data_start = 31
     fly_pos = fly.position.raw[data_start:length(fly.position.raw)]
     fly_laser = fly.laser.raw[data_start:length(fly.laser.raw)]
     if (fly_laser[length(fly_laser)] > 0) {
@@ -1227,7 +1227,7 @@ get_cumsums_total = function(file_name_filter, fly.info.movement) {
   for (ind in 1:nrow(fly.info.movement)) {
     if(fly.info.movement$Genotype[ind]=="WT"){
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
+        path = paste0("data/", fly.info.movement$Experimenter[ind], "/CS/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
                          file_name_filter, "_WT", ".csv"),
         full.names = T
@@ -1235,7 +1235,7 @@ get_cumsums_total = function(file_name_filter, fly.info.movement) {
     }
     if(fly.info.movement$Genotype[ind]=="CS"){
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+        path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
     }
@@ -1375,7 +1375,7 @@ learning_score = function(metric.ind, query.genotype, query.fly, query.experimen
   return(input.y.df.pre)
 }
 
-get_query_info=function(query.genotype){
+get_query_info = function(query.genotype){
   if(query.genotype %in% c("CS", "WT")){
     query.fly = fly.info.end[((fly.info.end$Genotype == "WT") |
                                     (fly.info.end$Genotype == "CS")), ]$Fly

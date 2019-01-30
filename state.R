@@ -31,8 +31,8 @@ behavioral_state = function(input.file,  span){
   return (states)
 }
 
-get_all_states_WT = function(session, fly.info){
-  states_WT = data.frame()
+get_all_states = function(session, fly.info){
+  states = data.frame()
   for(ind in 1:nrow(fly.info)){
     if(fly.info$Genotype[ind]=="WT"){
       input.file = list.files(
@@ -56,12 +56,12 @@ get_all_states_WT = function(session, fly.info){
         next
       }else{
         states = states[1:550]
-        states_WT = data.frame(rbind(states_WT, states))
+        states = data.frame(rbind(states, states))
       }
     }
   }
-  colnames(states_WT) =  c(1:550)
-  return(states_WT)
+  colnames(states) =  c(1:550)
+  return(states)
 }
 
 state_matrix = function(states){
