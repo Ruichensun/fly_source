@@ -649,7 +649,7 @@ data_filter = function(filter, fly.info){
         ind = fly.info$Genotype == genotype
       }
       pause = fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.6
+      ind.filter =  pause <= 0.9
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
@@ -811,9 +811,14 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       y_text = 610
     }
     
-    if (i %in% c(16:19)) {
+    if (i %in% c(16:17)) {
       yrange = c(0, 50)
       y_text = 50.5
+    }
+    
+    if (i %in% c(18:19)) {
+      yrange = c(0, 25)
+      y_text = 25.5
     }
     
     if (i == 20) {
@@ -1420,6 +1425,7 @@ test_initial_condition = function(i, query.genotype){
     metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
     metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
   }
+  
   metric = data.frame(
     factor = c(rep("E1-T", length(metric.df[metric.df$Type=="T" & metric.df$Session=="E1", ][, i])),
                rep("E1-R", length(metric.df[metric.df$Type=="R" & metric.df$Session=="E1", ][, i])),
