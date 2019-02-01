@@ -205,6 +205,8 @@ one_fly_statistics = function(input_file,
       
       md_pause_dur = median(real_pause_df$Pause_Duration) / framerate
       md_pause_middle_dur = (median(pause_middle_dur)) / framerate
+      avg_pause_dur = mean(real_pause_df$Pause_Duration) / framerate
+      avg_pause_middle_dur = (mean(pause_middle_dur)) / framerate
       
       frac_pause = sum(real_pause_df$Pause_Duration) / experiment_time 
       frac_pause_middle = (sum(pause_middle_dur)) / experiment_time
@@ -524,8 +526,10 @@ one_fly_statistics = function(input_file,
                               p_w2wm,
                               # p_w2w_middle,
                               p_w2p,
-                              p_w2pm
+                              p_w2pm,
                               # p_w2p_middle
+                              avg_pause_dur,
+                              avg_pause_middle_dur
                             ), stringsAsFactors=FALSE)
   
       colnames(ret) = c(
@@ -568,8 +572,10 @@ one_fly_statistics = function(input_file,
         "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
         # "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
         "Transition Probability (Pause not at the end): Walking to Pause", # 
-        "Transition Probability (Pause not at the end): Walking to Pause - middle" #41
+        "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
         # "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+        "Average Pause Duration",
+        "Average Middle Pause Duration"
       )
       return(ret)
 }
@@ -718,16 +724,14 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     "Memory of Walking", #30
     "Transition Probability (Pause not at the end): Pause to Pause", #31
     "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-    # "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
-    "Transition Probability (Pause not at the end): Pause to Walking", #34
-    "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
-    # "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
-    "Transition Probability (Pause not at the end): Walking to Walking", #37
-    "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
-    # "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
-    "Transition Probability (Pause not at the end): Walking to Pause", #40
-    "Transition Probability (Pause not at the end): Walking to Pause - middle" #41
-    # "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
+    "Transition Probability (Pause not at the end): Pause to Walking", #33
+    "Transition Probability (Pause not at the end): Pause to Walking - middle", #34
+    "Transition Probability (Pause not at the end): Walking to Walking", #35
+    "Transition Probability (Pause not at the end): Walking to Walking - middle", #36
+    "Transition Probability (Pause not at the end): Walking to Pause", #37
+    "Transition Probability (Pause not at the end): Walking to Pause - middle", #38
+    "Average Pause Duration", #39
+    "Average Middle Pause Duration" #40
   )
   
   if(query.genotype[1] == "WT"){
@@ -841,6 +845,10 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     if (i %in% c(35:38)) {
       yrange = c(0, 1)
       y_text = 1.1
+    }
+    if (i %in% c(39:40)) {
+      yrange = c(0, 600)
+      y_text = 605
     }
     
     col.pool = c(
@@ -1426,6 +1434,30 @@ test_initial_condition = function(i, query.genotype){
   return (a)
 }
 
+test_mid_training = function(i, query.genotype, normalization = F){
+  if (normalization == F){
+    if (query.genotype == c("CS") || query.genotype == c("WT")){
+      metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
+    } else{
+      metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
+      metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+    }
+    metric = data.frame(
+      factor = c(rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
+                 rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
+                 rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i]))),
+      value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1", ][, i],
+                           metric.df[metric.df$Session=="E1R1E1", ][, i],
+                           metric.df[metric.df$Session=="E1N1E1", ][, i]))
+    )
+    colnames(metric) = c("Session", "Value")
+    metric$Session = factor(metric$Session, levels=c("E1T1E1", "E1R1E1", "E1N1E1"))
+    a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+    return(a)
+  }else{return(NULL)}
+}
+
+
 test_after_training = function(i, query.genotype, normalization = F){
   if (normalization == F){
   if (query.genotype == c("CS") || query.genotype == c("WT")){
@@ -1512,7 +1544,7 @@ hypothesis_testing_E1 = function(i, fly.info){
   for (j in genotype_list){
     query.genotype = j
     print(query.genotype)
-    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] != 0) {
+    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] >= 20) {
     result = test_initial_condition(i, query.genotype)
     result = result$P.adjusted
     name_results =  c(paste0(query.genotype, ": R-N"), paste0(query.genotype, ": T-N"), paste0(query.genotype, ": T-R"))
@@ -1524,6 +1556,72 @@ hypothesis_testing_E1 = function(i, fly.info){
   return(E1_tests)
 }
 
+
+hypothesis_testing_2ndE1 = function(i, fly.info){
+  metrices =  c(
+    "Type", #1
+    "Experimenter", #2
+    "Genotype", #3
+    "Fly Number", #4
+    "Session", #5
+    "Number of Pause", #6
+    "Number of Middle Pause", #7
+    "Percentage Time Active", #8
+    "Percentage Time Active - Pause not at the End", #9
+    "Median Pause Duration",#10
+    "Median Middle Pause Duration", #11    
+    "Max Pause Duration", #12
+    "Max Middle Pause Duration", #13
+    "First Pause Duration", #14
+    "First Middle Pause Duration", #15
+    "Average Moving Speed", #16
+    "Average Moving Speed (excluding pause)", #17
+    "Average Speed When Enter Pause", #18
+    "Average Speed When Exit Pause",#19
+    "Moving Distance",#20
+    "Number of Turns",#21
+    "Number of Middle Turns",#22
+    "Fration of Middle Turns Out of Total Turns",#23
+    "Burstiness (Pause)",#24
+    "Burstiness (Inter Event Time)",#25
+    "Burstiness (Scrambled)",#26
+    "Burstiness (Walking bouts-thresholding)",#27
+    "Burstiness (Walking events-no thres)",#28
+    "Memory of Pause", #29
+    "Memory of Walking", #30
+    "Transition Probability (Pause not at the end): Pause to Pause", #31
+    "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+    "Transition Probability (Pause not at the end): Pause to Walking", #34
+    "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
+    "Transition Probability (Pause not at the end): Walking to Walking", #37
+    "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
+    "Transition Probability (Pause not at the end): Walking to Pause", #40
+    "Transition Probability (Pause not at the end): Walking to Pause - middle" #41
+  )
+  metric_name = metrices[i]
+  E3_tests = data.frame()
+  query.genotype = "WT"
+  result = test_mid_training(i, query.genotype)
+  result = result$P.adjusted
+  name_results = c(paste0("WT: ", "R-N"), paste0("WT: ", "T-N"), paste0("WT: ", "T-R"))
+  E3_tests = data.frame(factor = name_results, value = as.numeric(result))
+  genotype_list = c("SUN1", "SUN2", "SUN3", "JG17 x JU30", "R60D05 x JU30", "MB009B x JU30", "MB607B x JU30", "MB131B x JU30", "MB419B x JU30",  "UAS-DopR1-IR x 51635", 
+                    "UAS-DopR2-RNAi x 51635", "CS x JU30", "MB419B x DopR1-IR", "JG17 x DopR1-IR", "MB009B x DopR1-IR", "R60D05 x DopR1-IR", "MB607B x DopR1-IR", "MB131B x DopR1-IR",
+                    "108151 x 51636",  "SUN1 x CS", "SUN2 x CS", "SUN3 x CS", "Empty-Gal4 x JU30", "Empty-Gal4 x CS", "D2R-1 x 51635")
+  for (j in genotype_list){
+    query.genotype = j
+    print(query.genotype)
+    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] >= 20) {
+      result = test_mid_training(i, query.genotype)
+      result = result$P.adjusted
+      name_results =  c(paste0(query.genotype, ": R-N"), paste0(query.genotype, ": T-N"), paste0(query.genotype, ": T-R"))
+      temp = data.frame(factor = name_results, value = as.numeric(result))
+      E3_tests = rbind(E3_tests, temp)
+    }else{next}
+  }
+  E3_tests = cbind(E3_tests, E3_tests$value<0.05)
+  return(E3_tests)
+}
 
 hypothesis_testing_3rdE1 = function(i, fly.info){
   metrices =  c(
@@ -1583,7 +1681,7 @@ hypothesis_testing_3rdE1 = function(i, fly.info){
   for (j in genotype_list){
     query.genotype = j
     print(query.genotype)
-    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] != 0) {
+    if (dim(all_ofs_mutants[all_ofs_mutants$Genotype==query.genotype,])[1] >= 20) {
       result = test_after_training(i, query.genotype)
       result = result$P.adjusted
       name_results =  c(paste0(query.genotype, ": R-N"), paste0(query.genotype, ": T-N"), paste0(query.genotype, ": T-R"))
