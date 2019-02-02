@@ -51,4 +51,4 @@ fly.info.end = fly.info.include[ind.filtered, ]
 
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
 
-checking_fly_numbers(fly.info.include, 2, filename="Mutants_headcount.csv")
+checking_fly_numbers(fly.info.include, 2, filename="Mutants_headcount-2nd.csv")
