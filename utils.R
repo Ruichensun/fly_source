@@ -616,6 +616,30 @@ shuffle_is_pause = function(is_pause) {
   ## unfold
 }
 
+
+Use_T_find_R = function(fly.info, Tindex){
+  if (fly.info[Tindex, ]$Category != "T"){
+    return(c())
+  }else{
+    Rlst = c()
+    setup_T = fly.info[Tindex, ]$Setup
+    for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
+      if ((i < 1) | (i > nrow(fly.info))){
+        next
+      }
+      if (fly.info[i, ]$Category == "R" & 
+          fly.info[i, ]$Genotype == fly.info[Tindex, ]$Genotype &
+          fly.info[i, ]$Exp.date == fly.info[Tindex, ]$Exp.date &
+          fly.info[i, ]$Experimenter == fly.info[Tindex, ]$Experimenter & 
+          fly.info[i, ]$Setup != fly.info[Tindex, ]$Setup){
+        Rlst = c(Rlst, i)
+      }
+    }
+  return (Rlst)
+  }
+  
+}
+
 data_filter = function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
@@ -649,7 +673,7 @@ data_filter = function(filter, fly.info){
         ind = fly.info$Genotype == genotype
       }
       pause = fly.info$Fly.pause[ind]
-      ind.filter =  pause <= 0.8
+      ind.filter =  pause <= 0.9
       ind.include = c(ind.include, which(ind)[ind.filter])
     }
   }
@@ -758,7 +782,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
   }
   
-  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
+  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), "_point8.pdf"),
       onefile = T, width = 8
   )
   

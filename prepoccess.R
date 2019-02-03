@@ -129,7 +129,6 @@ for (ind in 1:nrow(fly.info)) {
     write.table(fly.pos.dat, output.file, row.names = F, quote = F, sep = ',')
   }
 }
-
 fly.info.out$Framerate = fly.info.framerate
 fly.info.out$Fly.moving.speed = fly.moving.speed
 fly.info.out$Fly.pause = fly.pause
