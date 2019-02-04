@@ -782,7 +782,7 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
   }
   
-  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), "_point8.pdf"),
+  pdf(paste0("all_metric_", query.genotype[1], "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )
   
