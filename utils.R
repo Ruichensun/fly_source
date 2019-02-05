@@ -938,6 +938,220 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
   
 }
 
+plot_comparison = function(genotype, metric.ind, all_ofs){
+  if (genotype == "R60D05 x JU30"){
+    g_list = c("R60D05 x JU30", 
+               "R60D05 x DopR1-IR",
+               # "JG17 x JU30",
+               "Empty-Gal4 x CS",
+               # "Empty-Gal4 x JU30", 
+               "CS x JU30")
+  }else if(genotype == "JG17 x JU30"){
+    g_list = c("JG17 x JU30",
+               "JG17 x DopR1-IR",
+               "Empty-Gal4 x CS",
+               "CS x JU30"
+              )
+  }else if(genotype == "SUN1"){
+    g_list = c("SUN1",
+               "SUN1 x CS",
+               "WT",
+               "UAS-DopR1-IR x 51635"
+    )
+  }else if(genotype == "SUN2"){
+    g_list = c("SUN2",
+               "SUN2 x CS",
+               "WT",
+               "UAS-DopR2-RNAi x 51635")
+  }else if(genotype == "MB009B x JU30"){
+    g_list = c("MB009B x JU30", 
+               "MB009B x DopR1-IR",
+               "Empty-Gal4 x CS",
+               "CS x JU30")
+  }else if(genotype == "MB131B x JU30"){
+    g_list = c("MB131B x JU30", 
+               "MB131B x DopR1-IR",
+               "Empty-Gal4 x CS",
+               "CS x JU30")
+  }else if(genotype == "MB419B x JU30"){
+    g_list = c("MB419B x JU30", 
+               "MB419B x DopR1-IR",
+               "Empty-Gal4 x CS",
+               "CS x JU30")
+  }else if(genotype == "MB607B x JU30"){
+    g_list = c("MB607B x JU30", 
+               "MB607B x DopR1-IR",
+               "Empty-Gal4 x CS",
+               "CS x JU30")
+  }
+  pdf(paste0("Comparison_", genotype, "_", Sys.Date(), ".pdf"),
+      onefile = T, width = 16
+  )
+  p = c()
+  metric.df = data.frame()
+  #Prep data
+  for (i in 1:length(g_list)){
+    m = data.frame(
+      factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+                 rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+                 rep(paste0("E1_N_", g_list[i]), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+                 rep(paste0("E5_T_", g_list[i]), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+                 rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+                 rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
+                 ),
+      value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+                           all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+                           all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+                           all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+                           all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+                           all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
+                           )
+                         )
+      )
+    colnames(m) = c("Session", "Value")
+    m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
+                                           paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
+    a = test_initial_condition(metric.ind, g_list[i])
+    b = test_after_training(metric.ind, g_list[i])
+    p = c(p, a$P.adjusted, b$P.adjusted)
+    metric.df = rbind(metric.df, m)
+  }                           
+
+  num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
+  
+  yrange = c(0, 1)
+  y_text = 1.1
+  
+  col.pool = rep(c("indianred3", "light blue", "grey80"), length(g_list) * 2)
+  
+  boxplot(
+    Value ~ Session,
+    data = metric.df,
+    ylim = yrange,
+    outline = F,
+    notch = F,
+    lwd = 1,
+    ylab = "",
+    xlab = "",
+    medlwd = 1,
+    xaxt = "n",
+    axes=F
+  )
+  axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
+  
+  stripchart(
+    Value ~ Session,
+    vertical = TRUE,
+    data = metric.df,
+    method = "jitter",
+    add = TRUE,
+    pch = 15,
+    cex = 0.5,
+    col =  col.pool
+  )
+
+  x_loc = c(1:(length(g_list) * 6))
+  y_top_base = 1
+  vertical_gap = 0.01
+  v_gap = 0.005
+  y_base_RN = y_top_base - 2.8 * vertical_gap
+  y_base_TN = y_top_base - 5.6 * vertical_gap
+  y_base_TR = y_top_base
+  
+  
+  for (i in 1:length(p)){
+    if (p[i] >= 0.05){
+      significance = "n.s."
+    }else if (p[i] < 0.05 & p[i] >= 0.01){
+      significance = "*"
+    }else if (p[i] < 0.01 & p[i] >= 0.001){
+      significance = "**"
+    }else if (p[i] < 0.001 & p[i] >= 0.0001){
+      significance = "***"
+    }else if (p[i] < 0.0001){
+      significance = "****"
+    }
+    if (significance != "n.s."){
+      if (i%%3 == 1){
+        text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
+        lines(c(i + 1, i + 2), 
+              c(y_base_RN, y_base_RN), 
+              xpd = NA) 
+        lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
+        lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
+        
+      }else if (i%%3 == 2){
+        text(i, y_base_TN + vertical_gap, significance, xpd = NA)
+        lines(c(i - 1, i + 1), 
+              c(y_base_TN, y_base_TN), 
+              xpd = NA)
+        lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
+        lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
+        
+      }else{
+        text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
+        lines(c(i - 2, i - 1), 
+              c(y_base_TR,  y_base_TR), 
+              xpd = NA)
+        lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+        lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+      }
+    }
+  }
+
+
+  text(x = (1:length(num)) - 0.1,
+       y = y_text,
+       num,
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+  
+  text(x = seq(1.5, (length(g_list)*6) - 1, by=6),
+       y = -0.05,
+       rep(c("Before"), length(g_list)),
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+   
+  text(x = seq(4.75, (length(g_list)*6) - 1, by=6),
+       y = -0.05,
+       rep(c("After"), length(g_list)),
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+   
+  text(x = seq(2.5, (length(g_list)*6) - 3.5, by= 6),
+       y = -0.1,
+       g_list,
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+
+  seq_for_lines = seq(3, (length(g_list)*6), by=6)
+  for (j in seq_for_lines) {
+    lines(c(j, j) + 0.5,
+          c(yrange[1] - 1e3, yrange[1] + 1e3),
+          col = "light grey",
+          lty = 1)
+  }
+  
+  seq_for_lines_2 = seq(6, (length(g_list)*6) - 6, by=6)
+  for (j in seq_for_lines_2) {
+    lines(c(j, j) + 0.5,
+          c(yrange[1] - 1e3, yrange[1] + 1e3),
+          col = "black",
+          lty = 1,
+          lwd = 2)
+  }
+  dev.off()
+}
+
+
 pass_fly_QC = function(input_file,
                         framerate = 50,
                         speed_max_thres = 50,
