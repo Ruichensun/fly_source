@@ -1029,10 +1029,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     g_list = c("WT")
   }else if (genotype == "R60D05 x JU30"){
     g_list = c("R60D05 x JU30", 
-               "R60D05 x DopR1-IR",
-               # "JG17 x JU30",
                "Empty-Gal4 x CS",
-               # "Empty-Gal4 x JU30", 
                "CS x JU30")
   }else if(genotype == "JG17 x JU30"){
     g_list = c("JG17 x JU30",
@@ -1623,12 +1620,7 @@ get_Wald_CI = function(data){
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
 
-get_learning_index = function(fly.info.end, all_ofs, metric.ind, category){
-  g_list = c("WT", "SUN1", "SUN2", "SUN3", 
-             "MB009B x JU30", "MB131B x JU30", "MB419B x JU30", "MB607B x JU30", 
-             "R60D05 x JU30", "JG17 x JU30",
-             "MB009B x PKCi", "MB131B x PKCi", "MB419B x PKCi", "MB607B x PKCi", 
-             "R60D05 x PKCi", "JG17 x PKCi")
+get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_list){
   master_learn = data.frame()
   for (i in 1:length(g_list)){
     learn_list = c()
