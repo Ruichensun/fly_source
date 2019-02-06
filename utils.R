@@ -1029,58 +1029,64 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     g_list = c("WT")
   }else if (genotype == "R60D05 x JU30"){
     g_list = c("R60D05 x JU30", 
+               "JG17 x JU30",
                "Empty-Gal4 x CS",
                "CS x JU30")
   }else if(genotype == "JG17 x JU30"){
     g_list = c("JG17 x JU30",
-               "JG17 x DopR1-IR",
                "Empty-Gal4 x CS",
                "CS x JU30"
               )
   }else if(genotype == "SUN1"){
     g_list = c("SUN1",
                "SUN1 x CS",
-               "WT",
-               "UAS-DopR1-IR x 51635"
+               "WT"
     )
   }else if(genotype == "SUN2"){
     g_list = c("SUN2",
                "SUN2 x CS",
-               "WT",
-               "UAS-DopR2-RNAi x 51635")
+               "WT")
   }else if(genotype == "SUN3"){
     g_list = c("SUN3",
                "SUN3 x CS",
-               "WT",
-               "D2R-1 x 51635")
+               "WT")
   }else if(genotype == "MB009B x JU30"){
     g_list = c("MB009B x JU30", 
-               "MB009B x DopR1-IR",
+               "MB131B x JU30", 
+               "MB419B x JU30",
+               "MB607B x JU30",
                "Empty-Gal4 x CS",
                "CS x JU30")
-  }else if(genotype == "MB131B x JU30"){
-    g_list = c("MB131B x JU30", 
-               "MB131B x DopR1-IR",
-               "Empty-Gal4 x CS",
-               "CS x JU30")
-  }else if(genotype == "MB419B x JU30"){
-    g_list = c("MB419B x JU30", 
-               "MB419B x DopR1-IR",
-               "Empty-Gal4 x CS",
-               "CS x JU30")
-  }else if(genotype == "MB607B x JU30"){
-    g_list = c("MB607B x JU30", 
-               "MB607B x DopR1-IR",
-               "Empty-Gal4 x CS",
-               "CS x JU30")
-  }
+  }else if(genotype == "UAS-DopR1-IR x 51635"){
+    g_list = c("UAS-DopR1-IR x 51635", 
+               "MB009B x DopR1-IR", 
+               "MB131B x DopR1-IR", 
+               "MB419B x DopR1-IR", 
+               "MB607B x DopR1-IR", 
+               "R60D05 x DopR1-IR", 
+               "JG17 x DopR1-IR")
+  }else if(genotype == "CS x PKCi"){
+    g_list = c("MB009B x PKCi", 
+               "MB131B x PKCi", 
+               "MB419B x PKCi", 
+               "MB607B x PKCi", 
+               "CS x PKCi", 
+               "R60D05 x PKCi",
+               "JG17 x PKCi")
+  }else if (genotype == "")
   pdf(paste0("Comparison_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 16
   )
   p = c()
   metric.df = data.frame()
   #Prep data
+  num = c()
   for (i in 1:length(g_list)){
+    num = c(num, 
+            length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]),
+            length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]),
+            length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])
+    )
     m = data.frame(
       factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
                  rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
@@ -1107,7 +1113,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     metric.df = rbind(metric.df, m)
   }                           
 
-  num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
+  # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
   
   yrange = c(0, 1)
   y_text = 1.1
@@ -1143,7 +1149,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
   x_loc = c(1:(length(g_list) * 6))
   y_top_base = 1
   vertical_gap = 0.01
-  v_gap = 0.005
+  v_gap = 0.01
   y_base_RN = y_top_base - 2.8 * vertical_gap
   y_base_TN = y_top_base - 5.6 * vertical_gap
   y_base_TR = y_top_base
@@ -1190,10 +1196,33 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     }
   }
 
-
-  text(x = (1:length(num)) - 0.1,
+   
+  # text(x = (1:(length(num))/2) - 0.1,
+  #      y = y_text,
+  #      num,
+  #      xpd = T,
+  #      srt = 0,
+  #      adj = 0
+  # )
+  
+  text(x = seq(0.85, length(num) * 2, by = 6),
        y = y_text,
-       num,
+       num[seq(1, length(num), by = 3)],
+       xpd = T,
+       srt = 0,
+       adj = 0
+       )
+  
+  text(x = seq(1.85, length(num) * 2, by = 6),
+       y = y_text,
+       num[seq(2, length(num), by = 3)],
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+  text(x = seq(2.85, length(num) * 2, by = 6),
+       y = y_text,
+       num[seq(3, length(num), by = 3)],
        xpd = T,
        srt = 0,
        adj = 0
