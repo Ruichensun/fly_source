@@ -26,6 +26,13 @@ query.sessions <- c(
   "E1T2E1T2E1T1E1T1",
   "E1T2E1T2E1T1E1T1E1",
   
+  "E2T2",
+  "E2T2E2",
+  "E2T2E2T2",
+  "E2T2E2T2E2",
+  "E2T2E2T2E2T2",
+  "E2T2E1T2E2T2E2",
+  
   "E1R1",
   "E1R1E1",
   "E1R1E1R1",

@@ -18,6 +18,10 @@ sessions <- c(
   "E1T2E1T2E1T1E1",
   "E1T2E1T2E1T1E1T1E1",
   
+  "E2T2E2",
+  "E2T2E2T2E2",
+  "E2T2E1T2E2T2E2",
+  
   "E1R1E1",
   "E1R1E1R1E1",
   "E1R1E1R1E1R1E1",
@@ -61,8 +65,6 @@ for(ind in 1:nrow(fly.info)){
   }
 }
 
-
-
 ## Mutants
 all_ofs_mutants = data.frame()
 fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
@@ -91,6 +93,7 @@ for(ind in 1:nrow(fly.info.mutant)){
 
 write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
 #CS_constant
 # all_ofs_constant = list()

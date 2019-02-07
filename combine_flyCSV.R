@@ -8,7 +8,7 @@ combine_flyCSV(experimenter, type)
 
 #CS
 type = rep("CS", 3)
-experimenter <- c("ES", "RS", "JD", "SW")
+experimenter <- c("ES", "RS", "JD", "SW", "JGLNRS")
 combine_flyCSV(experimenter, type)
 
 # #Response

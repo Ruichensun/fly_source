@@ -10,34 +10,35 @@ fly.info.mutants = read.csv("data/fly_info_mutants_preprocessed.csv",header = T,
 shared.info = c("Fly", "Category", "Gender","Genotype", "Exp.date", "Experimenter","Age",
                 "Setup", "Fly.moving.speed", "Fly.pause","Framerate")
 
-# All raw data to-date
 fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
 
-
+# Filter by baseline behaviors
 ind.T.excl = which((fly.info$Category=="T") & (fly.info$Fly.pause > 0.9))
 ind.RfromT.excl = c()
 for (i in 1:length(ind.T.excl)){
   ind.RfromT.excl = c(ind.RfromT.excl, Use_T_find_R(fly.info, ind.T.excl[i]))
 }
 ind.T.excl = c(ind.T.excl, ind.RfromT.excl)
-
 ind.other.excl = which((fly.info$Category!="T") & (fly.info$Fly.pause > 0.9))
-
 ind.all.excl = unique(c(ind.T.excl, ind.other.excl))
 
 #For Mutant data collected after Mar 20, 2017
 excl.fly.Mutant = na.omit(read.csv("excl_fly_mutant.csv",header = T, stringsAsFactors = F)[, 1:3])
 
 #WT data
-excl.fly.WT = data.frame(cbind(
-  # Batch 1 ES-WT: 1-276; Batch 2 ES-WT: 276-400; Batch 3 ES-WT: 400-present (as of June 28, 2017)
-  # Only Batch 3 data is for the current project. All prior data was for prototyping
-  c(58, 48, 1:400, 1:100, 1:40,118,122),
-  c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
-  c(rep("WT", 544))
-))
-colnames(excl.fly.WT) = colnames(excl.fly.Mutant)
-excl.fly = rbind(excl.fly.Mutant, excl.fly.WT)
+# excl.fly.WT = data.frame(
+#   cbind(
+#   # Batch 1 ES-WT: 1-276; Batch 2 ES-WT: 276-400; Batch 3 ES-WT: 400-present (as of June 28, 2017)
+#   # Only Batch 3 data is for the current project. All prior data was for prototyping
+#   c(58, 48, 1:400, 1:100, 1:40,118,122),
+#   c("RS", "JD", rep("ES", 400), rep("RS", 100), rep("JD", 40),rep("SW",2)),
+#   c(rep("WT", 544))
+# )
+# )
+# colnames(excl.fly.WT) = colnames(excl.fly.Mutant)
+excl.fly = rbind(excl.fly.Mutant 
+                 # excl.fly.WT
+                 )
 
 # All data to be excluded
 ind.excl = NULL
@@ -58,12 +59,8 @@ for (genotype in unique(fly.info$Genotype)) {
   ind.include = c(ind.include,which(ind)) 
 }
 
-fly.info.include = fly.info[ind.include,]
-
-# ind.filtered = data_filter(1, fly.info.include) 
-# fly.info.end = fly.info.include[ind.filtered, ]
-fly.info.end = fly.info.include
+fly.info.end = fly.info[ind.include,]
 
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
 
-checking_fly_numbers(fly.info.include, 1, filename="Mutants_headcount-updatedfilter.csv")
+checking_fly_numbers(fly.info.end, 1, filename="Mutants_headcount.csv")

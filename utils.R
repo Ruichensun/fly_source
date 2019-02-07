@@ -9,15 +9,24 @@ combine_flyCSV = function(experimenter, type){
   input_files = c()
   for (i in 1:length(experimenter)){
     filename = paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/", 
-                      experimenter[i], "/", type[1], "/CSV/Behavioral Experiments - ", type[2], "_", experimenter[i], ".csv")
+                      experimenter[i], "/", type[1], "/CSV/Behavioral Experiments - ", 
+                      type[2], "_", experimenter[i], ".csv")
     input_files = c(input_files, filename)
   }
   
-  output_file = paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/fly_info_", type[3], ".csv")
+  output_file = 
+    paste0("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/fly_info_", 
+           type[3], ".csv")
   for(i in 1:length(input_files)){
     info = read.csv(input_files[i],header=T,stringsAsFactors=F)
     info$Experimenter = experimenter[i]
     info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
+    if (experimenter[i] != "JGLNRS"){
+      info$Gap = 0
+      info$Exp.date2 = NA
+    }else{
+      info$Age = NA
+    }
     all_info = rbind(all_info,info)
   }
   write.table(all_info,
