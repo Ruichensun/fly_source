@@ -91,3 +91,8 @@ learning_index6 = get_learning_index(fly.info.end, all_ofs, 8, category, g_list6
 boxplot(Learning~Genotype, learning_index6, ylim = c(-1, 1), notch = F)
 
 a = dunn.test(x = learning_index$Learning, g = learning_index$Genotype, method = c("bonferroni"))
+
+
+
+#
+fly.info.gap = fly.info.end[fly.info.end$Gap==2, ]

@@ -26,12 +26,27 @@ query.sessions <- c(
   "E1T2E1T2E1T1E1T1",
   "E1T2E1T2E1T1E1T1E1",
   
+  "E2",
   "E2T2",
   "E2T2E2",
   "E2T2E2T2",
   "E2T2E2T2E2",
   "E2T2E2T2E2T2",
   "E2T2E1T2E2T2E2",
+  
+  "E2R2",
+  "E2R2E2",
+  "E2R2E2R2",
+  "E2R2E2R2E2",
+  "E2R2E2R2E2R2",
+  "E2R2E1R2E2R2E2",
+  
+  "E2N2",
+  "E2N2E2",
+  "E2N2E2N2",
+  "E2N2E2N2E2",
+  "E2N2E2N2E2N2",
+  "E2N2E1N2E2N2E2",
   
   "E1R1",
   "E1R1E1",
@@ -75,14 +90,16 @@ fly.moving.speed = NULL
 fly.info.framerate = NULL
 fly.info.out = NULL
 laser.status = NULL
-count = 0
 fly.pause = NULL
 
 for (ind in 1:nrow(fly.info)) {
+# for (ind in 160:170) {
   for (session in query.sessions) {
+    
     input.file <-list.files(path = paste0(path, fly.info$Experimenter[ind],"/CS/CSV/"),
                             pattern = paste0("ProcessedData_Fly", fly.info$Fly[ind], "_", session, 
                                              "_", fly.info$Gender[ind],"_.*"), full.names = T)
+    print(input.file)
     if (fly.info$Experimenter[ind] == "ES" & session == "E1" & length(input.file) == 0) {
       cat("M", fly.info$Fly[ind], fly.info$Category[ind],input.file, "\n",sep = "\t")
       break
@@ -114,9 +131,8 @@ for (ind in 1:nrow(fly.info)) {
             fly.pos <- file[, 1]
             laser.status <- file[, 2]
       }
-      }
+    }
     if (session == "E1") {
-      count = count + 1
       fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
       fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
       fly.info.framerate = c(fly.info.framerate, framerate)
@@ -132,6 +148,7 @@ for (ind in 1:nrow(fly.info)) {
     )
     output.file <- paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",
                           fly.info$Fly[ind],"_",session,"_WT", ".csv")
+    print(output.file)
     # print(output.file)
     write.table(fly.pos.dat, output.file, row.names = F, quote = F, sep = ',')
   }
@@ -158,6 +175,7 @@ for (ind in 1:nrow(fly.info)) {
                              pattern = paste0("ProcessedData_Fly", fly.info$Fly[ind],"_",
                                               session,"_",fly.info$Gender[ind], "_.*"),
                              full.names = T)
+    print(input.file)
     if (fly.info$Experimenter[ind] == "ES" & session == "E1" & length(input.file) == 0) {
       cat("M", fly.info$Fly[ind],fly.info$Category[ind],input.file,"\n",sep = "\t")
       break
@@ -206,7 +224,7 @@ for (ind in 1:nrow(fly.info)) {
     
     output.file <- paste0("data/", fly.info$Experimenter[ind], "/mutants/","ProcessedData_Fly", 
                           fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
-    # print(output.file)
+    print(output.file)
     write.table(fly.pos.dat,output.file, row.names = F, quote = F, sep = ',')
   }
 }

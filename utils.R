@@ -527,16 +527,12 @@ one_fly_statistics = function(input_file,
                               memory_w,
                               p_p2p,
                               p_p2pm,
-                              # p_p2p_middle,
                               p_p2w,
                               p_p2wm,
-                              # p_p2w_middle,
                               p_w2w,
                               p_w2wm,
-                              # p_w2w_middle,
                               p_w2p,
                               p_w2pm,
-                              # p_w2p_middle
                               avg_pause_dur,
                               avg_pause_middle_dur
                             ), stringsAsFactors=FALSE)
@@ -573,18 +569,14 @@ one_fly_statistics = function(input_file,
         "Memory of Walking", #30
         "Transition Probability (Pause not at the end): Pause to Pause", #31
         "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-        # "Transition Probability (Pause not at the end): Pause to Pause - middle - no bump", #33
-        "Transition Probability (Pause not at the end): Pause to Walking", #34
-        "Transition Probability (Pause not at the end): Pause to Walking - middle", #35
-        # "Transition Probability (Pause not at the end): Pause to Walking - middle - no bump", #36
-        "Transition Probability (Pause not at the end): Walking to Walking", #37
-        "Transition Probability (Pause not at the end): Walking to Walking - middle", #38
-        # "Transition Probability (Pause not at the end): Walking to Walking - middle - no bump", #39
-        "Transition Probability (Pause not at the end): Walking to Pause", # 
-        "Transition Probability (Pause not at the end): Walking to Pause - middle", #41
-        # "Transition Probability (Pause not at the end): Walking to Pause - middle - no bump" #42
-        "Average Pause Duration",
-        "Average Middle Pause Duration"
+        "Transition Probability (Pause not at the end): Pause to Walking", #33
+        "Transition Probability (Pause not at the end): Pause to Walking - middle", #34
+        "Transition Probability (Pause not at the end): Walking to Walking", #35
+        "Transition Probability (Pause not at the end): Walking to Walking - middle", #36
+        "Transition Probability (Pause not at the end): Walking to Pause", # 37
+        "Transition Probability (Pause not at the end): Walking to Pause - middle", #38
+        "Average Pause Duration", #39
+        "Average Middle Pause Duration" #40
       )
       return(ret)
 }
@@ -722,6 +714,236 @@ checking_fly_numbers = function(fly.info, filter, filename){
   colnames(mutant_info) = c("Genotype", "Number of Flies", "Number of Flies QCed")
   write.csv(mutant_info, file = filename , row.names = FALSE)
 }
+
+plot_gap = function(fly.info.end, all_ofs,#remember to use all_ofs_wT
+                    metric.ind,  #8
+                    gap #2
+                    ){
+  gap_flies = fly.info.end[fly.info.end$Gap==gap, ]
+  
+  m = data.frame(
+    factor = c(rep("E1-T", length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind])),
+               rep("E1-R", length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind])),
+               rep("E1-N", length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" , ][, metric.ind])),
+               rep("E1T1E1", length(all_ofs[all_ofs$Session=="E1T1E1" , ][, metric.ind])),
+               rep("E1R1E1", length(all_ofs[all_ofs$Session=="E1R1E1", ][, metric.ind])),
+               rep("E1N1E1", length(all_ofs[all_ofs$Session=="E1N1E1", ][, metric.ind])),
+               rep("E1T1E1T1E1", length(all_ofs[all_ofs$Session=="E1T1E1T1E1", ][, metric.ind])),
+               rep("E1R1E1R1E1", length(all_ofs[all_ofs$Session=="E1R1E1R1E1", ][, metric.ind])),
+               rep("E1N1E1N1E1", length(all_ofs[all_ofs$Session=="E1N1E1N1E1", ][, metric.ind])),
+               rep("E2-T", length(all_ofs[all_ofs$Session=="E2" & all_ofs$Type=="T" &
+                                            all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2-R", length(all_ofs[all_ofs$Session=="E2" & all_ofs$Type=="R" &
+                                            all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2-N", length(all_ofs[all_ofs$Session=="E2" & all_ofs$Type=="N" &
+                                            all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2T2E2", length(all_ofs[all_ofs$Session=="E2T2E2" &
+                                              all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2R2E2", length(all_ofs[all_ofs$Session=="E2R2E2" &
+                                              all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2N2E2", length(all_ofs[all_ofs$Session=="E2N2E2" &
+                                              all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2T2E2T2E2", length(all_ofs[all_ofs$Session=="E2T2E2T2E2" &
+                                                  all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2R2E2R2E2", length(all_ofs[all_ofs$Session=="E2R2E2R2E2" &
+                                                  all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind])),
+               rep("E2N2E2N2E2", length(all_ofs[all_ofs$Session=="E2N2E2N2E2" &
+                                                  all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind]))
+               ),
+    value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind], 
+                         all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind],
+                         all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1T1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1R1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1N1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1T1E1T1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1R1E1R1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E1N1E1N1E1", ][, metric.ind],
+                         all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind], 
+                         all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2T2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2R2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2N2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2T2E2T2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2R2E2R2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind],
+                         all_ofs[all_ofs$Session=="E2N2E2N2E2" &
+                                   all_ofs$`Fly Number`%in% gap_flies$Fly, ][, metric.ind]
+                       ))
+  )
+  colnames(m) = c("Session", "Value")
+  m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
+                                                   "E1T1E1", "E1R1E1", "E1N1E1",
+                                                   "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1",
+                                                   "E2-T", "E2-R", "E2-N",
+                                                   "E2T2E2", "E2R2E2", "E2N2E2",
+                                                   "E2T2E2T2E2", "E2R2E2R2E2", "E2N2E2N2E2"))
+  # a = test_initial_condition(i, "WT")
+  # b = test_mid_training(i, "WT")
+  # c = test_after_training(i, "WT")
+  num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
+  pdf(paste0("Gap", fly.info.gap$Gap[1], "_", Sys.Date(), ".pdf"),
+      onefile = T, width = 8
+  )
+  yrange = c(0, 1)
+  y_text = 1
+  col.pool = c(
+    "indianred3",
+    "light blue",
+    "grey80",
+    "indianred3",
+    "light blue",
+    "grey80",
+    "indianred3",
+    "light blue",
+    "grey80",
+    "indianred3",
+    "light blue",
+    "grey80",
+    "indianred3",
+    "light blue",
+    "grey80",
+    "indianred3",
+    "light blue",
+    "grey80"
+  )
+  boxplot(
+    Value ~ Session,
+    data = m,
+    ylim = yrange,
+    outline = F,
+    notch = F,
+    lwd = 1,
+    ylab = "",
+    xlab = "",
+    medlwd = 1,
+    # boxwex = 1,
+    xaxt = "n"
+  )
+  stripchart(
+    Value ~ Session,
+    vertical = TRUE,
+    data = m,
+    method = "jitter",
+    add = TRUE,
+    pch = 15,
+    cex = 0.5,
+    col =  col.pool
+  )
+  
+  # p = c()
+  # metric.df = data.frame()
+  # #Prep data
+  # for (i in 1:length(g_list)){
+  #   m = data.frame(
+  #     factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+  #                rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+  #                rep(paste0("E1_N_", g_list[i]), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+  #                rep(paste0("E5_T_", g_list[i]), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+  #                rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
+  #                rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
+  #     ),
+  #     value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+  #                          all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+  #                          all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+  #                          all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+  #                          all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
+  #                          all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
+  #     )
+  #     )
+  #   )
+  #   colnames(m) = c("Session", "Value")
+  #   m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
+  #                                          paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
+  #   a = test_initial_condition(metric.ind, g_list[i])
+  #   b = test_after_training(metric.ind, g_list[i])
+  #   p = c(p, a$P.adjusted, b$P.adjusted)
+  #   metric.df = rbind(metric.df, m)
+  # }                           
+  # 
+  # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
+  
+  # x_loc = c(1:(length(g_list) * 6))
+  # y_top_base = 1
+  # vertical_gap = 0.01
+  # v_gap = 0.005
+  # y_base_RN = y_top_base - 2.8 * vertical_gap
+  # y_base_TN = y_top_base - 5.6 * vertical_gap
+  # y_base_TR = y_top_base
+  # 
+  # 
+  # # for (i in 1:length(p)){
+  # #   if (p[i] >= 0.05){
+  # #     significance = "n.s."
+  # #   }else if (p[i] < 0.05 & p[i] >= 0.01){
+  # #     significance = "*"
+  # #   }else if (p[i] < 0.01 & p[i] >= 0.001){
+  # #     significance = "**"
+  # #   }else if (p[i] < 0.001 & p[i] >= 0.0001){
+  # #     significance = "***"
+  # #   }else if (p[i] < 0.0001){
+  # #     significance = "****"
+  # #   }
+  # #   if (significance != "n.s."){
+  # #     if (i%%3 == 1){
+  # #       text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
+  # #       lines(c(i + 1, i + 2), 
+  # #             c(y_base_RN, y_base_RN), 
+  # #             xpd = NA) 
+  # #       lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
+  # #       lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
+  # #       
+  # #     }else if (i%%3 == 2){
+  # #       text(i, y_base_TN + vertical_gap, significance, xpd = NA)
+  # #       lines(c(i - 1, i + 1), 
+  # #             c(y_base_TN, y_base_TN), 
+  # #             xpd = NA)
+  # #       lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
+  # #       lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
+  # #       
+  # #     }else{
+  # #       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
+  # #       lines(c(i - 2, i - 1), 
+  # #             c(y_base_TR,  y_base_TR), 
+  # #             xpd = NA)
+  # #       lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+  # #       lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+  # #     }
+  # #   }
+  # # }
+  # 
+  # 
+  # if (any(is.na(yrange)) |
+  #     any(is.infinite(yrange)) | any(is.nan(yrange))) {
+  #   yrange = c(-1, 1)
+  #   ylim = c(-1, 1)
+  # }
+  # text(x = (1:length(num)) - 0.1,
+  #      y = y_text,
+  #      # y_text,
+  #      num,
+  #      xpd = T,
+  #      srt = 0,
+  #      adj = 0
+  # )
+  # for (j in c(3, 6)) {
+  #   lines(c(j, j) + 0.5,
+  #         c(yrange[1] - 1e3, yrange[1] + 1e3),
+  #         col = "light grey",
+  #         lty = 1)
+  # }
+dev.off()
+  
+}
+
 
 plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, fly.info.end){
   metrices =  c(
@@ -1082,7 +1304,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
                "CS x PKCi", 
                "R60D05 x PKCi",
                "JG17 x PKCi")
-  }else if (genotype == "")
+  }
   pdf(paste0("Comparison_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 16
   )
@@ -1695,182 +1917,6 @@ get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_lis
   master_learn$Genotype = factor(master_learn$Genotype, levels = g_list)
   return(master_learn)
 }
-
-
-# plot_learning_index = function(fly.info.end, all_ofs, metric.ind, category){
-#   learning_index = get_learning_index(fly.info.end, all_ofs, metric.ind, category)
-#   g_list = levels(learning_index$Genotype)
-#   pdf(paste0("LearningIndex_", category, "_", Sys.Date(), ".pdf"),
-#       onefile = T, width = 16
-#   )
-#   p = c()
-#   metric.df = data.frame()
-#   #Prep data
-#   for (i in 1:length(g_list)){
-#     m = data.frame(
-#       factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-#                  rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-#                  rep(paste0("E1_N_", g_list[i]), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-#                  rep(paste0("E5_T_", g_list[i]), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-#                  rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-#                  rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
-#       ),
-#       value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-#                            all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-#                            all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-#                            all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-#                            all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-#                            all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
-#       )
-#       )
-#     )
-#     colnames(m) = c("Session", "Value")
-#     m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
-#                                            paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
-#     a = test_initial_condition(metric.ind, g_list[i])
-#     b = test_after_training(metric.ind, g_list[i])
-#     p = c(p, a$P.adjusted, b$P.adjusted)
-#     metric.df = rbind(metric.df, m)
-#   }                           
-#   
-#   num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
-#   
-#   yrange = c(0, 1)
-#   y_text = 1.1
-#   
-#   col.pool = rep(c("indianred3", "light blue", "grey80"), length(g_list) * 2)
-#   
-#   boxplot(
-#     Value ~ Session,
-#     data = metric.df,
-#     ylim = yrange,
-#     outline = F,
-#     notch = F,
-#     lwd = 1,
-#     ylab = "",
-#     xlab = "",
-#     medlwd = 1,
-#     xaxt = "n",
-#     axes=F
-#   )
-#   axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
-#   
-#   stripchart(
-#     Value ~ Session,
-#     vertical = TRUE,
-#     data = metric.df,
-#     method = "jitter",
-#     add = TRUE,
-#     pch = 15,
-#     cex = 0.5,
-#     col =  col.pool
-#   )
-#   
-#   x_loc = c(1:(length(g_list) * 6))
-#   y_top_base = 1
-#   vertical_gap = 0.01
-#   v_gap = 0.005
-#   y_base_RN = y_top_base - 2.8 * vertical_gap
-#   y_base_TN = y_top_base - 5.6 * vertical_gap
-#   y_base_TR = y_top_base
-#   
-#   
-#   for (i in 1:length(p)){
-#     if (p[i] >= 0.05){
-#       significance = "n.s."
-#     }else if (p[i] < 0.05 & p[i] >= 0.01){
-#       significance = "*"
-#     }else if (p[i] < 0.01 & p[i] >= 0.001){
-#       significance = "**"
-#     }else if (p[i] < 0.001 & p[i] >= 0.0001){
-#       significance = "***"
-#     }else if (p[i] < 0.0001){
-#       significance = "****"
-#     }
-#     
-#     # if (i%%3 == 1){
-#     #   text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
-#     #   lines(c(i + 1, i + 2), 
-#     #         c(y_base_RN, y_base_RN), 
-#     #         xpd = NA) 
-#     #   lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-#     #   lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-#     #   
-#     # }else if (i%%3 == 2){
-#     #   text(i, y_base_TN + vertical_gap, significance, xpd = NA)
-#     #   lines(c(i - 1, i + 1), 
-#     #         c(y_base_TN, y_base_TN), 
-#     #         xpd = NA)
-#     #   lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-#     #   lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-#     #   
-#     # }else{
-#     if (i%%3 == 0){
-#       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
-#       lines(c(i - 2, i - 1), 
-#             c(y_base_TR,  y_base_TR), 
-#             xpd = NA)
-#       lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-#       lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-#       
-#     }
-#   }
-#   
-#   
-#   text(x = (1:length(num)) - 0.1,
-#        y = y_text,
-#        num,
-#        xpd = T,
-#        srt = 0,
-#        adj = 0
-#   )
-#   
-#   text(x = seq(1.5, (length(g_list)*6) - 1, by=6),
-#        y = -0.05,
-#        rep(c("Before"), length(g_list)),
-#        xpd = T,
-#        srt = 0,
-#        adj = 0
-#   )
-#   
-#   text(x = seq(4.75, (length(g_list)*6) - 1, by=6),
-#        y = -0.05,
-#        rep(c("After"), length(g_list)),
-#        xpd = T,
-#        srt = 0,
-#        adj = 0
-#   )
-#   
-#   text(x = seq(2.5, (length(g_list)*6) - 3.5, by= 6),
-#        y = -0.1,
-#        g_list,
-#        xpd = T,
-#        srt = 0,
-#        adj = 0
-#   )
-#   
-#   seq_for_lines = seq(3, (length(g_list)*6), by=6)
-#   for (j in seq_for_lines) {
-#     lines(c(j, j) + 0.5,
-#           c(yrange[1] - 1e3, yrange[1] + 1e3),
-#           col = "light grey",
-#           lty = 1)
-#   }
-#   if (genotype != "WT"){
-#     seq_for_lines_2 = seq(6, (length(g_list)*6) - 6, by=6)
-#     for (j in seq_for_lines_2) {
-#       lines(c(j, j) + 0.5,
-#             c(yrange[1] - 1e3, yrange[1] + 1e3),
-#             col = "black",
-#             lty = 1,
-#             lwd = 2)
-#     }
-#   }
-#   
-#   dev.off()
-#   
-#   
-# }
 
 get_query_info = function(query.genotype){
   if(query.genotype %in% c("CS", "WT")){
