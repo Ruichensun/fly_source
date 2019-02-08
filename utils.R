@@ -229,269 +229,269 @@ one_fly_statistics = function(input_file,
       
   # 2nd Metric Group: Speed
       
-      # Enter and exit pause speeds (for all pauses)
-      fly_speed_at_pause_start = NULL
-      fly_speed_at_pause_end = NULL
-      window_size = 0.5 * framerate
-      if (num_mid_pause >= 2) {
-        for (i in 2:num_mid_pause) {
-          ps = mid_pause_df$Start_Index[i]
-          pe = mid_pause_df$End_Index[i]
-          if (ps < window_size || pe > experiment_time - window_size) {
-            fly_speed_at_pause_start = c(fly_speed_at_pause_start, NA)
-            fly_speed_at_pause_end = c(fly_speed_at_pause_end, NA)
-          } else{
-            fly_speed_at_pause_start = c(fly_speed_at_pause_start, mean(abs(fly_speed[(ps - window_size):ps])))
-            fly_speed_at_pause_end = c(fly_speed_at_pause_end, mean(abs(fly_speed[pe:(pe + window_size)])))
-          }
-        }
-      }
-      
-      #Avg fly speed 
-      avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
-      avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) > 0)]), na.rm = TRUE)
-      
-      if (length(fly_speed[which(abs(fly_speed) > 0)]) < 10) {
-        avg_fly_speed_not_in_pause = 0
-      }
-      if (max(abs(fly_speed)) == 0) {
-        avg_fly_speed_not_in_pause = NA
-      }
-      
-      avg_fly_speed_enter = mean(fly_speed_at_pause_start, na.rm = TRUE)
-      avg_fly_speed_exit = mean(fly_speed_at_pause_end, na.rm = TRUE)
-
-      # Convert the speed from px/frame to mm/sec
-      # The visible part of the tube is 47 mm
-      avg_speed = (avg_fly_speed * 47 / 768) / (1 / framerate)
-      avg_speed_moving = (avg_fly_speed_not_in_pause * 47 / 768) / (1 / framerate)
-      avg_speed_enter = (avg_fly_speed_enter * 47 / 768) / (1 / framerate)
-      avg_speed_exit = (avg_fly_speed_exit * 47 / 768) / (1 / framerate)
-      
-      # Total Moving Distance
-      tot_moving_dist = sum(abs(fly_speed[1:experiment_time]), na.rm = TRUE)
-      dist = tot_moving_dist * 47 / 768 
-      
-  # 3rd Metric Group: Turns
-      
-      # Step 0 - smoothing
-      ma = function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
-      bin_size = 150
-      fly_pos_sm = ma(fly_pos, bin_size)
-      fly_speed_sm = diff(fly_pos_sm)
-      
-      # Step 1 - get the moving direction (speed sign)
-      bin_positive_frac = NULL
-      t = bin_size
-      while (t < experiment_time) {
-        bin_fly_speed = fly_speed_sm[t - 1:bin_size + 1]
-        frac = sum(bin_fly_speed > 0, na.rm = T) / sum(bin_fly_speed != 0, na.rm = T)
-        bin_positive_frac = c(bin_positive_frac, frac)
-        t = t + bin_size
-      }
-      
-      # Step 2 - get the turns
-      turns = find_intersect_points(bin_positive_frac, rep(0.5, length(bin_positive_frac)))
-      turns = ceiling(turns * bin_size - bin_size / 2)
-      position_turns = (fly_pos[turns] + fly_pos[turns - 1]) / 2 # Use original fly_pos value as the actual position
-      mid_turns = turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
-      position_mid_turns = position_turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
-      
-      # Step 3 - get turn numbers
-      num_turns = length(turns)
-      num_mid_turns = length(mid_turns)
-      
-      if (num_turns == 0){
-        frac_mid_turns = 0
-      } else{
-        frac_mid_turns = num_mid_turns / num_turns
-      }
-
-  # 4th Metric Group: Burstiness
-      
-      # inter-event time is pause defined previously #
-      PD = mid_pause_df$Pause_Duration
-      
-      if (num_pause <= 3) {
-        B_pause = 1
-      }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
-      
-      ## inter-event time is frames with zero velocity #
-      b_inter_event = replace(abs(fly_speed), abs(fly_speed) > 0, 1)
-      inter_event_time = rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
-      if (length(inter_event_time) <= 3) {
-        Burst_inter_event = 1
-      }else{
-        Burst_inter_event = (sd(pause_df$Pause_Duration) - mean(pause_df$Pause_Duration)) /
-                            (sd(pause_df$Pause_Duration) + mean(pause_df$Pause_Duration))
-      }
-      
-      # scrambled burstiness 
-      b_scrambled = sample(b_inter_event)
-      t_scrambled =rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
-      B_scrambled = c()
-      if (length(t_scrambled) <= 3) {B_scrambled = 1
-      } else{
-        B_scrambled = (sd((t_scrambled), na.rm = T) - mean((t_scrambled), na.rm = T)) / 
-                       (sd((t_scrambled), na.rm = T) + mean((t_scrambled), na.rm = T))
-      }
-
-      # inter event is walking (with thresholding)
-      if (num_mid_pause <= 3) {
-        w_burstiness = 1
-      } else{
-        walk_end = mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
-        walk_start = mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
-        walks_dur = walk_end - walk_start
-        w_burstiness = (sd(walks_dur) - mean(walks_dur)) / (sd(walks_dur) + mean(walks_dur))
-      }
-      
-      ## inter event is walking (no thresholding)
-      burstiness_m_inverted = rep(0, length(b_inter_event))
-      burstiness_m_inverted = replace(burstiness_m_inverted, b_inter_event == 0, 1)
-      m_inverted =rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
-      if (length(m_inverted) <= 3) {m_burstiness = 1
-      } else{
-        m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / 
-                       (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
-      }
-
-  # 5th Metric Group: Memory
-      
-      # inter_event_time is the unfiltered ones and zeros (rasterplot) versions of fly_pos
-      # When walking bout is an event
-      memory = 0
-      if (length(inter_event_time) < 2) {
-        memory = NA
-      } else{
-        m1 = mean(inter_event_time[1:(length(inter_event_time) - 1)]) #mean of inter-event time from 1 to n-1
-        m2 = mean(inter_event_time[2:(length(inter_event_time))]) #mean of inter-event time from 2 to n
-        std1 = sd(inter_event_time[1:(length(inter_event_time) - 1)])
-        std2 = sd(inter_event_time[2:(length(inter_event_time))])
-        for (i in 1:(length(inter_event_time) - 1)) {
-          memory = memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /(std1 * std2))
-        }
-        memory = (1 / (length(inter_event_time) - 1)) * memory
-      }
-      
-      # When pause is an event (inter event is walking)
-      memory_w = 0
-      if (length(m_inverted) < 2) {
-        memory_w = NA
-      } else{
-        m3 = mean(m_inverted[1:(length(m_inverted) - 1)])
-        m4 = mean(m_inverted[2:(length(m_inverted))])
-        std3 = sd(m_inverted[1:(length(m_inverted) - 1)])
-        std4 = sd(m_inverted[2:(length(m_inverted))])
-        for (i in 1:(length(m_inverted) - 1)) {
-          memory_w = memory_w + ((m_inverted[i] - m3) * (m_inverted[i + 1] - m4) / (std3 * std4))
-        }
-        memory_w = (1 / (length(m_inverted) - 1)) * memory_w
-      }
-      
-  # 6th Metric Group: Behavioral States
-      
-      # Get Behavioral State
-      p_to_p = sum(pause_df$Pause_Duration - 1)
-      if (num_pause < 2) {w_to_w = 0
-      } else{w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - 
-                       pause_df$End_Index[1:(length(pause_df$Start_Index) - 1)] - 1)
-      }
-      p_to_w = length(pause_df$Start_Index)
-      w_to_p = length(pause_df$End_Index)
-      if ((p_to_p) + (p_to_w) == 0) {
-        p_p2p = NA
-        p_p2w = NA
-      } else{
-        p_p2p = p_to_p / (p_to_p + p_to_w)
-        p_p2w = p_to_w / (p_to_p + p_to_w)
-      }
-      
-      if ((w_to_p) + (w_to_w) == 0) {
-        p_w2p = NA
-        p_w2w = NA
-      } else if (is.na((w_to_p) + (w_to_w))) {
-        p_w2p = NA
-        p_w2w = NA
-      } else{
-        p_w2p = w_to_p / (w_to_p + w_to_w)
-        p_w2w = w_to_w / (w_to_p + w_to_w)
-      }
-      
-      # Behavioral states for pauses not at the end
-      
-      p_2_p_m = sum(mid_pause_df$Pause_Duration - 1)
-      if (num_mid_pause < 2){
-        w_2_w_m = 0
-      }else{
-        w_2_w_m = sum(mid_pause_df$Start_Index[2:length(mid_pause_df$Start_Index)] - 
-                        mid_pause_df$End_Index[1:(length(mid_pause_df$End_Index)-1)] - 1)
-      }
-      p_2_w_m = length(mid_pause_df$Start_Index)
-      w_2_p_m = length(mid_pause_df$End_Index)
-      if (p_2_p_m + p_2_w_m == 0){
-        p_p2pm = NA
-        p_p2wm = NA
-      }else{
-        p_p2pm = p_2_p_m / (p_2_p_m + p_2_w_m)
-        p_p2wm = p_2_w_m / (p_2_p_m + p_2_w_m)
-      }
-      if (w_2_p_m + w_2_w_m == 0){
-        p_w2pm = NA
-        p_w2wm = NA
-      }else{
-        p_w2pm = w_2_p_m / (w_2_p_m + w_2_w_m)
-        p_w2wm = w_2_w_m / (w_2_p_m + w_2_w_m)
-      }
-      
-      ## Behavioral states for pauses not at the end & not bumping to the wall
-      nobump_df = subset(mid_pause_df, ((Start_Type == 1) & (End_Type == 2)) | ((Start_Type == 4) & (End_Type == 3)))
-      bump_df = subset(mid_pause_df, ((Start_Type == 1) &(End_Type == 3)) | ((Start_Type == 4) & (End_Type == 2)))
-      pause_end_df = subset(pause_df, (Start_Position < chamber_end_thres) | (Start_Position > 767 - chamber_end_thres))
-      
-      p_to_p_end = sum(pause_end_df$Pause_Duration - 1)
-      p_to_w_end = length(pause_end_df$Start_Index)
-      w_to_p_end = length(pause_end_df$End_Index)
-      p_to_p_middle_bump = sum(bump_df$Pause_Duration - 1)
-      p_to_w_middle_bump = length(bump_df$Start_Index)
-      w_to_p_middle_bump = length(bump_df$End_Index)
-      p_to_p_middle_nobump = sum(nobump_df$Pause_Duration - 1)
-      num_pause_middle_nobump = nrow(nobump_df)
-      num_pause_middle_bump = nrow(bump_df)
-      num_pause_end = nrow(pause_end_df)
-      
-      if (num_pause < 2) {
-        w_to_w_middle_nobump = 0
-      } else{
-        if (num_pause_middle_nobump < 2) {
-          w_to_w_middle_nobump = 0
-        } else{
-          w_to_w_middle_nobump = 
-            sum(nobump_df$Start_Index[2:dim(nobump_df)[1]] - nobump_df$End_Index[1:(dim(nobump_df)[1] - 1)] - 1) - 
-            sum(p_to_p_end, p_to_w_end, w_to_p_end, p_to_p_middle_bump, p_to_w_middle_bump, w_to_p_middle_bump)
-        }
-      }
-      
-      p_to_w_middle_nobump = length(nobump_df$Start_Index)
-      w_to_p_middle_nobump = length(nobump_df$End_Index)
-      
-      if (p_to_p_middle_nobump + p_to_w_middle_nobump == 0) {
-        p_p2p_middle = NA
-        p_p2w_middle = NA
-      } else{
-        p_p2p_middle = p_to_p_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
-        p_p2w_middle = p_to_w_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
-      }
-      
-      if (is.na(w_to_w_middle_nobump)) {w_to_w_middle_nobump = 0}
-      
-      if (w_to_p_middle_nobump + w_to_w_middle_nobump == 0) {
-        p_w2p_middle = NA
-        p_w2w_middle = NA
-      } else{
-        p_w2p_middle = w_to_p_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
-        p_w2w_middle = w_to_w_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
-      }
+  #     # Enter and exit pause speeds (for all pauses)
+  #     fly_speed_at_pause_start = NULL
+  #     fly_speed_at_pause_end = NULL
+  #     window_size = 0.5 * framerate
+  #     if (num_mid_pause >= 2) {
+  #       for (i in 2:num_mid_pause) {
+  #         ps = mid_pause_df$Start_Index[i]
+  #         pe = mid_pause_df$End_Index[i]
+  #         if (ps < window_size || pe > experiment_time - window_size) {
+  #           fly_speed_at_pause_start = c(fly_speed_at_pause_start, NA)
+  #           fly_speed_at_pause_end = c(fly_speed_at_pause_end, NA)
+  #         } else{
+  #           fly_speed_at_pause_start = c(fly_speed_at_pause_start, mean(abs(fly_speed[(ps - window_size):ps])))
+  #           fly_speed_at_pause_end = c(fly_speed_at_pause_end, mean(abs(fly_speed[pe:(pe + window_size)])))
+  #         }
+  #       }
+  #     }
+  #     
+  #     #Avg fly speed 
+  #     avg_fly_speed = mean(abs(fly_speed), na.rm = TRUE)
+  #     avg_fly_speed_not_in_pause = mean(abs(fly_speed[which(abs(fly_speed) > 0)]), na.rm = TRUE)
+  #     
+  #     if (length(fly_speed[which(abs(fly_speed) > 0)]) < 10) {
+  #       avg_fly_speed_not_in_pause = 0
+  #     }
+  #     if (max(abs(fly_speed)) == 0) {
+  #       avg_fly_speed_not_in_pause = NA
+  #     }
+  #     
+  #     avg_fly_speed_enter = mean(fly_speed_at_pause_start, na.rm = TRUE)
+  #     avg_fly_speed_exit = mean(fly_speed_at_pause_end, na.rm = TRUE)
+  # 
+  #     # Convert the speed from px/frame to mm/sec
+  #     # The visible part of the tube is 47 mm
+  #     avg_speed = (avg_fly_speed * 47 / 768) / (1 / framerate)
+  #     avg_speed_moving = (avg_fly_speed_not_in_pause * 47 / 768) / (1 / framerate)
+  #     avg_speed_enter = (avg_fly_speed_enter * 47 / 768) / (1 / framerate)
+  #     avg_speed_exit = (avg_fly_speed_exit * 47 / 768) / (1 / framerate)
+  #     
+  #     # Total Moving Distance
+  #     tot_moving_dist = sum(abs(fly_speed[1:experiment_time]), na.rm = TRUE)
+  #     dist = tot_moving_dist * 47 / 768 
+  #     
+  # # 3rd Metric Group: Turns
+  #     
+  #     # Step 0 - smoothing
+  #     ma = function(x, bin_size){filter(x, rep(1/bin_size, bin_size), sides=2)}
+  #     bin_size = 150
+  #     fly_pos_sm = ma(fly_pos, bin_size)
+  #     fly_speed_sm = diff(fly_pos_sm)
+  #     
+  #     # Step 1 - get the moving direction (speed sign)
+  #     bin_positive_frac = NULL
+  #     t = bin_size
+  #     while (t < experiment_time) {
+  #       bin_fly_speed = fly_speed_sm[t - 1:bin_size + 1]
+  #       frac = sum(bin_fly_speed > 0, na.rm = T) / sum(bin_fly_speed != 0, na.rm = T)
+  #       bin_positive_frac = c(bin_positive_frac, frac)
+  #       t = t + bin_size
+  #     }
+  #     
+  #     # Step 2 - get the turns
+  #     turns = find_intersect_points(bin_positive_frac, rep(0.5, length(bin_positive_frac)))
+  #     turns = ceiling(turns * bin_size - bin_size / 2)
+  #     position_turns = (fly_pos[turns] + fly_pos[turns - 1]) / 2 # Use original fly_pos value as the actual position
+  #     mid_turns = turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
+  #     position_mid_turns = position_turns[position_turns > chamber_end_thres & position_turns < 767 - chamber_end_thres]
+  #     
+  #     # Step 3 - get turn numbers
+  #     num_turns = length(turns)
+  #     num_mid_turns = length(mid_turns)
+  #     
+  #     if (num_turns == 0){
+  #       frac_mid_turns = 0
+  #     } else{
+  #       frac_mid_turns = num_mid_turns / num_turns
+  #     }
+  # 
+  # # 4th Metric Group: Burstiness
+  #     
+  #     # inter-event time is pause defined previously #
+  #     PD = mid_pause_df$Pause_Duration
+  #     
+  #     if (num_pause <= 3) {
+  #       B_pause = 1
+  #     }else{B_pause = (sd(PD) - mean(PD)) / (sd(PD) + mean(PD))}
+  #     
+  #     ## inter-event time is frames with zero velocity #
+  #     b_inter_event = replace(abs(fly_speed), abs(fly_speed) > 0, 1)
+  #     inter_event_time = rle(b_inter_event)$length[rle(b_inter_event)$values == 0]
+  #     if (length(inter_event_time) <= 3) {
+  #       Burst_inter_event = 1
+  #     }else{
+  #       Burst_inter_event = (sd(pause_df$Pause_Duration) - mean(pause_df$Pause_Duration)) /
+  #                           (sd(pause_df$Pause_Duration) + mean(pause_df$Pause_Duration))
+  #     }
+  #     
+  #     # scrambled burstiness 
+  #     b_scrambled = sample(b_inter_event)
+  #     t_scrambled =rle(b_scrambled)$length[rle(b_scrambled)$values == 0]
+  #     B_scrambled = c()
+  #     if (length(t_scrambled) <= 3) {B_scrambled = 1
+  #     } else{
+  #       B_scrambled = (sd((t_scrambled), na.rm = T) - mean((t_scrambled), na.rm = T)) / 
+  #                      (sd((t_scrambled), na.rm = T) + mean((t_scrambled), na.rm = T))
+  #     }
+  # 
+  #     # inter event is walking (with thresholding)
+  #     if (num_mid_pause <= 3) {
+  #       w_burstiness = 1
+  #     } else{
+  #       walk_end = mid_pause_df$Start_Index[2:dim(mid_pause_df)[1]]
+  #       walk_start = mid_pause_df$End_Index[1:(dim(mid_pause_df)[1]-1)]
+  #       walks_dur = walk_end - walk_start
+  #       w_burstiness = (sd(walks_dur) - mean(walks_dur)) / (sd(walks_dur) + mean(walks_dur))
+  #     }
+  #     
+  #     ## inter event is walking (no thresholding)
+  #     burstiness_m_inverted = rep(0, length(b_inter_event))
+  #     burstiness_m_inverted = replace(burstiness_m_inverted, b_inter_event == 0, 1)
+  #     m_inverted =rle(burstiness_m_inverted)$length[rle(burstiness_m_inverted)$values ==0]
+  #     if (length(m_inverted) <= 3) {m_burstiness = 1
+  #     } else{
+  #       m_burstiness = (sd((m_inverted), na.rm = T) - mean((m_inverted), na.rm = T)) / 
+  #                      (sd((m_inverted), na.rm = T) + mean((m_inverted), na.rm = T))
+  #     }
+  # 
+  # # 5th Metric Group: Memory
+  #     
+  #     # inter_event_time is the unfiltered ones and zeros (rasterplot) versions of fly_pos
+  #     # When walking bout is an event
+  #     memory = 0
+  #     if (length(inter_event_time) < 2) {
+  #       memory = NA
+  #     } else{
+  #       m1 = mean(inter_event_time[1:(length(inter_event_time) - 1)]) #mean of inter-event time from 1 to n-1
+  #       m2 = mean(inter_event_time[2:(length(inter_event_time))]) #mean of inter-event time from 2 to n
+  #       std1 = sd(inter_event_time[1:(length(inter_event_time) - 1)])
+  #       std2 = sd(inter_event_time[2:(length(inter_event_time))])
+  #       for (i in 1:(length(inter_event_time) - 1)) {
+  #         memory = memory + ((inter_event_time[i] - m1) * (inter_event_time[i + 1] - m2) /(std1 * std2))
+  #       }
+  #       memory = (1 / (length(inter_event_time) - 1)) * memory
+  #     }
+  #     
+  #     # When pause is an event (inter event is walking)
+  #     memory_w = 0
+  #     if (length(m_inverted) < 2) {
+  #       memory_w = NA
+  #     } else{
+  #       m3 = mean(m_inverted[1:(length(m_inverted) - 1)])
+  #       m4 = mean(m_inverted[2:(length(m_inverted))])
+  #       std3 = sd(m_inverted[1:(length(m_inverted) - 1)])
+  #       std4 = sd(m_inverted[2:(length(m_inverted))])
+  #       for (i in 1:(length(m_inverted) - 1)) {
+  #         memory_w = memory_w + ((m_inverted[i] - m3) * (m_inverted[i + 1] - m4) / (std3 * std4))
+  #       }
+  #       memory_w = (1 / (length(m_inverted) - 1)) * memory_w
+  #     }
+  #     
+  # # 6th Metric Group: Behavioral States
+  #     
+  #     # Get Behavioral State
+  #     p_to_p = sum(pause_df$Pause_Duration - 1)
+  #     if (num_pause < 2) {w_to_w = 0
+  #     } else{w_to_w = sum(pause_df$Start_Index[2:length(pause_df$Start_Index)] - 
+  #                      pause_df$End_Index[1:(length(pause_df$Start_Index) - 1)] - 1)
+  #     }
+  #     p_to_w = length(pause_df$Start_Index)
+  #     w_to_p = length(pause_df$End_Index)
+  #     if ((p_to_p) + (p_to_w) == 0) {
+  #       p_p2p = NA
+  #       p_p2w = NA
+  #     } else{
+  #       p_p2p = p_to_p / (p_to_p + p_to_w)
+  #       p_p2w = p_to_w / (p_to_p + p_to_w)
+  #     }
+  #     
+  #     if ((w_to_p) + (w_to_w) == 0) {
+  #       p_w2p = NA
+  #       p_w2w = NA
+  #     } else if (is.na((w_to_p) + (w_to_w))) {
+  #       p_w2p = NA
+  #       p_w2w = NA
+  #     } else{
+  #       p_w2p = w_to_p / (w_to_p + w_to_w)
+  #       p_w2w = w_to_w / (w_to_p + w_to_w)
+  #     }
+  #     
+  #     # Behavioral states for pauses not at the end
+  #     
+  #     p_2_p_m = sum(mid_pause_df$Pause_Duration - 1)
+  #     if (num_mid_pause < 2){
+  #       w_2_w_m = 0
+  #     }else{
+  #       w_2_w_m = sum(mid_pause_df$Start_Index[2:length(mid_pause_df$Start_Index)] - 
+  #                       mid_pause_df$End_Index[1:(length(mid_pause_df$End_Index)-1)] - 1)
+  #     }
+  #     p_2_w_m = length(mid_pause_df$Start_Index)
+  #     w_2_p_m = length(mid_pause_df$End_Index)
+  #     if (p_2_p_m + p_2_w_m == 0){
+  #       p_p2pm = NA
+  #       p_p2wm = NA
+  #     }else{
+  #       p_p2pm = p_2_p_m / (p_2_p_m + p_2_w_m)
+  #       p_p2wm = p_2_w_m / (p_2_p_m + p_2_w_m)
+  #     }
+  #     if (w_2_p_m + w_2_w_m == 0){
+  #       p_w2pm = NA
+  #       p_w2wm = NA
+  #     }else{
+  #       p_w2pm = w_2_p_m / (w_2_p_m + w_2_w_m)
+  #       p_w2wm = w_2_w_m / (w_2_p_m + w_2_w_m)
+  #     }
+  #     
+  #     ## Behavioral states for pauses not at the end & not bumping to the wall
+  #     nobump_df = subset(mid_pause_df, ((Start_Type == 1) & (End_Type == 2)) | ((Start_Type == 4) & (End_Type == 3)))
+  #     bump_df = subset(mid_pause_df, ((Start_Type == 1) &(End_Type == 3)) | ((Start_Type == 4) & (End_Type == 2)))
+  #     pause_end_df = subset(pause_df, (Start_Position < chamber_end_thres) | (Start_Position > 767 - chamber_end_thres))
+  #     
+  #     p_to_p_end = sum(pause_end_df$Pause_Duration - 1)
+  #     p_to_w_end = length(pause_end_df$Start_Index)
+  #     w_to_p_end = length(pause_end_df$End_Index)
+  #     p_to_p_middle_bump = sum(bump_df$Pause_Duration - 1)
+  #     p_to_w_middle_bump = length(bump_df$Start_Index)
+  #     w_to_p_middle_bump = length(bump_df$End_Index)
+  #     p_to_p_middle_nobump = sum(nobump_df$Pause_Duration - 1)
+  #     num_pause_middle_nobump = nrow(nobump_df)
+  #     num_pause_middle_bump = nrow(bump_df)
+  #     num_pause_end = nrow(pause_end_df)
+  #     
+  #     if (num_pause < 2) {
+  #       w_to_w_middle_nobump = 0
+  #     } else{
+  #       if (num_pause_middle_nobump < 2) {
+  #         w_to_w_middle_nobump = 0
+  #       } else{
+  #         w_to_w_middle_nobump = 
+  #           sum(nobump_df$Start_Index[2:dim(nobump_df)[1]] - nobump_df$End_Index[1:(dim(nobump_df)[1] - 1)] - 1) - 
+  #           sum(p_to_p_end, p_to_w_end, w_to_p_end, p_to_p_middle_bump, p_to_w_middle_bump, w_to_p_middle_bump)
+  #       }
+  #     }
+  #     
+  #     p_to_w_middle_nobump = length(nobump_df$Start_Index)
+  #     w_to_p_middle_nobump = length(nobump_df$End_Index)
+  #     
+  #     if (p_to_p_middle_nobump + p_to_w_middle_nobump == 0) {
+  #       p_p2p_middle = NA
+  #       p_p2w_middle = NA
+  #     } else{
+  #       p_p2p_middle = p_to_p_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
+  #       p_p2w_middle = p_to_w_middle_nobump / (p_to_p_middle_nobump + p_to_w_middle_nobump)
+  #     }
+  #     
+  #     if (is.na(w_to_w_middle_nobump)) {w_to_w_middle_nobump = 0}
+  #     
+  #     if (w_to_p_middle_nobump + w_to_w_middle_nobump == 0) {
+  #       p_w2p_middle = NA
+  #       p_w2w_middle = NA
+  #     } else{
+  #       p_w2p_middle = w_to_p_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
+  #       p_w2w_middle = w_to_w_middle_nobump / (w_to_p_middle_nobump + w_to_w_middle_nobump)
+  #     }
 
   #7th: Return output
       
@@ -510,29 +510,29 @@ one_fly_statistics = function(input_file,
                               max_pause_middle,
                               first_pause,
                               first_pause_middle,
-                              avg_speed,
-                              avg_speed_moving,
-                              avg_speed_enter,
-                              avg_speed_exit,
-                              dist,
-                              num_turns,
-                              num_mid_turns,
-                              frac_mid_turns,
-                              B_pause,    
-                              Burst_inter_event,
-                              B_scrambled,
-                              w_burstiness,
-                              m_burstiness,
-                              memory,
-                              memory_w,
-                              p_p2p,
-                              p_p2pm,
-                              p_p2w,
-                              p_p2wm,
-                              p_w2w,
-                              p_w2wm,
-                              p_w2p,
-                              p_w2pm,
+                              # avg_speed,
+                              # avg_speed_moving,
+                              # avg_speed_enter,
+                              # avg_speed_exit,
+                              # dist,
+                              # num_turns,
+                              # num_mid_turns,
+                              # frac_mid_turns,
+                              # B_pause,    
+                              # Burst_inter_event,
+                              # B_scrambled,
+                              # w_burstiness,
+                              # m_burstiness,
+                              # memory,
+                              # memory_w,
+                              # p_p2p,
+                              # p_p2pm,
+                              # p_p2w,
+                              # p_p2wm,
+                              # p_w2w,
+                              # p_w2wm,
+                              # p_w2p,
+                              # p_w2pm,
                               avg_pause_dur,
                               avg_pause_middle_dur
                             ), stringsAsFactors=FALSE)
@@ -552,29 +552,29 @@ one_fly_statistics = function(input_file,
         "Max Middle Pause Duration", #13
         "First Pause Duration", #14
         "First Middle Pause Duration", #15
-        "Average Moving Speed", #16
-        "Average Moving Speed (excluding pause)", #17
-        "Average Speed When Enter Pause", #18
-        "Average Speed When Exit Pause",#19
-        "Moving Distance",#20
-        "Number of Turns",#21
-        "Number of Middle Turns",#22
-        "Fraction of Middle Turns Out of Total Turns",#23
-        "Burstiness (Pause)",#24
-        "Burstiness (Inter Event Time)",#25
-        "Burstiness (Scrambled)",#26
-        "Burstiness (Walking bouts-thresholding)",#27
-        "Burstiness (Walking events-no thres)",#28
-        "Memory of Pause", #29
-        "Memory of Walking", #30
-        "Transition Probability (Pause not at the end): Pause to Pause", #31
-        "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-        "Transition Probability (Pause not at the end): Pause to Walking", #33
-        "Transition Probability (Pause not at the end): Pause to Walking - middle", #34
-        "Transition Probability (Pause not at the end): Walking to Walking", #35
-        "Transition Probability (Pause not at the end): Walking to Walking - middle", #36
-        "Transition Probability (Pause not at the end): Walking to Pause", # 37
-        "Transition Probability (Pause not at the end): Walking to Pause - middle", #38
+        # "Average Moving Speed", #16
+        # "Average Moving Speed (excluding pause)", #17
+        # "Average Speed When Enter Pause", #18
+        # "Average Speed When Exit Pause",#19
+        # "Moving Distance",#20
+        # "Number of Turns",#21
+        # "Number of Middle Turns",#22
+        # "Fraction of Middle Turns Out of Total Turns",#23
+        # "Burstiness (Pause)",#24
+        # "Burstiness (Inter Event Time)",#25
+        # "Burstiness (Scrambled)",#26
+        # "Burstiness (Walking bouts-thresholding)",#27
+        # "Burstiness (Walking events-no thres)",#28
+        # "Memory of Pause", #29
+        # "Memory of Walking", #30
+        # "Transition Probability (Pause not at the end): Pause to Pause", #31
+        # "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
+        # "Transition Probability (Pause not at the end): Pause to Walking", #33
+        # "Transition Probability (Pause not at the end): Pause to Walking - middle", #34
+        # "Transition Probability (Pause not at the end): Walking to Walking", #35
+        # "Transition Probability (Pause not at the end): Walking to Walking - middle", #36
+        # "Transition Probability (Pause not at the end): Walking to Pause", # 37
+        # "Transition Probability (Pause not at the end): Walking to Pause - middle", #38
         "Average Pause Duration", #39
         "Average Middle Pause Duration" #40
       )
@@ -942,6 +942,250 @@ plot_gap = function(fly.info.end, all_ofs,#remember to use all_ofs_wT
   # }
 dev.off()
   
+}
+
+
+plot_WT = function(all_ofs, genotype, i){
+  df = all_ofs[all_ofs$Genotype==genotype, ]
+  
+  if (genotype == "WT"){
+    m = data.frame(
+      factor = c(rep("E1-T", length(df[df$Type=="T" & df$Session=="E1", ][, i])),
+                 rep("E1-R", length(df[df$Type=="R" & df$Session=="E1", ][, i])),
+                 rep("E1-N", length(df[df$Type=="N" & df$Session=="E1", ][, i])),
+                 rep("E1T1E1", length(df[df$Session=="E1T1E1", ][, i])),
+                 rep("E1R1E1", length(df[df$Session=="E1R1E1", ][, i])),
+                 rep("E1N1E1", length(df[df$Session=="E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1", ][, i])),
+                 rep("E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1", ][, i])),
+                 # rep("E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1", ][, i])),
+                 rep("E1T1E1T1E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1", ][, i])),
+                 rep("E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1", ][, i])),
+                 # rep("E1T1E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
+                 rep("E1T1E1T1E1T2E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
+                 rep("E1R1E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
+      ),
+      value = as.numeric(c(df[df$Type=="T" & df$Session=="E1", ][, i], 
+                           df[df$Type=="R" & df$Session=="E1", ][, i],
+                           df[df$Type=="N" & df$Session=="E1", ][, i],
+                           df[df$Session=="E1T1E1", ][, i],
+                           df[df$Session=="E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1", ][, i],
+                           # df[df$Session=="E1T1E1T1E1T1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1T2E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1N1E1", ][, i],
+                           # df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]
+      ))
+    )
+    colnames(m) = c("Session", "Value")
+    m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
+                                           "E1T1E1", "E1R1E1", "E1N1E1",
+                                           "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1",
+                                           # "E1T1E1T1E1T1E1", 
+                                           "E1T1E1T1E1T2E1", "E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1",
+                                           # "E1T1E1T1E1T1E1T1E1", 
+                                           "E1T1E1T1E1T2E1T2E1", "E1R1E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1N1E1"))
+    s =  c("Baselne", "Post 1st Session", "Post 2nd Session", 
+           "Post 1st Reverse ", "Post 2nd Reverse")
+    col.pool = c(
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred4",
+      "light blue",
+      "grey80",
+      "indianred4",
+      "light blue",
+      "grey80"
+    )
+    a = test_initial_condition(i, genotype, all_ofs)
+    b = test_mid_training(i, genotype, all_ofs)
+    c = test_after_training(i, genotype, all_ofs)
+    d = test_reverse_training_1st(i, genotype, all_ofs)
+    e = test_reverse_training_2nd(i, genotype, all_ofs)
+    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted, d$P.adjusted, e$P.adjusted)
+  }else{
+    
+    m = data.frame(
+      factor = c(rep("E1-T", length(df[df$Type=="T" & df$Session=="E1", ][, i])),
+                 rep("E1-R", length(df[df$Type=="R" & df$Session=="E1", ][, i])),
+                 rep("E1-N", length(df[df$Type=="N" & df$Session=="E1", ][, i])),
+                 rep("E1T1E1", length(df[df$Session=="E1T1E1", ][, i])),
+                 rep("E1R1E1", length(df[df$Session=="E1R1E1", ][, i])),
+                 rep("E1N1E1", length(df[df$Session=="E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1", ][, i])),
+                 rep("E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1", ][, i])),
+                 # rep("E1T1E1T1E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1", ][, i])),
+                 rep("E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1", ][, i])),
+                 rep("E1T1E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
+                 # rep("E1T1E1T1E1T2E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
+                 rep("E1R1E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
+                 rep("E1N1E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
+      ),
+      value = as.numeric(c(df[df$Type=="T" & df$Session=="E1", ][, i], 
+                           df[df$Type=="R" & df$Session=="E1", ][, i],
+                           df[df$Type=="N" & df$Session=="E1", ][, i],
+                           df[df$Session=="E1T1E1", ][, i],
+                           df[df$Session=="E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1T1E1", ][, i],
+                           # df[df$Session=="E1T1E1T1E1T2E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1N1E1", ][, i],
+                           df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
+                           # df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
+                           df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
+                           df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]
+      ))
+    )
+    colnames(m) = c("Session", "Value")
+    m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
+                                           "E1T1E1", "E1R1E1", "E1N1E1",
+                                           "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1",
+                                           "E1T1E1T1E1T1E1",
+                                           # "E1T1E1T1E1T2E1", 
+                                           "E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1",
+                                           "E1T1E1T1E1T1E1T1E1",
+                                           # "E1T1E1T1E1T2E1T2E1", 
+                                           "E1R1E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1N1E1"))
+    s =  c("Baselne", "Post 1st Session", "Post 2nd Session", 
+           "Post 3rd Session ", "Post 4th Session")
+    col.pool = c(
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80",
+      "indianred2",
+      "light blue",
+      "grey80"
+    )
+    a = test_initial_condition(i, genotype, all_ofs)
+    b = test_mid_training(i, genotype, all_ofs)
+    c = test_after_training(i, genotype, all_ofs)
+    d = test_3rd_training(i, genotype, all_ofs)
+    e = test_4th_training(i, genotype, all_ofs)
+    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted, d$P.adjusted, e$P.adjusted)
+  }
+
+  num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
+  
+  pdf(paste0(genotype, "_PTA_", Sys.Date(), ".pdf"),
+      onefile = T, width = 16
+  )
+  
+  yrange = c(0, 1)
+  y_text = 1
+  boxplot(
+    Value ~ Session,
+    data = m,
+    ylim = yrange,
+    outline = F,
+    notch = F,
+    lwd = 1,
+    ylab = "",
+    xlab = "",
+    medlwd = 1,
+    xaxt = "n"
+  )
+  stripchart(
+    Value ~ Session,
+    vertical = TRUE,
+    data = m,
+    method = "jitter",
+    add = TRUE,
+    pch = 15,
+    cex = 0.5,
+    col =  col.pool
+  )
+  text(x = c(0.8, 1.8, 2.8, 9.85),
+       y = y_text,
+       # y_text,
+       c(num[1:3], num[10]),
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+  
+  y_top_base = 1.1
+  vertical_gap = 0.01
+  v_gap = 0.005
+  y_base_RN = y_top_base - 2.8 * vertical_gap
+  y_base_TN = y_top_base - 5.6 * vertical_gap
+  y_base_TR = y_top_base
+  
+  
+  for (i in 1:length(p)){
+    if (p[i] >= 0.05){
+      significance = "n.s."
+    }else if (p[i] < 0.05 & p[i] >= 0.01){
+      significance = "*"
+    }else if (p[i] < 0.01 & p[i] >= 0.001){
+      significance = "**"
+    }else if (p[i] < 0.001 & p[i] >= 0.0001){
+      significance = "***"
+    }else if (p[i] < 0.0001){
+      significance = "****"
+    }
+    
+    if (i%%3==0){
+      text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
+      lines(c(i - 2, i - 1), 
+            c(y_base_TR,  y_base_TR), 
+            xpd = NA)
+      lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+      lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
+      
+    }
+  }
+
+  
+  seq_for_lines = seq(3, 15, by=3)
+  for (j in seq_for_lines) {
+    lines(c(j, j) + 0.5,
+          c(yrange[1] - 1e3, yrange[1] + 1e3),
+          col = "light grey",
+          lty = 1)
+  }
+  
+  text(x = c(1.5, 4, 7, 10, 13),
+       y = -0.1,
+       # y_text,
+       s,
+       xpd = T,
+       srt = 0,
+       adj = 0
+  )
+  dev.off()
 }
 
 
@@ -1940,12 +2184,11 @@ get_query_info = function(query.genotype){
               query.experimenter))
 }    
 
-test_initial_condition = function(i, query.genotype){
+test_initial_condition = function(i, query.genotype, all_ofs){
   if (query.genotype == c("CS") || query.genotype == c("WT")){
-    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
   }else{
-    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
-    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
   }
   
   metric = data.frame(
@@ -1962,52 +2205,165 @@ test_initial_condition = function(i, query.genotype){
   return (a)
 }
 
-test_mid_training = function(i, query.genotype, normalization = F){
-  if (normalization == F){
-    if (query.genotype == c("CS") || query.genotype == c("WT")){
-      metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
-    } else{
-      metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
-      metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
-    }
-    metric = data.frame(
-      factor = c(rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
-                 rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
-                 rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i]))),
-      value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1", ][, i],
-                           metric.df[metric.df$Session=="E1R1E1", ][, i],
-                           metric.df[metric.df$Session=="E1N1E1", ][, i]))
-    )
-    colnames(metric) = c("Session", "Value")
-    metric$Session = factor(metric$Session, levels=c("E1T1E1", "E1R1E1", "E1N1E1"))
-    a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
-    return(a)
-  }else{return(NULL)}
+test_mid_training = function(i, query.genotype, all_ofs){
+
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
+  }
+  metric = data.frame(
+    factor = c(rep("E1T1E1", length(metric.df[metric.df$Session=="E1T1E1", ][, i])),
+               rep("E1R1E1", length(metric.df[metric.df$Session=="E1R1E1", ][, i])),
+               rep("E1N1E1", length(metric.df[metric.df$Session=="E1N1E1", ][, i]))),
+    value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1", ][, i],
+                         metric.df[metric.df$Session=="E1R1E1", ][, i],
+                         metric.df[metric.df$Session=="E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c("E1T1E1", "E1R1E1", "E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+  
 }
 
 
-test_after_training = function(i, query.genotype, normalization = F){
-  if (normalization == F){
+test_after_training = function(i, query.genotype, all_ofs){
+
   if (query.genotype == c("CS") || query.genotype == c("WT")){
-    metric.df = read.table("all_ofs_WT.csv", stringsAsFactors = F, sep = ',', header = T)
-  } else{
-    metric.df = read.table("all_ofs_mutants.csv", stringsAsFactors = F, sep = ',', header = T)
-    metric.df = metric.df[metric.df$Genotype==query.genotype[1], ]
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
   }
   metric = data.frame(
-    factor = c(rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
-               rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
-               rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
-    value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
-                         metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
-                         metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
+  factor = c(rep("E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i])),
+             rep("E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1", ][, i])),
+             rep("E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))),
+  value = as.numeric(c(metric.df[metric.df$Session=="E1T1E1T1E1", ][, i],
+                       metric.df[metric.df$Session=="E1R1E1R1E1", ][, i],
+                       metric.df[metric.df$Session=="E1N1E1N1E1", ][, i]))
   )
   colnames(metric) = c("Session", "Value")
   metric$Session = factor(metric$Session, levels=c("E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"))
   a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
   return(a)
-  }else{return(NULL)}
+
 }
+
+test_3rd_training = function(i, query.genotype, all_ofs){
+  
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
+  }
+  metric = data.frame(
+    factor = c(
+      rep("E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i])),
+      rep("E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i])),
+      rep("E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))),
+    value = as.numeric(c(
+      metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i],
+      metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i],
+      metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c(
+    "E1T1E1T1E1T1E1",
+    "E1R1E1R1E1R1E1",
+    "E1N1E1N1E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+  
+}
+
+test_4th_training = function(i, query.genotype, all_ofs){
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
+  }
+  metric = data.frame(
+    factor = c(
+      rep("E1T1E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
+      # rep("E1T1E1T1E1T2E1T2E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
+      rep("E1R1E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
+      rep("E1N1E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))),
+    value = as.numeric(c(
+      metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
+      # metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
+      metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
+      metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c(
+    "E1T1E1T1E1T1E1T1E1",
+    # "E1T1E1T1E1T2E1T2E1", 
+    "E1R1E1R1E1R1E1R1E1", 
+    "E1N1E1N1E1N1E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+}
+
+
+test_reverse_training_1st = function(i, query.genotype, all_ofs){
+
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
+  }
+  metric = data.frame(
+    factor = c(
+               # rep("E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i])),
+               rep("E1T1E1T1E1T2E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T2E1", ][, i])),
+               rep("E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i])),
+               rep("E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))),
+    value = as.numeric(c(
+                         # metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i],
+                         metric.df[metric.df$Session=="E1T1E1T1E1T2E1", ][, i],
+                         metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i],
+                         metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c(
+                                                   # "E1T1E1T1E1T1E1",
+                                                   "E1T1E1T1E1T2E1", 
+                                                   "E1R1E1R1E1R1E1",
+                                                   "E1N1E1N1E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+
+}
+
+test_reverse_training_2nd = function(i, query.genotype, all_ofs){
+  if (query.genotype == c("CS") || query.genotype == c("WT")){
+    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
+  }else{
+    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
+  }
+  metric = data.frame(
+    factor = c(
+               # rep("E1T1E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
+               rep("E1T1E1T1E1T2E1T2E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
+               rep("E1R1E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
+               rep("E1N1E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))),
+    value = as.numeric(c(
+                         # metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
+                         metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
+                         metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
+                         metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
+  )
+  colnames(metric) = c("Session", "Value")
+  metric$Session = factor(metric$Session, levels=c(
+                                                   # "E1T1E1T1E1T1E1T1E1", 
+                                                   "E1T1E1T1E1T2E1T2E1", 
+                                                   "E1R1E1R1E1R1E1R1E1", 
+                                                   "E1N1E1N1E1N1E1N1E1"))
+  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
+  return(a)
+}
+
 
 hypothesis_testing_E1 = function(i, fly.info){
   metrices =  c(
