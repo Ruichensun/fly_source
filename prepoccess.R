@@ -84,7 +84,7 @@ query.sessions <- unique(query.sessions)
 
 ## CS
 fly.info = read.csv(paste0(path,"fly_info_CS.csv"),header = T,stringsAsFactors = F)
-fly.info$Age = as.Date(fly.info$Exp.date, format = '%m/%d/%Y') - as.Date(fly.info$Birth.date, format = '%m/%d/%Y')
+# fly.info$Age = as.Date(fly.info$Death.date, format = '%m/%d/%Y') - as.Date(fly.info$Birth.date, format = '%m/%d/%Y')
 fly.info$Fly = as.numeric(fly.info$Fly)
 fly.moving.speed = NULL
 fly.info.framerate = NULL
@@ -160,7 +160,7 @@ write.table(fly.info.out, "data/fly_info_CS_preprocessed.csv", row.names = F,quo
 
 ## Mutants
 fly.info = read.csv(paste0(path, "fly_info_mutants.csv"),header = T,stringsAsFactors = F)
-fly.info$Age = as.Date(fly.info$Exp.date, format = '%m/%d/%Y')  - as.Date(fly.info$Birth.date, format = '%m/%d/%Y')
+# fly.info$Age = as.Date(fly.info$Death.date, format = '%m/%d/%Y')  - as.Date(fly.info$Birth.date, format = '%m/%d/%Y')
 fly.info$Fly = as.numeric(fly.info$Fly)
 fly.moving.speed = NULL
 fly.info.framerate = NULL

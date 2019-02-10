@@ -5,18 +5,15 @@ library(dunn.test)
 
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos; Output: a vector of 0 and 1 of (length of input) - 1 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") | 
-                                        (fly.info.include$Genotype == "CS")) & 
-                                        (fly.info.include$Category =="T") & 
-                                        (fly.info.include$experimenter!="SW"), ]
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") | 
-                                        (fly.info.include$Genotype == "CS")) & 
-                                        (fly.info.include$Category == "R") & 
-                                        (fly.info.include$experimenter!="SW"), ]
-fly.info.movement.N = fly.info.include[((fly.info.include$Genotype == "WT") | 
-                                        (fly.info.include$Genotype == "CS")) & 
-                                        (fly.info.include$Category == "N") & 
-                                        (fly.info.include$experimenter!="SW"), ]
+fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                        (fly.info.end$Genotype == "CS")) & 
+                                        (fly.info.end$Category =="T"), ]
+fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                        (fly.info.end$Genotype == "CS")) & 
+                                        (fly.info.end$Category == "R") , ]
+fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                        (fly.info.end$Genotype == "CS")) & 
+                                        (fly.info.end$Category == "N") , ]
 
 ###Including All Relevant Sessions
 sessions <- c(
@@ -65,12 +62,12 @@ cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 
 # cumsums_CI structure: for each of the 6 lists: 3 rows by 8568 columns. First row is median
 # Second row is CI lower bound, Third row is CI upper bound
 
-trained_1 = cumsums_CI[[1]][1,] 
-yoked_1   = cumsums_CI[[2]][1,] 
-blank_1   = cumsums_CI[[3]][1,]
-trained_2 = cumsums_CI[[4]][1,] 
-yoked_2   = cumsums_CI[[5]][1,] 
-blank_2   = cumsums_CI[[6]][1,] 
+trained_1 = cumsums_total[[1]][min_sequence_length,] 
+yoked_1   = cumsums_total[[2]][min_sequence_length,] 
+blank_1   = cumsums_total[[3]][min_sequence_length,] 
+trained_2 = cumsums_total[[4]][min_sequence_length,] 
+yoked_2   = cumsums_total[[5]][min_sequence_length,] 
+blank_2   = cumsums_total[[6]][min_sequence_length,] 
 T1_label = rep("T1", length(trained_1))
 R1_label = rep("R1", length(yoked_1))
 N1_label = rep("N1", length(blank_1))
@@ -92,9 +89,9 @@ colnames(N2_df) = c("Value", "Session")
 
 Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
 Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
-dunn.test(x = Session1_df$Value, g = Session1_df$Session, method = c("bonferroni"))
-dunn.test(x = Session2_df$Value, g = Session2_df$Session, method = c("bonferroni"))
-
+first_training_test = dunn.test(x = Session1_df$Value, g = Session1_df$Session, method = c("bonferroni"))
+second_training_test = dunn.test(x = Session2_df$Value, g = Session2_df$Session, method = c("bonferroni"))
+p = c(first_training_test$P.adjusted, second_training_test$P.adjusted)
 
 # Confidence Interval
 
@@ -121,14 +118,14 @@ coordinates = list(append(cumsums_CI[[1]][2,], rev(cumsums_CI[[1]][3,])),
 
 
 pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
-    onefile = T, width = 5, height = 5)
+    onefile = T, width = 8, height = 8)
     # First training session
     plot(
       1,
       type = "n",
-      xlab = "",
-      ylab = "",
-      xlim = c(0, 200),
+      xlab = "Time (sec)",
+      ylab = "Cumulative Walking Duration (sec)",
+      xlim = c(0, 180),
       ylim = c(0, 100)
     )
     
@@ -161,30 +158,164 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       forward_index,
       cumsums_CI[[1]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
       cumsums_CI[[2]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
       cumsums_CI[[3]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.5, 0.5, 0.5, 0.5)
     )
+    
+    # T - Red 
+    lines(
+      x = c(168, 171),
+      y = c(cumsums_CI[[1]][2,][min_sequence_length],cumsums_CI[[1]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(168, 171),
+      y = c(cumsums_CI[[1]][3,][min_sequence_length],cumsums_CI[[1]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(169.5, 169.5),
+      y = c(cumsums_CI[[1]][2,][min_sequence_length],cumsums_CI[[1]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(169, 170),
+      y = c(cumsums_CI[[1]][1,][min_sequence_length],cumsums_CI[[1]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    # R - Blue
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[2]][2,][min_sequence_length],cumsums_CI[[2]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[2]][3,][min_sequence_length],cumsums_CI[[2]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(173.5, 173.5),
+      y = c(cumsums_CI[[2]][2,][min_sequence_length],cumsums_CI[[2]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(173, 174),
+      y = c(cumsums_CI[[2]][1,][min_sequence_length],cumsums_CI[[2]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 3,
+      col = "blue"
+    )
+    
+    # N - Grey
+    lines(
+      x = c(164, 167),
+      y = c(cumsums_CI[[3]][2,][min_sequence_length],cumsums_CI[[3]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(164, 167),
+      y = c(cumsums_CI[[3]][3,][min_sequence_length],cumsums_CI[[3]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(165.5, 165.5),
+      y = c(cumsums_CI[[3]][2,][min_sequence_length],cumsums_CI[[3]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(165, 166),
+      y = c(cumsums_CI[[3]][1,][min_sequence_length],cumsums_CI[[3]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 3,
+      col = "grey"
+    )
+    
+    if (p[3] >= 0.05){
+      significance = "n.s."
+    }else if (p[3] < 0.05 & p[3] >= 0.01){
+      significance = "*"
+    }else if (p[3] < 0.01 & p[3] >= 0.001){
+      significance = "**"
+    }else if (p[3] < 0.001 & p[3] >= 0.0001){
+      significance = "***"
+    }else if (p[3] < 0.0001){
+      significance = "****"
+    }
+    
+    text(182, 
+         57, 
+         significance, 
+         xpd = NA,
+         srt = 270,
+         font = 24
+    )
+    lines(c(176, 178), 
+          c(c(cumsums_CI[[1]][1,][min_sequence_length],cumsums_CI[[1]][1,][min_sequence_length])), 
+          xpd = NA)
+    lines(c(176, 178), 
+          c(c(cumsums_CI[[2]][1,][min_sequence_length],cumsums_CI[[2]][1,][min_sequence_length])), 
+          xpd = NA)
+    lines(
+      c(178,178),
+      c(cumsums_CI[[1]][1,][min_sequence_length], cumsums_CI[[2]][1,][min_sequence_length]),
+      xpd = NA
+    )
+    
+    
+    
     # Second training session
     plot(
       1,
       type = "n",
       xlab = "",
       ylab = "",
-      xlim = c(0, 200),
+      # xlab = "Time (sec)",
+      # ylab = "Cumulative Walking Duration (sec)",
+      xlim = c(0, 180),
       ylim = c(0, 100)
     )
     
@@ -217,22 +348,152 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       forward_index,
       cumsums_CI[[4]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.8, 0, 0, 0.5)
     )
     lines(
       forward_index,
       cumsums_CI[[5]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.0, 0, 0.8, 0.5)
     )
     lines(
       forward_index,
       cumsums_CI[[6]][1,],
       lty = 1,
-      lwd = 2,
+      lwd = 3,
       col = rgb(0.5, 0.5, 0.5, 0.5)
     )
-  
+    # T - Red 
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[4]][2,][min_sequence_length],cumsums_CI[[4]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[4]][3,][min_sequence_length],cumsums_CI[[4]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(173.5, 173.5),
+      y = c(cumsums_CI[[4]][2,][min_sequence_length],cumsums_CI[[4]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+    lines(
+      x = c(173, 174),
+      y = c(cumsums_CI[[4]][1,][min_sequence_length],cumsums_CI[[4]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    # R - Blue
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[5]][2,][min_sequence_length],cumsums_CI[[5]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(172, 175),
+      y = c(cumsums_CI[[5]][3,][min_sequence_length],cumsums_CI[[5]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(173.5, 173.5),
+      y = c(cumsums_CI[[5]][2,][min_sequence_length],cumsums_CI[[5]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "blue"
+    )
+    
+    lines(
+      x = c(173, 174),
+      y = c(cumsums_CI[[5]][1,][min_sequence_length],cumsums_CI[[5]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 3,
+      col = "blue"
+    )
+    
+    # N - Grey
+    lines(
+      x = c(164, 167),
+      y = c(cumsums_CI[[6]][2,][min_sequence_length],cumsums_CI[[6]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(164, 167),
+      y = c(cumsums_CI[[6]][3,][min_sequence_length],cumsums_CI[[6]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(165.5, 165.5),
+      y = c(cumsums_CI[[6]][2,][min_sequence_length],cumsums_CI[[6]][3,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "grey"
+    )
+    
+    lines(
+      x = c(165, 166),
+      y = c(cumsums_CI[[6]][1,][min_sequence_length],cumsums_CI[[6]][1,][min_sequence_length]),
+      lty = 1,
+      lwd = 3,
+      col = "grey"
+    )
+    
+    if (p[6] >= 0.05){
+      significance = "n.s."
+    }else if (p[6] < 0.05 & p[6] >= 0.01){
+      significance = "*"
+    }else if (p[6] < 0.01 & p[6] >= 0.001){
+      significance = "**"
+    }else if (p[6] < 0.001 & p[6] >= 0.0001){
+      significance = "***"
+    }else if (p[6] < 0.0001){
+      significance = "****"
+    }
+      
+    text(180, 
+         47, 
+         significance, 
+         xpd = NA,
+         srt = 90,
+         font = 24
+         )
+    lines(c(176, 178), 
+          c(c(cumsums_CI[[4]][1,][min_sequence_length],cumsums_CI[[4]][1,][min_sequence_length])), 
+          xpd = NA)
+    lines(c(176, 178), 
+          c(c(cumsums_CI[[5]][1,][min_sequence_length],cumsums_CI[[5]][1,][min_sequence_length])), 
+          xpd = NA)
+    lines(
+      c(178,178),
+      c(cumsums_CI[[5]][1,][min_sequence_length], cumsums_CI[[4]][1,][min_sequence_length]),
+      xpd = NA
+    )
+
 dev.off()
+
+save.image("cumsums.Rdata")
