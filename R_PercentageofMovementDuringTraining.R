@@ -2,69 +2,79 @@ source("plot_trend.R")
 setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 
 #Quantify the mean of delay onset/off of laser of one file
+fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category =="T"), ]
+fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "R") , ]
 
-fly.info.movement.T = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category =="T")&
-                                         (fly.info.include$experimenter!="SW"), ]
 
-fly.info.movement.R = fly.info.include[((fly.info.include$Genotype == "WT") |
-                                          (fly.info.include$Genotype == "CS")) &
-                                         (fly.info.include$Category == "R")&
-                                         (fly.info.include$experimenter!="SW"), ]
+R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+R1 = R1[complete.cases(R1), ]
 
-first_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1",
-                                                         fly.info.movement.R)
-first_yoked_session = first_yoked_session[complete.cases(first_yoked_session), ]
+R2 = Hit_by_laser("E1R1E1R1", fly.info.movement.R)
+R2 = R2[complete.cases(R2), ]
 
-second_yoked_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1R1E1R1", 
-                                                          fly.info.movement.R)
-second_yoked_session = second_yoked_session[complete.cases(second_yoked_session), ]
+T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+T1 = T1[complete.cases(T1), ]
 
-first_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1", 
-                                                            fly.info.movement.T)
-first_training_session = first_training_session[complete.cases(first_training_session), ]
-
-second_training_session = total_chance_of_being_hit_by_laser(file_name_filter = "E1T1E1T1",
-                                                             fly.info.movement.T)
-second_training_session = second_training_session[complete.cases(second_training_session), ]
+T2 = Hit_by_laser( "E1T1E1T1",fly.info.movement.T)
+T2 = T2[complete.cases(T2), ]
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)
 
 Chance_of_being_hit = list(
   
-  first_training_session$`Chances of being hit during walking`,
-  first_training_session$`Chances of being hit during pause `,
-  
-  first_yoked_session$`Chances of being hit during walking`,
-  first_yoked_session$`Chances of being hit during pause `,
-  
-  second_training_session$`Chances of being hit during walking`,
-  second_training_session$`Chances of being hit during pause `,
-  
-  second_yoked_session$`Chances of being hit during walking`,
-  second_yoked_session$`Chances of being hit during pause `
+  T1$`Chances of being hit during walking`,
+  T1$`Chances of being hit during pause `,
+  R1$`Chances of being hit during walking`,
+  R1$`Chances of being hit during pause `,
+  T2$`Chances of being hit during walking`,
+  T2$`Chances of being hit during pause `,
+  R2$`Chances of being hit during walking`,
+  R2$`Chances of being hit during pause `
 )
+
+p = c(wilcox.test(Chance_of_being_hit[[1]], Chance_of_being_hit[[2]])$p.value,
+      wilcox.test(Chance_of_being_hit[[3]], Chance_of_being_hit[[4]])$p.value,
+      wilcox.test(Chance_of_being_hit[[5]], Chance_of_being_hit[[6]])$p.value,
+      wilcox.test(Chance_of_being_hit[[7]], Chance_of_being_hit[[8]])$p.value)
+
+sig = c()
+for (i in 1:length(p)){
+  if (p[i] >= 0.05){
+    significance = "n.s."
+  }else if (p[i] < 0.05 & p[i] >= 0.01){
+    significance = "*"
+  }else if (p[i] < 0.01 & p[i] >= 0.001){
+    significance = "**"
+  }else if (p[i] < 0.001 & p[i] >= 0.0001){
+    significance = "***"
+  }else if (p[i] < 0.0001){
+    significance = "****"
+  }
+  sig = c(sig, significance)
+}
 
 col.pool <- c( "indianred3",
                "indianred3",
                "light blue",
                "light blue"
                )
-
 boxplot(
   Chance_of_being_hit[1:4],
   ylim = c(0, 1),
   outline = F,
   notch = F,
-  lwd = 2,
+  medlwd = 1,
   ylab = "Percentage",
   xaxt = "n",
-  col = col.pool,
-  # main = "Chance of being punished in first session",
-  ann = FALSE
+  ann = FALSE,
+  axes=F
 )
+axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
 stripchart(
   vertical = TRUE,
   x = Chance_of_being_hit[1:4],
@@ -72,17 +82,15 @@ stripchart(
   add = TRUE,
   pch = 15,
   cex = 0.5,
-  col =  "grey40"
+  col =  col.pool
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[1:4])) - 0.1,
-  y = 1.02,
+  x = c(1.35, 3.35),
+  y = 1.2,
   labels = c(
-    length(Chance_of_being_hit[[1]]),
-    length(Chance_of_being_hit[[2]]),
-    length(Chance_of_being_hit[[3]]),
-    length(Chance_of_being_hit[[4]])
+    paste0("n = ", length(Chance_of_being_hit[[1]])),
+    paste0("n = ", length(Chance_of_being_hit[[3]]))
   ),
   xpd = T,
   srt = 0,
@@ -90,13 +98,25 @@ text(
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[1:4])) - 0.3,
+  x = (1:length(Chance_of_being_hit[1:4])) - 0.1,
   y = -0.1,
   labels = c(
-    "T - Walking",
-    "T - Pause",
-    "R - Walking",
-    "R - Pause"
+    "Walking",
+    "Pause",
+    "Walking",
+    "Pause"
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+text(
+  x = c(1.35, 3.35),
+  y = -0.2,
+  labels = c(
+    "Training",
+    "Yoked Control"
   ),
   xpd = T,
   srt = 0,
@@ -106,25 +126,34 @@ text(
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
-# lines(c(4.5, 4.5), c(-1, 1.2),
-#       col = "light grey",
-#       lty = 1)
-# lines(c(6.5, 6.5), c(-1, 1.2),
-#       col = "light grey",
-#       lty = 1)
+
+text(
+     x = c(1.5, 3.5),
+     y = 1.1,
+     c(sig[1], sig[2]),
+     xpd = NA)
+
+lines(c(1, 2), 
+      y = c(1.07, 1.07), 
+      xpd = NA)
+
+lines(c(3, 4), 
+      y = c(1.07, 1.07), 
+      xpd = NA)
 
 boxplot(
   Chance_of_being_hit[5:8],
   ylim = c(0, 1),
   outline = F,
   notch = F,
-  lwd = 2,
+  medlwd = 1,
   ylab = "Percentage",
   xaxt = "n",
-  col = col.pool,
-  # main = "Chance of being punished in second session",
-  ann = FALSE
+  ann = FALSE,
+  axes=F
 )
+axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
+
 stripchart(
   vertical = TRUE,
   x = Chance_of_being_hit[5:8],
@@ -132,17 +161,15 @@ stripchart(
   add = TRUE,
   pch = 15,
   cex = 0.5,
-  col =  "grey40"
+  col = col.pool
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[5:8])) - 0.1,
-  y = 1.02,
+  x = c(1.35, 3.35),
+  y = 1.2,
   labels = c(
-    length(Chance_of_being_hit[[5]]),
-    length(Chance_of_being_hit[[6]]),
-    length(Chance_of_being_hit[[7]]),
-    length(Chance_of_being_hit[[8]])
+    paste0("n = ", length(Chance_of_being_hit[[5]])),
+    paste0("n = ", length(Chance_of_being_hit[[7]]))
   ),
   xpd = T,
   srt = 0,
@@ -150,13 +177,13 @@ text(
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[5:8])) - 0.3,
+  x = (1:length(Chance_of_being_hit[5:8])) - 0.1,
   y = -0.1,
   labels = c(
-    "T - Walking",
-    "T - Pause",
-    "R - Walking",
-    "R - Pause"
+    "Walking",
+    "Pause",
+    "Walking",
+    "Pause"
   ),
   xpd = T,
   srt = 0,
@@ -166,14 +193,33 @@ text(
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
-# lines(c(4.5, 4.5), c(-1, 1.2),
-#       col = "light grey",
-#       lty = 1)
-# lines(c(6.5, 6.5), c(-1, 1.2),
-#       col = "light grey",
-#       lty = 1)
 
 
+text(
+  x = c(1.35, 3.35),
+  y = -0.2,
+  labels = c(
+    "Training",
+    "Yoked Control"
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0
+)
+
+text(
+  x = c(1.5, 3.5),
+  y = 1.1,
+  c(sig[3], sig[4]),
+  xpd = NA)
+
+lines(c(1, 2), 
+      y = c(1.07, 1.07), 
+      xpd = NA)
+
+lines(c(3, 4), 
+      y = c(1.07, 1.07), 
+      xpd = NA)
 dev.off()
 
 

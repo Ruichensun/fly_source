@@ -1861,6 +1861,47 @@ pass_fly_QC = function(input_file,
   }
 }
 
+
+get_laser_df = function(fly_laser, framerate){
+  laser_ON  = rle(fly_laser)$length[rle(fly_laser)$values == 1]
+  laser_OFF = rle(fly_laser)$length[rle(fly_laser)$values == 0]
+  label_for_laser = rep(0, length(fly_laser))
+  for (i in 1:(length(label_for_laser) - 1)) {
+    if ((fly_laser[i] == 0) & (fly_laser[i + 1] > 0)) {
+      label_for_laser[i + 1] = 1
+    }
+    if ((fly_laser[i] > 0) & (fly_laser[i + 1] == 0)) {
+      label_for_laser[i + 1] = 2
+    }
+  }
+  laser_df = data.frame()
+  if (laser_OFF[1] == length(fly_laser)) {
+    laser_df = data.frame(0,
+                          0,
+                          0,
+                          (laser_OFF[1]) / framerate,
+                          (laser_OFF[1] - 0) / framerate,
+                          TRUE)
+  } else{
+    laser_df = data.frame (which(label_for_laser == 1),
+                           which(label_for_laser == 2),
+                           laser_ON / framerate,
+                           (laser_OFF[2:length(laser_OFF)]) / framerate,
+                           (laser_OFF[2:length(laser_OFF)] - laser_ON) / framerate,
+                           laser_OFF[2:length(laser_OFF)] >= 8 * 60 * framerate
+  )
+  }
+  colnames(laser_df) = c(
+    "Laser_On",
+    "Laser_Off",
+    "ON_duration",
+    "OFF_duration",
+    "Difference",
+    "eight_min_OFF"
+  )
+}
+
+
 one_fly_laser_statistics = function(input_file, framerate){
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
   fly.position.raw = as.numeric(fly.file[[1]])
@@ -1887,41 +1928,7 @@ one_fly_laser_statistics = function(input_file, framerate){
         fly_laser[i] = 1
       }
     }
-    laser_ON  = rle(fly_laser)$length[rle(fly_laser)$values == 1]
-    laser_OFF = rle(fly_laser)$length[rle(fly_laser)$values == 0]
-    label_for_laser = rep(0, length(fly_laser))
-    for (i in 1:(length(label_for_laser) - 1)) {
-      if ((fly_laser[i] == 0) & (fly_laser[i + 1] > 0)) {
-        label_for_laser[i + 1] = 1
-      }
-      if ((fly_laser[i] > 0) & (fly_laser[i + 1] == 0)) {
-        label_for_laser[i + 1] = 2
-      }
-    }
-    laser_df = data.frame()
-    if (laser_OFF[1] == length(fly_laser)) {
-      laser_df = data.frame(0,
-                            0,
-                            0,
-                            (laser_OFF[1]) / framerate,
-                            (laser_OFF[1] - 0) / framerate,
-                            TRUE)
-    } else{laser_df = data.frame (which(label_for_laser == 1),
-                                  which(label_for_laser == 2),
-                                  laser_ON / framerate,
-                                  (laser_OFF[2:length(laser_OFF)]) / framerate,
-                                  (laser_OFF[2:length(laser_OFF)] - laser_ON) / framerate,
-                                  laser_OFF[2:length(laser_OFF)] > 8 * 60 * framerate
-    )
-    }
-    colnames(laser_df) = c(
-      "Laser_On",
-      "Laser_Off",
-      "ON_duration",
-      "OFF_duration",
-      "Difference",
-      "eight_min_OFF"
-    )
+    laser_df = get_laser_df(fly_laser, framerate)
     number_of_laser_clicks = length(laser_df$Laser_On)
     total_laser_ON = sum(laser_df$ON_duration)
     if (number_of_laser_clicks == 1) {
@@ -2051,33 +2058,36 @@ chance_of_being_hit_by_laser = function(input_file){
 }
 
 #Calculating all the flies' chance of being hit by types (T/R)
-total_chance_of_being_hit_by_laser = function(file_name_filter, fly.info.movement) {
+Hit_by_laser = function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
+  # for (ind in 100:110) {
     if(fly.info.movement$Genotype[ind]=="WT"){
       input.file = list.files(
-        path = paste0("data/",fly.info.movement$experimenter[ind],"/CS/"),
+        path = paste0("data/",fly.info.movement$Experimenter[ind],"/CS/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
     }
     if(fly.info.movement$Genotype[ind]=="CS"){
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+        path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
     }
     laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
   }
-  names(laser_chance) = c("Chances of being hit during walking", "Chances of being hit during pause ", "Laser ON duration percentage")
+  names(laser_chance) = c("Chances of being hit during walking", 
+                          "Chances of being hit during pause ", 
+                          "Laser ON duration percentage")
   return(laser_chance)
 }
 
 fly_pos_to_moving_status = function(fly_pos){ 
   # This is determined by quantile(abs(fly_moving_status),c(0.97, 0.975, 0.98)), and the 97.5% 
   # corresponds to 28.6
-  speed_threshold = 50 
+  speed_threshold = 50
   fly_moving_status = diff(fly_pos)
   # Finding out the fly's moving status by two criteria: velocity = 0 or velocity much larger than 
   # a speed threshold

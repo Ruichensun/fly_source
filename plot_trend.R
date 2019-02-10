@@ -59,8 +59,10 @@ cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 
                   apply((cumsums_total[[5]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
                   apply((cumsums_total[[6]][1:min_sequence_length,])/framerate, 1, get_Wald_CI)
                   )
-# cumsums_CI structure: for each of the 6 lists: 3 rows by 8568 columns. First row is median
-# Second row is CI lower bound, Third row is CI upper bound
+# cumsums_CI structure: for each of the 6 lists: 3 rows by 8147 columns. 
+# First row is median
+# Second row is CI lower bound
+# Third row is CI upper bound
 
 trained_1 = cumsums_total[[1]][min_sequence_length,] 
 yoked_1   = cumsums_total[[2]][min_sequence_length,] 
@@ -304,9 +306,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       c(cumsums_CI[[1]][1,][min_sequence_length], cumsums_CI[[2]][1,][min_sequence_length]),
       xpd = NA
     )
-    
-    
-    
+
     # Second training session
     plot(
       1,

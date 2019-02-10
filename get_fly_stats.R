@@ -67,7 +67,8 @@ for(ind in 1:nrow(fly.info)){
           framerate = fly.info$Framerate[ind]        
           ofs = one_fly_statistics(input.file, framerate=framerate)
           Type = fly.info$Category[ind]
-          ofs = cbind(Type, ofs)
+          Gender = fly.info$Gender[ind]
+          ofs = cbind(Type, Gender, ofs)
           all_ofs_WT = rbind(all_ofs_WT, ofs)
     }
     
@@ -94,7 +95,8 @@ for(ind in 1:nrow(fly.info.mutant)){
         framerate = fly.info.mutant$Framerate[ind]        
         ofs = one_fly_statistics(input.file, framerate=framerate)
         Type = fly.info.mutant$Category[ind]
-        ofs = cbind(Type, ofs)
+        Gender = fly.info.mutant$Gender[ind]
+        ofs = cbind(Type, Gender, ofs)
         all_ofs_mutants = rbind(all_ofs_mutants, ofs)
       }
   }
