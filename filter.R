@@ -7,7 +7,7 @@ fly.info.CS$Genotype = "WT"
 
 fly.info.mutants = read.csv("data/fly_info_mutants_preprocessed.csv",header = T, stringsAsFactors = F)
 
-shared.info = c("Fly", "Category", "Gender", "Genotype", "Exp.date", "Experimenter", "Age",
+shared.info = c("Fly", "Category", "Gender", "Genotype", "Exp.date", "Experimenter", "Age", "Gender",
                 "Setup", "Fly.moving.speed", "Fly.pause","Framerate", "Gap")
 
 fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])

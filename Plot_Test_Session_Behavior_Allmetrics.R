@@ -11,7 +11,6 @@ plot_all_raw_metrics(query.genotype, query.fly, query.experimenter, fly.info)
 
 
 # Mutant Flies
-
 for (i in 1:length(unique(fly.info.mutant$Genotype))){
   query.genotype = unique(fly.info.mutant$Genotype)[i]
   query.fly = fly.info.mutant[(fly.info.mutant$Genotype == query.genotype), ]$Fly
@@ -22,7 +21,7 @@ for (i in 1:length(unique(fly.info.mutant$Genotype))){
 # Hypothesis Testing
 
 # 9: Percentage Time Active - Middle Pause
-num = 8
+num = 9
 E1 = hypothesis_testing_E1(num, fly.info.mutant)
 E3 = hypothesis_testing_2ndE1(num, fly.info.mutant)
 E5 = hypothesis_testing_3rdE1(num, fly.info.mutant)
@@ -32,12 +31,7 @@ E5[3,]
 
 # Some backup codes
 
-# input.file = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1_WT.csv"
-# input.file2 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1N1E1_WT.csv"
-# input.file3 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly256_E1N1E1N1E1_WT.csv"
-# input.file4 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1_WT.csv"
-# input.file5 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1T1E1_WT.csv"
-# input.file6 = "D:/Behavioral_project/behavior_experiment_data/Analysis/data/JD/CS/ProcessedData_Fly254_E1T1E1T1E1_WT.csv"
+
 
 fly.info.test = fly.info.end[fly.info.end$Fly.pause < 1, ]
 filtered_all_ofs = data.frame()

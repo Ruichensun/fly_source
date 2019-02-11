@@ -103,7 +103,11 @@ for(ind in 1:nrow(fly.info.mutant)){
 }
 
 write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
+
 write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
+
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
 #CS_constant

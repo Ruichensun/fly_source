@@ -134,7 +134,6 @@ for (ind in 1:nrow(fly.info.control)) {
       }
     }
     if (session == "E1") {
-      count = count + 1
       fly.moving.speed = c(fly.moving.speed, get_fly_moving_speed(fly.pos, framerate))
       fly.pause = c(fly.pause, get_fly_initial_pause(fly.pos, framerate))
       fly.info.framerate = c(fly.info.framerate, framerate)
@@ -186,7 +185,7 @@ all_ofs_control = data.frame()
 for(ind in 1:nrow(fly.info.all_controls)){
   # print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
   for(ind.session in 1:length(query.sessions)){
-    if (ind < 5000){
+    if (fly.info.all_controls$Fly[ind] < 5000){
       input.file <- list.files(path = paste0("data/", fly.info.all_controls$Experimenter[ind], "/CS_controls/"),                             
                                pattern = paste0("ProcessedData_Fly",fly.info.all_controls$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
                                full.names=T)
@@ -212,52 +211,92 @@ write.table(all_ofs_control, file = "all_ofs_control.csv", append = FALSE, col.n
 save.image("all_ofs_control.Rdata")
 
 # Plot the results
-constant = fly.info.all_controls[as.numeric
-                                 (fly.info.all_controls$Fly)>4999, ]
-
-pdf(paste0("Comparison_", genotype, "_", Sys.Date(), ".pdf"),
-    onefile = T, width = 16
-)
+constant = all_ofs_control[as.numeric(all_ofs_control$`Fly Number`)>4999, ]
+control_1 = all_ofs_control[as.numeric(all_ofs_control$`Fly Number`)<2000, ]
+control_2 = all_ofs_control[as.numeric(all_ofs_control$`Fly Number`)>2000 & as.numeric(all_ofs_control$`Fly Number`)<2999, ]
+#Constant
+control = NULL
+control = constant
+metric.ind = 8
 p = c()
-metric.df = data.frame()
+m = data.frame()
 #Prep data
-for (i in 1:length(g_list)){
+#Constant
   m = data.frame(
-    factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-               rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-               rep(paste0("E1_N_", g_list[i]), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-               rep(paste0("E5_T_", g_list[i]), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-               rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-               rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
+    factor = c(rep("E1_T", length(control[control$Type=="T" & control$Session=="E1", ][, metric.ind])),
+               rep("E1_R", length(control[control$Type=="R" & control$Session=="E1", ][, metric.ind])),
+               rep("E1_N", length(control[control$Type=="N" & control$Session=="E1", ][, metric.ind])),
+               rep("E3_T", length(control[control$Session=="E1T1E1", ][, metric.ind])),
+               rep("E3_R", length(control[control$Session=="E1R1E1", ][, metric.ind])),
+               rep("E3_N", length(control[control$Session=="E1N1E1", ][, metric.ind])),
+               rep("E5_T", length(control[control$Session=="E1T1E1T1E1" , ][, metric.ind])),
+               rep("E5_R", length(control[control$Session=="E1R1E1R1E1" , ][, metric.ind])),
+               rep("E5_N", length(control[control$Session=="E1N1E1N1E1" , ][, metric.ind]))
     ),
-    value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-                         all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-                         all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-                         all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-                         all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-                         all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
-    )
+    value = as.numeric(c(control[control$Type=="T" & control$Session=="E1", ][, metric.ind], 
+                         control[control$Type=="R" & control$Session=="E1", ][, metric.ind],
+                         control[control$Type=="N" & control$Session=="E1", ][, metric.ind],
+                         control[control$Session=="E1T1E1" , ][, metric.ind], 
+                         control[control$Session=="E1R1E1" , ][, metric.ind],
+                         control[control$Session=="E1N1E1" , ][, metric.ind],
+                         control[control$Session=="E1T1E1T1E1" , ][, metric.ind], 
+                         control[control$Session=="E1R1E1R1E1" , ][, metric.ind],
+                         control[all_ofs_control$Session=="E1N1E1N1E1" , ][, metric.ind]
+                         )
     )
   )
   colnames(m) = c("Session", "Value")
-  m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
-                                         paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
-  a = test_initial_condition(metric.ind, g_list[i])
-  b = test_after_training(metric.ind, g_list[i])
-  p = c(p, a$P.adjusted, b$P.adjusted)
-  metric.df = rbind(metric.df, m)
-}                           
+  m$Session = factor(m$Session, levels=c(paste0("E1_T"), paste0("E1_R"), paste0("E1_N"), 
+                                         paste0("E3_T"), paste0("E3_R"), paste0("E3_N"),
+                                         paste0("E5_T"), paste0("E5_R"), paste0("E5_N")))
 
-num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
+                           
+
+num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
+
+#Control_1
+control = NULL
+control = control_2
+metric.ind = 8
+p = c()
+m = data.frame()
+#Prep data
+#Constant
+m = data.frame(
+  factor = c(rep("E1_T", length(control[control$Type=="T" & control$Session=="E1", ][, metric.ind])),
+             rep("E1_R", length(control[control$Type=="R" & control$Session=="E1", ][, metric.ind])),
+             rep("E1_N", length(control[control$Type=="N" & control$Session=="E1", ][, metric.ind])),
+             rep("E3_T", length(control[control$Session=="E1T1E1", ][, metric.ind])),
+             rep("E3_R", length(control[control$Session=="E1R1E1", ][, metric.ind])),
+             rep("E3_N", length(control[control$Session=="E1N1E1", ][, metric.ind]))
+            
+  ),
+  value = as.numeric(c(control[control$Type=="T" & control$Session=="E1", ][, metric.ind], 
+                       control[control$Type=="R" & control$Session=="E1", ][, metric.ind],
+                       control[control$Type=="N" & control$Session=="E1", ][, metric.ind],
+                       control[control$Session=="E1T1E1" , ][, metric.ind], 
+                       control[control$Session=="E1R1E1" , ][, metric.ind],
+                       control[control$Session=="E1N1E1" , ][, metric.ind]))
+)
+colnames(m) = c("Session", "Value")
+m$Session = factor(m$Session, levels=c(paste0("E1_T"), paste0("E1_R"), paste0("E1_N"), 
+                                       paste0("E3_T"), paste0("E3_R"), paste0("E3_N")
+                                       ))
+
+
+
+num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
+
+
 
 yrange = c(0, 1)
 y_text = 1.1
 
-col.pool = rep(c("indianred3", "light blue", "grey80"), length(g_list) * 2)
+col.pool = rep(c("indianred3", "light blue", "grey80"), 3)
 
 boxplot(
   Value ~ Session,
-  data = metric.df,
+  data = m,
   ylim = yrange,
   outline = F,
   notch = F,
@@ -273,7 +312,7 @@ axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
 stripchart(
   Value ~ Session,
   vertical = TRUE,
-  data = metric.df,
+  data = m,
   method = "jitter",
   add = TRUE,
   pch = 15,
