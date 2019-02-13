@@ -55,7 +55,7 @@ plot_comparison("R60D05 x JU30", 8, all_ofs)
 plot_comparison("CS x PKCi", 8, all_ofs)
 plot_comparison("UAS-DopR1-IR x 51635", 8, all_ofs)
 
-
+plot_comparison("CS x JU30", 9, all_ofs)
 
 category = "T"
 par(mfrow = c(3, 1))

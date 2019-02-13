@@ -959,14 +959,6 @@ plot_WT = function(all_ofs, genotype, i){
                  rep("E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1", ][, i])),
                  rep("E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1", ][, i])),
                  rep("E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1", ][, i]))
-                 # # rep("E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1", ][, i])),
-                 # rep("E1T1E1T1E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1", ][, i])),
-                 # rep("E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1", ][, i])),
-                 # rep("E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1", ][, i])),
-                 # # rep("E1T1E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
-                 # rep("E1T1E1T1E1T2E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
-                 # rep("E1R1E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
-                 # rep("E1N1E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
       ),
       value = as.numeric(c(df[df$Type=="T" & df$Session=="E1", ][, i], 
                            df[df$Type=="R" & df$Session=="E1", ][, i],
@@ -976,29 +968,14 @@ plot_WT = function(all_ofs, genotype, i){
                            df[df$Session=="E1N1E1", ][, i],
                            df[df$Session=="E1T1E1T1E1", ][, i],
                            df[df$Session=="E1R1E1R1E1", ][, i],
-                           df[df$Session=="E1N1E1N1E1", ][, i]
-                           # # df[df$Session=="E1T1E1T1E1T1E1", ][, i],
-                           # df[df$Session=="E1T1E1T1E1T2E1", ][, i],
-                           # df[df$Session=="E1R1E1R1E1R1E1", ][, i],
-                           # df[df$Session=="E1N1E1N1E1N1E1", ][, i],
-                           # # df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
-                           # df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
-                           # df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
-                           # df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]
-      ))
+                           df[df$Session=="E1N1E1N1E1", ][, i]))
     )
     colnames(m) = c("Session", "Value")
     m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
                                            "E1T1E1", "E1R1E1", "E1N1E1",
                                            "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"
-                                           # "E1T1E1T1E1T1E1", 
-                                           # "E1T1E1T1E1T2E1", "E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1",
-                                           # # "E1T1E1T1E1T1E1T1E1", 
-                                           # "E1T1E1T1E1T2E1T2E1", "E1R1E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1N1E1"
                                            ))
-    s =  c("Pre-test", "Test 1", "Test 2"
-           # "Post 1st Reverse ", "Post 2nd Reverse"
-           )
+    s =  c("Pre-test", "Test 1", "Test 2")
     col.pool = c(
       "indianred3",
       "light blue",
@@ -1009,21 +986,11 @@ plot_WT = function(all_ofs, genotype, i){
       "indianred3",
       "light blue",
       "grey80"
-      # "indianred2",
-      # "light blue",
-      # "grey80",
-      # "indianred2",
-      # "light blue",
-      # "grey80"
     )
     a = test_initial_condition(i, genotype, all_ofs)
     b = test_mid_training(i, genotype, all_ofs)
     c = test_after_training(i, genotype, all_ofs)
-    # d = test_reverse_training_1st(i, genotype, all_ofs)
-    # e = test_reverse_training_2nd(i, genotype, all_ofs)
-    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted
-          # d$P.adjusted, e$P.adjusted
-          )
+    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted)
   }else{
     
     m = data.frame(
@@ -1036,14 +1003,7 @@ plot_WT = function(all_ofs, genotype, i){
                  rep("E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1", ][, i])),
                  rep("E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1", ][, i])),
                  rep("E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1", ][, i]))
-                 # rep("E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1", ][, i])),
-                 # # rep("E1T1E1T1E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1", ][, i])),
-                 # rep("E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1", ][, i])),
-                 # rep("E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1", ][, i])),
-                 # rep("E1T1E1T1E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
-                 # # rep("E1T1E1T1E1T2E1T2E1", length(df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
-                 # rep("E1R1E1R1E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
-                 # rep("E1N1E1N1E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
+
       ),
       value = as.numeric(c(df[df$Type=="T" & df$Session=="E1", ][, i], 
                            df[df$Type=="R" & df$Session=="E1", ][, i],
@@ -1054,30 +1014,15 @@ plot_WT = function(all_ofs, genotype, i){
                            df[df$Session=="E1T1E1T1E1", ][, i],
                            df[df$Session=="E1R1E1R1E1", ][, i],
                            df[df$Session=="E1N1E1N1E1", ][, i]
-                           # df[df$Session=="E1T1E1T1E1T1E1", ][, i],
-                           # df[df$Session=="E1T1E1T1E1T2E1", ][, i],
-                           # df[df$Session=="E1R1E1R1E1R1E1", ][, i],
-                           # df[df$Session=="E1N1E1N1E1N1E1", ][, i],
-                           # df[df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
-                           # # df[df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
-                           # df[df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
-                           # df[df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]
+
       ))
     )
     colnames(m) = c("Session", "Value")
     m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
                                            "E1T1E1", "E1R1E1", "E1N1E1",
                                            "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"
-                                           # "E1T1E1T1E1T1E1",
-                                           # # "E1T1E1T1E1T2E1", 
-                                           # "E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1",
-                                           # "E1T1E1T1E1T1E1T1E1",
-                                           # # "E1T1E1T1E1T2E1T2E1", 
-                                           # "E1R1E1R1E1R1E1R1E1", "E1N1E1N1E1N1E1N1E1"
                                            ))
-    s =  c("Pre-test", "Test 1", "Test 2"
-           # , "Post 3rd Session ", "Post 4th Session"
-           )
+    s =  c("Pre-test", "Test 1", "Test 2")
     col.pool = c(
       "indianred3",
       "light blue",
@@ -1088,30 +1033,16 @@ plot_WT = function(all_ofs, genotype, i){
       "indianred3",
       "light blue",
       "grey80"
-      # "indianred2",
-      # "light blue",
-      # "grey80",
-      # "indianred2",
-      # "light blue",
-      # "grey80"
     )
     a = test_initial_condition(i, genotype, all_ofs)
     b = test_mid_training(i, genotype, all_ofs)
     c = test_after_training(i, genotype, all_ofs)
-    # d = test_3rd_training(i, genotype, all_ofs)
-    # e = test_4th_training(i, genotype, all_ofs)
-    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted
-          # d$P.adjusted, e$P.adjusted
-          )
+    p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted)
   }
 
   num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
   
-  pdf(paste0(genotype,
-             # "_Female",
-             "_", i, "_", Sys.Date(), ".pdf"),
-      onefile = T, width = 8
-  )
+  pdf(paste0(genotype, "_", i, "_", Sys.Date(), ".pdf"), onefile = T, width = 8)
   if (i == 9){
     yrange = c(0, 1)
     y_text = 1
@@ -1156,7 +1087,6 @@ plot_WT = function(all_ofs, genotype, i){
     axis(side=2, at=c(0, 20, 40, 60, 80, 100, 120))
     text(x = c(0.8, 1.8, 2.8, 9.85),
          y = 125,
-         # y_text,
          c(num[1:3], num[10]),
          xpd = T,
          srt = 0,
@@ -1192,9 +1122,6 @@ plot_WT = function(all_ofs, genotype, i){
     vertical_gap = 2
     v_gap = 1
   }
-  
-  
- 
   stripchart(
     Value ~ Session,
     vertical = TRUE,
@@ -1205,14 +1132,9 @@ plot_WT = function(all_ofs, genotype, i){
     cex = 0.5,
     col =  col.pool
   )
-  
-  
- 
   y_base_RN = y_top_base - 2.8 * vertical_gap
   y_base_TN = y_top_base - 5.6 * vertical_gap
   y_base_TR = y_top_base
-  
-  
   for (i in 1:length(p)){
     if (p[i] >= 0.05){
       significance = "n.s."
@@ -1225,7 +1147,6 @@ plot_WT = function(all_ofs, genotype, i){
     }else if (p[i] < 0.0001){
       significance = "****"
     }
-    
     if (i%%3==0){
       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
       lines(c(i - 2, i - 1), 
@@ -1236,8 +1157,6 @@ plot_WT = function(all_ofs, genotype, i){
       
     }
   }
-
-  
   seq_for_lines = seq(3, 9, by=3)
   for (j in seq_for_lines) {
     lines(c(j, j) + 0.5,
@@ -1245,12 +1164,8 @@ plot_WT = function(all_ofs, genotype, i){
           col = "light grey",
           lty = 1)
   }
-  
-  text(x = c(1.5, 4, 7
-             # , 10, 13
-             ),
+  text(x = c(1.5, 4, 7),
        y = -0.1,
-       # y_text,
        s,
        xpd = T,
        srt = 0,
@@ -1464,89 +1379,6 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
       cex = 0.5,
       col =  col.pool
     )
-    
-    # p = c()
-    # metric.df = data.frame()
-    # #Prep data
-    # for (i in 1:length(g_list)){
-    #   m = data.frame(
-    #     factor = c(rep(paste0("E1_T_", g_list[i]), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-    #                rep(paste0("E1_R_", g_list[i]), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-    #                rep(paste0("E1_N_", g_list[i]), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-    #                rep(paste0("E5_T_", g_list[i]), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-    #                rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
-    #                rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
-    #     ),
-    #     value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-    #                          all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-    #                          all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-    #                          all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
-    #                          all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-    #                          all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
-    #     )
-    #     )
-    #   )
-    #   colnames(m) = c("Session", "Value")
-    #   m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
-    #                                          paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
-    #   a = test_initial_condition(metric.ind, g_list[i])
-    #   b = test_after_training(metric.ind, g_list[i])
-    #   p = c(p, a$P.adjusted, b$P.adjusted)
-    #   metric.df = rbind(metric.df, m)
-    # }                           
-    # 
-    # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
-    # 
-    # x_loc = c(1:(length(g_list) * 6))
-    # y_top_base = 1
-    # vertical_gap = 0.01
-    # v_gap = 0.005
-    # y_base_RN = y_top_base - 2.8 * vertical_gap
-    # y_base_TN = y_top_base - 5.6 * vertical_gap
-    # y_base_TR = y_top_base
-    # 
-    
-    # for (i in 1:length(p)){
-    #   if (p[i] >= 0.05){
-    #     significance = "n.s."
-    #   }else if (p[i] < 0.05 & p[i] >= 0.01){
-    #     significance = "*"
-    #   }else if (p[i] < 0.01 & p[i] >= 0.001){
-    #     significance = "**"
-    #   }else if (p[i] < 0.001 & p[i] >= 0.0001){
-    #     significance = "***"
-    #   }else if (p[i] < 0.0001){
-    #     significance = "****"
-    #   }
-    #   if (significance != "n.s."){
-    #     if (i%%3 == 1){
-    #       text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
-    #       lines(c(i + 1, i + 2), 
-    #             c(y_base_RN, y_base_RN), 
-    #             xpd = NA) 
-    #       lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #       lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #       
-    #     }else if (i%%3 == 2){
-    #       text(i, y_base_TN + vertical_gap, significance, xpd = NA)
-    #       lines(c(i - 1, i + 1), 
-    #             c(y_base_TN, y_base_TN), 
-    #             xpd = NA)
-    #       lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #       lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #       
-    #     }else{
-    #       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
-    #       lines(c(i - 2, i - 1), 
-    #             c(y_base_TR,  y_base_TR), 
-    #             xpd = NA)
-    #       lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-    #       lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-    #     }
-    #   }
-    # }
-    
-    
     if (any(is.na(yrange)) |
         any(is.infinite(yrange)) | any(is.nan(yrange))) {
       yrange = c(-1, 1)
@@ -1568,85 +1400,10 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
     }
   }
   dev.off()
-  
 }
 
 plot_single = function(genotype, metric.ind, all_ofs){
   g_list = genotype
-  # if (genotype == "WT"){
-  #   g_list = c("WT")
-  # }else if (genotype == "R60D05 x JU30"){
-  #   g_list = c("R60D05 x JU30",
-  #              "JG17 x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "JG17 x JU30"){
-  #   g_list = c("JG17 x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30"
-  #             )
-  # }else if(genotype == "SUN1"){
-  #   g_list = c("SUN1",
-  #              "SUN1 x CS"
-  #              # "WT"
-  #   )
-  # }else if(genotype == "SUN2"){
-  #   g_list = c("SUN2",
-  #              "SUN2 x CS"
-  #              # "WT"
-  #              )
-  # }else if(genotype == "SUN3"){
-  #   g_list = c("SUN3",
-  #              "SUN3 x CS"
-  #              # "WT"
-  #              )
-  # }else if(genotype == "MB009B x JU30"){
-  #   g_list = c("MB009B x JU30",
-  #              "MB131B x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "MB419B x JU30"){
-  #   g_list = c( "MB419B x JU30",
-  #               "MB607B x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "UAS-DopR1-IR x 51635"){
-  #   g_list = c("SUN1",
-  #              # "SUN1 x CS",
-  #              # "DopR1 x JU30",
-  #              "UAS-DopR1-IR x 51635",
-  #              "MB009B x DopR1-IR",
-  #              "MB131B x DopR1-IR",
-  #              "MB419B x DopR1-IR",
-  #              "MB607B x DopR1-IR",
-  #              "R60D05 x DopR1-IR",
-  #              "JG17 x DopR1-IR"
-  #              )
-  # 
-  # }else if(genotype == "R60D05 x DopR1-IR"){
-  #   g_list = c("UAS-DopR1-IR x 51635",
-  #              "R60D05 x DopR1-IR",
-  #              "JG17 x DopR1-IR"
-  #   )
-  # 
-  # }else if(genotype == "CS x PKCi"){
-  #   g_list = c("CS x PKCi",
-  #              "MB009B x PKCi",
-  #              "MB131B x PKCi",
-  #              "MB419B x PKCi",
-  #              "MB607B x PKCi",
-  #              "R60D05 x PKCi",
-  #              "JG17 x PKCi")
-  # }else if(genotype ==  "THGAL4 x JU29"){
-  #   g_list = c("D2R-1 x 51635",
-  #              "DopR2 x JU30",
-  #              "DopR1 x JU30",
-  #              "THGAL4 x JU29",
-  #              "THGAL4 x JU30",
-  #              "OK107 x JU30",
-  #              "UAS-DopR2-RNAi x 51635",
-  #              "UAS-DopR1-IR x 51635")
-  # }
   pdf(paste0("Single_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )
@@ -1688,8 +1445,6 @@ plot_single = function(genotype, metric.ind, all_ofs){
     p = c(comp$P.adjusted)
     metric.df = rbind(metric.df, m)
   }                           
-
-  # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
   
   yrange = c(0, 1)
   y_text = 1.1
@@ -1813,15 +1568,6 @@ plot_single = function(genotype, metric.ind, all_ofs){
     }
     
   }
-
-  #  
-  # text(x = (1:(length(num))/2) - 0.1,
-  #      y = y_text,
-  #      num,
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
   
   text(x = seq(0.85, length(num) * 2, by = 6),
        y = y_text,
@@ -1845,31 +1591,6 @@ plot_single = function(genotype, metric.ind, all_ofs){
        srt = 0,
        adj = 0
   )
-
-  # text(x = seq(1.5, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("Before"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
-  # text(x = seq(4.75, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("After"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
-  # text(x = seq(2.5, (length(g_list)*6) - 3.5, by= 6),
-  #      y = -0.1,
-  #      g_list,
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  # 
   seq_for_lines = seq(3, (length(g_list)*6), by=6)
   for (j in seq_for_lines) {
     lines(c(j, j) + 0.5,
@@ -1893,7 +1614,6 @@ plot_single = function(genotype, metric.ind, all_ofs){
 
 
 plot_comparison = function(genotype, metric.ind, all_ofs){
-  # g_list = genotype
   if (genotype == "WT"){
     g_list = c("WT")
   }else if (genotype == "R60D05 x JU30"){
@@ -2011,10 +1731,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     p = c(p, a$P.adjusted, b$P.adjusted)
     # p = c(comp$P.adjusted)
     metric.df = rbind(metric.df, m)
-  }                           
-  
-  # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
-  
+  }                         
   yrange = c(0, 1)
   y_text = 1.1
   
@@ -2045,8 +1762,6 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     cex = 0.5,
     col =  col.pool
   )
-  
-  # x_loc = c(1:(length(g_list) * 6))
   y_top_base = 1
   vertical_gap = 0.01
   v_gap = 0.01
@@ -2067,24 +1782,6 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     }else if (p[i] < 0.0001){
       significance = "****"
     }
-    
-    # if (i%%3 == 1){
-    #   text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
-    #   lines(c(i + 1, i + 2), 
-    #         c(y_base_RN, y_base_RN), 
-    #         xpd = NA) 
-    #   lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #   lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #   
-    # }else if (i%%3 == 2){
-    #   text(i, y_base_TN + vertical_gap, significance, xpd = NA)
-    #   lines(c(i - 1, i + 1), 
-    #         c(y_base_TN, y_base_TN), 
-    #         xpd = NA)
-    #   lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #   lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #   
-    # }else{
     if (i%%3==0){
       
       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
@@ -2097,15 +1794,6 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
     }
     
   }
-  
-  #  
-  # text(x = (1:(length(num))/2) - 0.1,
-  #      y = y_text,
-  #      num,
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
   
   text(x = seq(0.85, length(num) * 2, by = 6),
        y = y_text,
@@ -2130,22 +1818,6 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
        adj = 0
   )
   
-  # text(x = seq(1.5, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("Before"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
-  # text(x = seq(4.75, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("After"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
   text(x = seq(2.5, (length(g_list)*6) - 3.5, by= 6),
        y = -0.1,
        g_list,
@@ -2177,81 +1849,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
 
 
 plot_single_15 = function(genotype, metric.ind, all_ofs){
-  # g_list = genotype
-  # if (genotype == "WT"){
-  #   g_list = c("WT")
-  # }else if (genotype == "R60D05 x JU30"){
-  #   g_list = c("R60D05 x JU30",
-  #              "JG17 x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "JG17 x JU30"){
-  #   g_list = c("JG17 x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30"
-  #             )
-  # }else if(genotype == "SUN1"){
-  #   g_list = c("SUN1",
-  #              "SUN1 x CS"
-  #              # "WT"
-  #   )
-  # }else if(genotype == "SUN2"){
-  #   g_list = c("SUN2",
-  #              "SUN2 x CS"
-  #              # "WT"
-  #              )
-  # }else if(genotype == "SUN3"){
-  #   g_list = c("SUN3",
-  #              "SUN3 x CS"
-  #              # "WT"
-  #              )
-  # }else if(genotype == "MB009B x JU30"){
-  #   g_list = c("MB009B x JU30",
-  #              "MB131B x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "MB419B x JU30"){
-  #   g_list = c( "MB419B x JU30",
-  #               "MB607B x JU30",
-  #              "Empty-Gal4 x CS",
-  #              "CS x JU30")
-  # }else if(genotype == "UAS-DopR1-IR x 51635"){
-  #   g_list = c("SUN1",
-  #              # "SUN1 x CS",
-  #              # "DopR1 x JU30",
-  #              "UAS-DopR1-IR x 51635",
-  #              "MB009B x DopR1-IR",
-  #              "MB131B x DopR1-IR",
-  #              "MB419B x DopR1-IR",
-  #              "MB607B x DopR1-IR",
-  #              "R60D05 x DopR1-IR",
-  #              "JG17 x DopR1-IR"
-  #              )
-  # 
-  # }else if(genotype == "R60D05 x DopR1-IR"){
-  #   g_list = c("UAS-DopR1-IR x 51635",
-  #              "R60D05 x DopR1-IR",
-  #              "JG17 x DopR1-IR"
-  #   )
-  # 
-  # }else if(genotype == "CS x PKCi"){
-  #   g_list = c("CS x PKCi",
-  #              "MB009B x PKCi",
-  #              "MB131B x PKCi",
-  #              "MB419B x PKCi",
-  #              "MB607B x PKCi",
-  #              "R60D05 x PKCi",
-  #              "JG17 x PKCi")
-  # }else if(genotype ==  "THGAL4 x JU29"){
-  #   g_list = c("D2R-1 x 51635",
-  #              "DopR2 x JU30",
-  #              "DopR1 x JU30",
-  #              "THGAL4 x JU29",
-  #              "THGAL4 x JU30",
-  #              "OK107 x JU30",
-  #              "UAS-DopR2-RNAi x 51635",
-  #              "UAS-DopR1-IR x 51635")
-  # }
+  g_list = genotype
   pdf(paste0("15_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )
@@ -2292,10 +1890,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
     p = c(p, a$P.adjusted, b$P.adjusted)
     # p = c(comp$P.adjusted)
     metric.df = rbind(metric.df, m)
-  }                           
-  
-  # num = as.data.frame(table(metric.df[!is.na(metric.df$Value),]$Session))$Freq
-  
+  }                         
   yrange = c(0, 1)
   y_text = 1.1
   
@@ -2326,8 +1921,6 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
     cex = 0.5,
     col =  col.pool
   )
-  
-  # x_loc = c(1:(length(g_list) * 6))
   y_top_base = 1
   vertical_gap = 0.01
   v_gap = 0.01
@@ -2348,24 +1941,6 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
     }else if (p[i] < 0.0001){
       significance = "****"
     }
-    
-    # if (i%%3 == 1){
-    #   text(((i + 2) + (i + 1))/2, y_base_RN + vertical_gap , significance, xpd = NA)
-    #   lines(c(i + 1, i + 2), 
-    #         c(y_base_RN, y_base_RN), 
-    #         xpd = NA) 
-    #   lines(c(i + 1, i + 1), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #   lines(c(i + 2, i + 2), c(y_base_RN, y_base_RN - v_gap), xpd = NA)
-    #   
-    # }else if (i%%3 == 2){
-    #   text(i, y_base_TN + vertical_gap, significance, xpd = NA)
-    #   lines(c(i - 1, i + 1), 
-    #         c(y_base_TN, y_base_TN), 
-    #         xpd = NA)
-    #   lines(c(i - 1, i - 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #   lines(c(i + 1, i + 1), c(y_base_TN, y_base_TN - v_gap), xpd = NA)
-    #   
-    # }else{
     if (i == 3){
       text(
         1.5, 
@@ -2389,22 +1964,8 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
             xpd = NA)
       lines(c(4, 4), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
       lines(c(5, 5), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-      
     }
-    
-
-    
   }
-  
-  #  
-  # text(x = (1:(length(num))/2) - 0.1,
-  #      y = y_text,
-  #      num,
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  
   text(x = seq(0.85, length(num) * 2, by = 6),
        y = y_text,
        num[seq(1, length(num), by = 3)],
@@ -2427,31 +1988,6 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
        srt = 0,
        adj = 0
   )
-  
-  # text(x = seq(1.5, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("Before"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
-  # text(x = seq(4.75, (length(g_list)*6) - 1, by=6),
-  #      y = -0.05,
-  #      rep(c("After"), length(g_list)),
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  #  
-  # text(x = seq(2.5, (length(g_list)*6) - 3.5, by= 6),
-  #      y = -0.1,
-  #      g_list,
-  #      xpd = T,
-  #      srt = 0,
-  #      adj = 0
-  # )
-  # 
   seq_for_lines = seq(3, (length(g_list)*6), by=6)
   for (j in seq_for_lines) {
     lines(c(j, j) + 0.5,
@@ -2459,17 +1995,6 @@ plot_single_15 = function(genotype, metric.ind, all_ofs){
           col = "light grey",
           lty = 1)
   }
-  # if (genotype != "WT"){
-  #   seq_for_lines_2 = seq(6, (length(g_list)*6) - 6, by=6)
-  #   for (j in seq_for_lines_2) {
-  #     lines(c(j, j) + 0.5,
-  #           c(yrange[1] - 1e3, yrange[1] + 1e3),
-  #           col = "black",
-  #           lty = 1,
-  #           lwd = 2)
-  #   }
-  # }
-  
   dev.off()
 }
 
@@ -3065,66 +2590,6 @@ test_4th_training = function(i, query.genotype, all_ofs){
   a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
   return(a)
 }
-
-
-test_reverse_training_1st = function(i, query.genotype, all_ofs){
-
-  if (query.genotype == c("CS") || query.genotype == c("WT")){
-    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
-  }else{
-    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
-  }
-  metric = data.frame(
-    factor = c(
-               # rep("E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i])),
-               rep("E1T1E1T1E1T2E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T2E1", ][, i])),
-               rep("E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i])),
-               rep("E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))),
-    value = as.numeric(c(
-                         # metric.df[metric.df$Session=="E1T1E1T1E1T1E1", ][, i],
-                         metric.df[metric.df$Session=="E1T1E1T1E1T2E1", ][, i],
-                         metric.df[metric.df$Session=="E1R1E1R1E1R1E1", ][, i],
-                         metric.df[metric.df$Session=="E1N1E1N1E1N1E1", ][, i]))
-  )
-  colnames(metric) = c("Session", "Value")
-  metric$Session = factor(metric$Session, levels=c(
-                                                   # "E1T1E1T1E1T1E1",
-                                                   "E1T1E1T1E1T2E1", 
-                                                   "E1R1E1R1E1R1E1",
-                                                   "E1N1E1N1E1N1E1"))
-  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
-  return(a)
-
-}
-
-test_reverse_training_2nd = function(i, query.genotype, all_ofs){
-  if (query.genotype == c("CS") || query.genotype == c("WT")){
-    metric.df = all_ofs[all_ofs$Genotype=="WT", ]
-  }else{
-    metric.df = all_ofs[all_ofs$Genotype==query.genotype, ]
-  }
-  metric = data.frame(
-    factor = c(
-               # rep("E1T1E1T1E1T1E1T1E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i])),
-               rep("E1T1E1T1E1T2E1T2E1", length(metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i])),
-               rep("E1R1E1R1E1R1E1R1E1", length(metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i])),
-               rep("E1N1E1N1E1N1E1N1E1", length(metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))),
-    value = as.numeric(c(
-                         # metric.df[metric.df$Session=="E1T1E1T1E1T1E1T1E1", ][, i],
-                         metric.df[metric.df$Session=="E1T1E1T1E1T2E1T2E1", ][, i],
-                         metric.df[metric.df$Session=="E1R1E1R1E1R1E1R1E1", ][, i],
-                         metric.df[metric.df$Session=="E1N1E1N1E1N1E1N1E1", ][, i]))
-  )
-  colnames(metric) = c("Session", "Value")
-  metric$Session = factor(metric$Session, levels=c(
-                                                   # "E1T1E1T1E1T1E1T1E1", 
-                                                   "E1T1E1T1E1T2E1T2E1", 
-                                                   "E1R1E1R1E1R1E1R1E1", 
-                                                   "E1N1E1N1E1N1E1N1E1"))
-  a = dunn.test(x = metric$Value, g = metric$Session, method = c("bonferroni"))
-  return(a)
-}
-
 
 hypothesis_testing_E1 = function(i, fly.info){
   metrices =  c(
