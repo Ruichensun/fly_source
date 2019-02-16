@@ -6,45 +6,30 @@ library(dunn.test)
 # For data preprocessing: combining all fly info into one document
 
 metrices = c(
-  "Experimenter", #2
-  "Genotype", #3
-  "Fly Number", #4
-  "Session", #5
-  "Number of Pause", #6
-  "Number of Middle Pause", #7
-  "Percentage Time Active", #8
-  "Percentage Time Active - Pause not at the End", #9
-  "Median Pause Duration",#10
-  "Median Middle Pause Duration", #11    
-  "Max Pause Duration", #12
-  "Max Middle Pause Duration", #13
-  "First Pause Duration", #14
-  "First Middle Pause Duration", #15
-  "Average Moving Speed", #16
-  "Average Moving Speed (excluding pause)", #17
-  "Average Speed When Enter Pause", #18
-  "Average Speed When Exit Pause",#19
-  "Moving Distance",#20
-  "Number of Turns",#21
-  "Number of Middle Turns",#22
-  "Fraction of Middle Turns Out of Total Turns",#23
-  # "Burstiness (Pause)",#24
-  # "Burstiness (Inter Event Time)",#25
-  # "Burstiness (Scrambled)",#26
-  # "Burstiness (Walking bouts-thresholding)",#27
-  # "Burstiness (Walking events-no thres)",#28
-  # "Memory of Pause", #29
-  # "Memory of Walking", #30
-  # "Transition Probability (Pause not at the end): Pause to Pause", #31
-  # "Transition Probability (Pause not at the end): Pause to Pause - middle", #32
-  # "Transition Probability (Pause not at the end): Pause to Walking", #33
-  # "Transition Probability (Pause not at the end): Pause to Walking - middle", #34
-  # "Transition Probability (Pause not at the end): Walking to Walking", #35
-  # "Transition Probability (Pause not at the end): Walking to Walking - middle", #36
-  # "Transition Probability (Pause not at the end): Walking to Pause", # 37
-  # "Transition Probability (Pause not at the end): Walking to Pause - middle", #38
-  "Average Pause Duration", #39
-  "Average Middle Pause Duration" #40
+  "Experimenter", 
+  "Genotype", 
+  "Fly Number", 
+  "Session", 
+  "Number of Pause", 
+  "Number of Middle Pause", 
+  "Percentage Time Active", 
+  "Percentage Time Active - Pause not at the End",
+  "Median Pause Duration",
+  "Median Middle Pause Duration",    
+  "Max Pause Duration",
+  "Max Middle Pause Duration", 
+  "First Pause Duration",
+  "First Middle Pause Duration", 
+  "Average Moving Speed", 
+  "Average Moving Speed (excluding pause)",
+  "Average Speed When Enter Pause", 
+  "Average Speed When Exit Pause",
+  "Moving Distance",
+  "Number of Turns",
+  "Number of Middle Turns",
+  "Fraction of Middle Turns Out of Total Turns",
+  "Average Pause Duration", 
+  "Average Middle Pause Duration"
 )
 
 
