@@ -9,42 +9,33 @@ sessions <- c(
   "E1T1E1T1E1",
   "E1T1E1T1E1T1E1",
   "E1T1E1T1E1T1E1T1E1",
-  
   "E1T1E1T1E1T2E1",
   "E1T1E1T1E1T2E1T2E1",
-  
   "E1T2E1",
   "E1T2E1T2E1",
   "E1T2E1T2E1T1E1",
   "E1T2E1T2E1T1E1T1E1",
-  
   "E2",
   "E2T2E2",
   "E2T2E2T2E2",
   "E2T2E1T2E2T2E2",
- 
   "E2R2E2",
   "E2R2E2R2E2",
   "E2R2E1R2E2R2E2",
-  
   "E2N2E2",
   "E2N2E2N2E2",
   "E2N2E1N2E2N2E2",
-  
   "E1R1E1",
   "E1R1E1R1E1",
   "E1R1E1R1E1R1E1",
   "E1R1E1R1E1R1E1R1E1",
-  
   "E1N1E1",
   "E1N1E1N1E1",
   "E1N1E1N1E1N1E1",
   "E1N1E1N1E1N1E1N1E1",
-  
   "E1T1E1R1E1",
   "E1T1E1R1E1R1E1",
   "E1T1E1T1E1R1E1R1E1",
-  
   "E1T1E1N1E1",
   "E1T1E1N1E1N1E1",
   "E1T1E1T1E1N1E1N1E1"
@@ -81,7 +72,8 @@ fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
 
 for(ind in 1:nrow(fly.info.mutant)){
   # print(paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/", "ProcessedData_Fly",fly.info.mutant$Fly[ind]))
-  query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
+  # query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
+  # print(query.sessions)
   for(ind.session in 1:length(query.sessions)){
     input.file <- list.files(path = paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
