@@ -7,10 +7,22 @@ fly.info.CS$Genotype = "WT"
 
 fly.info.mutants = read.csv("data/fly_info_mutants_preprocessed.csv",header = T, stringsAsFactors = F)
 
-shared.info = c("Fly", "Category", "Gender", "Genotype", "Exp.date", "Experimenter", "Age", "Gender",
-                "Setup", "Fly.moving.speed", "Fly.pause","Framerate", "Gap")
+shared.info = c("Fly", 
+                "Category", 
+                "Gender", 
+                "Genotype", 
+                "Exp.date", 
+                "Experimenter", 
+                "Age", 
+                "Gender",
+                "Setup", 
+                "Fly.moving.speed", 
+                "Fly.pause",
+                "Framerate", 
+                "Gap")
 
-fly.info = rbind(fly.info.CS[, shared.info], fly.info.mutants[, shared.info])
+fly.info = rbind(fly.info.CS[, shared.info], 
+                 fly.info.mutants[, shared.info])
 
 # Filter by baseline behaviors
 ind.T.excl = which((fly.info$Category=="T") & (fly.info$Fly.pause > 0.9))
@@ -50,9 +62,11 @@ for (ind in 1:nrow(excl.fly)) {
 ind.include = NULL
 for (genotype in unique(fly.info$Genotype)) {
   if (genotype == "CS") {next}
-  else if (genotype == "WT") {ind = fly.info$Genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)}
-  
-  else{ind = fly.info$Genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)}
+  else if (genotype == "WT") {
+    ind = fly.info$Genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+  }else{
+      ind = fly.info$Genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+      }
   ind.include = c(ind.include,which(ind)) 
 }
 
