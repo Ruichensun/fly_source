@@ -2102,20 +2102,41 @@ get_laser_df = function(fly_laser, framerate){
     "Difference",
     "eight_min_OFF"
   )
+  return(laser_df)
 }
 
 
 one_fly_laser_statistics = function(input_file, framerate){
+  file_path = unlist(strsplit(input_file, "/"))
+  Experimenter = file_path[2]
+  file_name = unlist(strsplit(file_path[4], "_"))
+  file_session = file_name[3]
+  genotype = unlist(strsplit(file_name[4],".csv"))[1]
+  fly_num = as.integer(unlist((strsplit(file_name[2], "Fly")))[2])
+
   fly.file = read.csv(input_file, header = T, stringsAsFactors = F)
   fly.position.raw = as.numeric(fly.file[[1]])
   fly.laser.raw = as.numeric(fly.file[[2]])
   if (is.na(fly.laser.raw[1]) == T) {
-    number_of_laser_clicks = NA
-    total_laser_ON = NA
-    ret = list(number_of_laser_clicks,
-               total_laser_ON #in seconds
-    )
-    names(ret) = c("Number of Laser Punishments", "Total Laser Exposure in Seconds")
+    number_of_laser_clicks = -1
+    total_laser_ON = -1
+    ret = data.frame(cbind(
+      Experimenter,
+      genotype,
+      fly_num,
+      file_session,
+      number_of_laser_clicks,
+      total_laser_ON #in seconds
+    ))
+    colnames(ret) = c(
+      "Experimenter", 
+      "Genotype", 
+      "Fly Number",
+      "Session",       
+      "Laser_Count",
+      "Laser_Exposure"
+      )
+    return(ret)
   }else{
     data_start = 31
     fly_pos = fly.position.raw[data_start:length(fly.position.raw)]
@@ -2139,10 +2160,21 @@ one_fly_laser_statistics = function(input_file, framerate){
         number_of_laser_clicks = 0
       }
     }
-    ret = list(number_of_laser_clicks,
-               total_laser_ON 
-    )
-    names(ret) = c("Number of Laser Punishments","Total Laser Exposure in Seconds")
+    ret = data.frame(cbind(
+      Experimenter,
+      genotype,
+      fly_num,
+      file_session,
+      number_of_laser_clicks,
+      total_laser_ON 
+    ))
+    colnames(ret) = c(
+      "Experimenter", 
+      "Genotype", 
+      "Fly Number",
+      "Session",       
+      "Laser_Count",
+      "Laser_Exposure")
     return(ret)
   }
 }
