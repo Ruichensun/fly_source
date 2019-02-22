@@ -20,7 +20,6 @@ for (i in 2:nrow(ofls)){
   }
 }
 
-
 laser_T = ofls[ofls$Session=="E1T1E1T1" & ofls$Laser_Count < 45, ]
 laser_R = ofls[ofls$Session=="E1R1E1R1" & ofls$Laser_Count < 45, ]
 
@@ -53,12 +52,12 @@ R_bel_test = subset(all_ofs_WT,
                          (all_ofs_WT$Fly.Number %in% R_med_bel[R_med_bel$Experimenter=="SW",]$Fly.Number))
 )
 
-boxplot(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
-        R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
-boxplot(R_abv_test[R_abv_test$Session=="E1", ]$Percentage.Time.Active, 
-        R_bel_test[R_bel_test$Session=="E1", ]$Percentage.Time.Active)
-
-wilcox.test(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
-        R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
+# boxplot(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
+#         R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
+# boxplot(R_abv_test[R_abv_test$Session=="E1", ]$Percentage.Time.Active, 
+#         R_bel_test[R_bel_test$Session=="E1", ]$Percentage.Time.Active)
+# 
+# wilcox.test(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
+#         R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
 
 
