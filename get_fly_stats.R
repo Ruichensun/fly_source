@@ -3,7 +3,6 @@ setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 sessions <- c(
-  
   "E1",
   "E1T1E1",
   "E1T1E1T1E1",
@@ -48,11 +47,16 @@ all_ofs_WT = data.frame()
 fly.info = fly.info.end[fly.info.end$Genotype %in% c("WT", "CS"),]
 
 for(ind in 1:nrow(fly.info)){
-  # print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
-                             full.names=T)
+    if (fly.info$Genotype[ind]=="WT"){
+      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
+                               full.names=T)
+    }else if(fly.info$Genotype[ind]=="CS"){
+      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/mutants/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_CS",".csv"),
+                               full.names=T)
+    }
     if(length(input.file) == 0){next
       }else{
           framerate = fly.info$Framerate[ind]        
@@ -71,9 +75,6 @@ all_ofs_mutants = data.frame()
 fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
 
 for(ind in 1:nrow(fly.info.mutant)){
-  # print(paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/", "ProcessedData_Fly",fly.info.mutant$Fly[ind]))
-  # query.sessions = gsub("X",fly.info.mutant$Category[ind],sessions)
-  # print(query.sessions)
   for(ind.session in 1:length(query.sessions)){
     input.file <- list.files(path = paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
@@ -104,13 +105,17 @@ sessions_laser = c(
   "E1R1E1R1"
 )
 
-# for(ind in 1:nrow(fly.info)){
-for(ind in 1:3){
-  # print(paste0("data/", fly.info$Experimenter[ind], "/CS/", "ProcessedData_Fly",fly.info$Fly[ind]))
+for(ind in 1:nrow(fly.info)){
   for(ind.session in 1:length(sessions_laser)){
-    input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
-                             full.names=T)
+    if (fly.info$Genotype[ind]=="WT"){
+      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
+                               full.names=T)
+    }else if(fly.info$Genotype[ind]=="CS"){
+      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/mutants/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
+                               full.names=T)
+    }
     if(length(input.file) == 0){next
     }else{
       framerate = fly.info$Framerate[ind]        
@@ -124,6 +129,7 @@ for(ind in 1:3){
 }
 
 write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
 
 write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
@@ -132,9 +138,6 @@ write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.n
 all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
-
-
-
 
 save.image("all_ofs.Rdata")
 
