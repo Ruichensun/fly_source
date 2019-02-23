@@ -23,12 +23,37 @@ for (i in 2:nrow(ofls)){
 laser_T = ofls[ofls$Session=="E1T1E1T1" & ofls$Laser_Count < 45, ]
 laser_R = ofls[ofls$Session=="E1R1E1R1" & ofls$Laser_Count < 45, ]
 
+
+
 # Remember to remove flies that receive more than 45 clicks
 med = median(laser_T$Laser_Exposure)
+T_med_abv = laser_T[laser_T$Laser_Exposure >= med, ]
+T_med_bel = laser_T[laser_T$Laser_Exposure < med, ]
 R_med_abv = laser_R[laser_R$Laser_Exposure >= med, ]
 R_med_bel = laser_R[laser_R$Laser_Exposure < med, ] 
 
 # Get fly activity for the two groups
+T_abv_test = subset(all_ofs_WT, 
+                    ((all_ofs_WT$Experimenter=="ES") & 
+                       (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="ES",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="RS") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="RS",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="JD") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="JD",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="SW") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="SW",]$Fly.Number))
+)
+
+T_bel_test = subset(all_ofs_WT, 
+                    ((all_ofs_WT$Experimenter=="ES") & 
+                       (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="ES",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="RS") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="RS",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="JD") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="JD",]$Fly.Number))|
+                      ((all_ofs_WT$Experimenter=="SW") & 
+                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="SW",]$Fly.Number))
+)
 
 R_abv_test = subset(all_ofs_WT, 
                     ((all_ofs_WT$Experimenter=="ES") & 
@@ -54,13 +79,20 @@ R_bel_test = subset(all_ofs_WT,
 
 
 # Prepare boxplot 
-num = c(length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active),
+num = c(length(T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active),
+        length(T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active),
+        length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active),
         length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))
 
 m = data.frame(
-  factor = c(rep("Top50", length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)),
-             rep("Bottom50", length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))),
+  factor = c(rep("T-Top50", length(T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active)),
+             rep("T-Bottom50", length(T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active)),
+             rep("R-Top50", length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)),
+             rep("R-Bottom50", length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))),
   value = as.numeric(c(
+    
+    T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active,
+    T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active,
     R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active,
     R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active
   ))
@@ -68,11 +100,11 @@ m = data.frame(
 
 
 colnames(m) = c("Segment", "Value")
-m$Segment = factor(m$Segment, levels = c("Top50", "Bottom50"))
+m$Segment = factor(m$Segment, levels = c("T-Top50", "T-Bottom50", "R-Top50", "R-Bottom50"))
 
 a = dunn.test(x = m$Value, g = m$Segment, method = c("bonferroni"))
 
-col.pool = c("light blue", "dark blue")
+col.pool = c("indianred2", "indianred3", "light blue", "dark blue")
 
 boxplot(
   Value ~ Segment,
