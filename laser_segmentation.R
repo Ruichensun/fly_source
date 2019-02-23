@@ -52,12 +52,45 @@ R_bel_test = subset(all_ofs_WT,
                          (all_ofs_WT$Fly.Number %in% R_med_bel[R_med_bel$Experimenter=="SW",]$Fly.Number))
 )
 
-# boxplot(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
-#         R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
-# boxplot(R_abv_test[R_abv_test$Session=="E1", ]$Percentage.Time.Active, 
-#         R_bel_test[R_bel_test$Session=="E1", ]$Percentage.Time.Active)
-# 
-# wilcox.test(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active, 
-#         R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
+
+# Prepare boxplot 
+num = c(length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active),
+        length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))
+
+m = data.frame(
+  factor = c(rep("Top50", length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)),
+             rep("Bottom50", length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))),
+  value = as.numeric(c(
+    R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active,
+    R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active
+  ))
+)
+
+
+colnames(m) = c("Segment", "Value")
+m$Segment = factor(m$Segment, levels = c("Top50", "Bottom50"))
+
+a = dunn.test(x = m$Value, g = m$Segment, method = c("bonferroni"))
+
+col.pool = c("light blue", "dark blue")
+
+boxplot(
+  Value ~ Segment,
+  data = m
+)
+
+
+stripchart(
+  Value ~ Segment,
+  vertical = TRUE,
+  data = m,
+  method = "jitter",
+  add = TRUE,
+  pch = 15,
+  cex = 0.5,
+  col =  col.pool
+)
+
+
 
 
