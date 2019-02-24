@@ -26,11 +26,11 @@ laser_R = ofls[ofls$Session=="E1R1E1R1" & ofls$Laser_Count < 45, ]
 
 
 # Remember to remove flies that receive more than 45 clicks
-med = median(laser_T$Laser_Exposure)
-T_med_abv = laser_T[laser_T$Laser_Exposure >= med, ]
-T_med_bel = laser_T[laser_T$Laser_Exposure < med, ]
-R_med_abv = laser_R[laser_R$Laser_Exposure >= med, ]
-R_med_bel = laser_R[laser_R$Laser_Exposure < med, ] 
+med = median(laser_T$Laser_Count)
+T_med_abv = laser_T[laser_T$Laser_Count >= med, ]
+T_med_bel = laser_T[laser_T$Laser_Count < med, ]
+R_med_abv = laser_R[laser_R$Laser_Count >= med, ]
+R_med_bel = laser_R[laser_R$Laser_Count < med, ] 
 
 # Get fly activity for the two groups
 T_abv_test = subset(all_ofs_WT, 

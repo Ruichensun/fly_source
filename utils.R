@@ -2400,7 +2400,35 @@ get_Wald_CI = function(data){
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
 
-get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_list){
+
+###
+
+# Use_T_find_R = function(fly.info, Tindex){
+#   if (fly.info[Tindex, ]$Category != "T"){
+#     return(c())
+#   }else{
+#     Rlst = c()
+#     setup_T = fly.info[Tindex, ]$Setup
+#     for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
+#       if ((i < 1) | (i > nrow(fly.info))){
+#         next
+#       }
+#       if (fly.info[i, ]$Category == "R" & 
+#           fly.info[i, ]$Genotype == fly.info[Tindex, ]$Genotype &
+#           fly.info[i, ]$Exp.date == fly.info[Tindex, ]$Exp.date &
+#           fly.info[i, ]$Experimenter == fly.info[Tindex, ]$Experimenter & 
+#           fly.info[i, ]$Setup != fly.info[Tindex, ]$Setup){
+#         Rlst = c(Rlst, i)
+#       }
+#     }
+#     return (Rlst)
+
+#   }
+#   
+# }
+
+
+get_learning_index_normalized = function(fly.info.end, all_ofs, metric.ind, category, g_list){
   master_learn = data.frame()
   for (i in 1:length(g_list)){
     learn_list = c()
@@ -2417,10 +2445,51 @@ get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_lis
     }
     for (j in 1:nrow(fly.info.temp)){
       E1 = metric.df[metric.df$`Fly Number`== fly.info.temp[j, ]$Fly & 
-                     metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
-                     metric.df$Session=="E1", ][, metric.ind]
+                       metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
+                       metric.df$Session=="E1", ]$Percentage.Time.Active
       E5 = metric.df[metric.df$`Fly Number`== fly.info.temp[j, ]$Fly & 
-                     metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
+                       metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
+                       metric.df$Session==paste0("E1", category, "1E1", category, "1E1"), ]$Percentage.Time.Active
+      learn_index = (as.numeric(E1) - as.numeric(E5))/(as.numeric(E1))
+      
+      
+      # learn_index = (as.numeric(E5))/(as.numeric(E1))
+      learn_list = c(learn_list, learn_index)
+    }
+    name_list = rep(g_list[i], length(learn_list))
+    m = data.frame(
+      factor = name_list,
+      value = learn_list
+    )
+    colnames(m) = c("Genotype", "Learning")
+    master_learn = rbind(master_learn, m)
+  }
+  master_learn$Genotype = factor(master_learn$Genotype, levels = g_list)
+  return(master_learn)
+}
+
+
+get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_list){
+  master_learn = data.frame()
+  for (i in 1:length(g_list)){
+    learn_list = c()
+    if (g_list[i]=="WT"){
+      fly.info.temp = fly.info.end[(fly.info.end$Genotype == "WT"|fly.info.end$Genotype=="CS") &
+                                     fly.info.end$Category == category, ]
+      metric.df = all_ofs[(all_ofs$Genotype=="WT"|all_ofs$Genotype=="CS") &
+                            all_ofs$Type==category, ]
+    }else{
+      fly.info.temp = fly.info.end[fly.info.end$Genotype == g_list[i] &
+                                     fly.info.end$Category == category , ]
+      metric.df = all_ofs[all_ofs$Genotype==g_list[i] &
+                            all_ofs$Type==category, ]
+    }
+    for (j in 1:nrow(fly.info.temp)){
+      E1 = metric.df[metric.df$`Fly Number`== fly.info.temp[j, ]$Fly &
+                     metric.df$Experimenter == fly.info.temp[j, ]$Experimenter &
+                     metric.df$Session=="E1", ][, metric.ind]
+      E5 = metric.df[metric.df$`Fly Number`== fly.info.temp[j, ]$Fly &
+                     metric.df$Experimenter == fly.info.temp[j, ]$Experimenter &
                      metric.df$Session==paste0("E1", category, "1E1", category, "1E1"), ][, metric.ind]
       learn_index = (as.numeric(E1) - as.numeric(E5))/(as.numeric(E1))
       # learn_index = (as.numeric(E5))/(as.numeric(E1))
