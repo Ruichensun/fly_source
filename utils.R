@@ -2428,7 +2428,7 @@ get_Wald_CI = function(data){
 # }
 
 
-get_learning_index_normalized = function(fly.info.end, all_ofs, metric.ind,  g_list){
+get_learning_index_normalized = function(fly.info.end, all_ofs, g_list){
   master_learn = data.frame()
   for (i in 1:length(g_list)){
     learn_list = c()
@@ -2438,41 +2438,46 @@ get_learning_index_normalized = function(fly.info.end, all_ofs, metric.ind,  g_l
       fly.info.temp = fly.info.end[fly.info.end$Genotype == g_list[i] , ]
     }
     for (j in 1:nrow(fly.info.temp)){
+    # for (j in 1:2){
       if (fly.info.temp[j, ]$Category=="T"){
-      
-        Rlst = Use_T_find_R(fly.info.temp, fly.info.temp[j, ]$Fly)
+        Rlst = Use_T_find_R(fly.info.temp, j)
         if (length(Rlst) > 0){
           E1_R = c()
           E5_R = c()
+          
           for (k in 1:length(Rlst)){
-            E1_R = c(E1_R, all_ofs[all_ofs$Fly.Number==Rlst[k] &
-                                     (all_ofs$Genotype == "WT"|all_ofs$Genotype=="CS"), ]
-                     &
-                             all_ofs$Type=="R" &
-                               all_ofs$Experimenter == fly.info.temp[j, ]$Experimenter &
-                               all_ofs$Session=="E1", ]$Percentage.Time.Active)
-            E5_R = c(E5_R, metric.df[metric.df$Fly.Number==Rlst[k] &
-                               metric.df$Type=="R" &
-                               metric.df$Experimenter == fly.info.temp[j, ]$Experimenter &
-                               metric.df$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)
+            E1_R = c(E1_R, all_ofs[all_ofs$Fly.Number == fly.info.temp[Rlst[k],]$Fly &
+                                   all_ofs$Genotype == fly.info.temp[Rlst[k],]$Genotype &
+                                   all_ofs$Experimenter == fly.info.temp[Rlst[k],]$Experimenter &
+                                   all_ofs$Session == "E1" &
+                                   all_ofs$Type == "R", ]$Percentage.Time.Active)
+                                    
+            E5_R = c(E5_R, all_ofs[all_ofs$Fly.Number == fly.info.temp[Rlst[k],]$Fly &
+                                     all_ofs$Genotype == fly.info.temp[Rlst[k],]$Genotype &
+                                     all_ofs$Experimenter == fly.info.temp[Rlst[k],]$Experimenter &
+                                     all_ofs$Session == "E1R1E1R1E1" &
+                                     all_ofs$Type == "R", ]$Percentage.Time.Active)
           }
           E1_R = mean(E1_R)
           E5_R = mean(E5_R)
 
-          E1_T = metric.df[metric.df$Fly.Number== fly.info.temp[j, ]$Fly & 
-                           metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
-                           metric.df$Session=="E1" &
-                           metric.df$Type=="T", ]$Percentage.Time.Active
-          E5_T = metric.df[metric.df$Fly.Number== fly.info.temp[j, ]$Fly & 
-                           metric.df$Experimenter == fly.info.temp[j, ]$Experimenter & 
-                           metric.df$Session=="E1T1E1T1E1", ]$Percentage.Time.Active
-          learn_index = (E1_T - E5_T) - (E1_R - E5_R)
+          E1_T = all_ofs[all_ofs$Fly.Number== fly.info.temp[j, ]$Fly & 
+                           all_ofs$Experimenter == fly.info.temp[j, ]$Experimenter & 
+                           all_ofs$Genotype == fly.info.temp[j, ]$Genotype &
+                           all_ofs$Session=="E1" &
+                           all_ofs$Type=="T", ]$Percentage.Time.Active
+          E5_T = all_ofs[all_ofs$Fly.Number== fly.info.temp[j, ]$Fly & 
+                           all_ofs$Experimenter == fly.info.temp[j, ]$Experimenter &
+                           all_ofs$Genotype == fly.info.temp[j, ]$Genotype &
+                           all_ofs$Session=="E1T1E1T1E1", ]$Percentage.Time.Active
+          learn_index = ((E1_T - E5_T)/E1_T - (E1_R - E5_R)/E1_R)
+          # learn_index = (E1_T - E5_T) / E1_T
           # learn_index = (as.numeric(E1) - as.numeric(E5))/(as.numeric(E1))
           # learn_index = (as.numeric(E5))/(as.numeric(E1))
           learn_list = c(learn_list, learn_index)
         }
-      
-    }}
+      }
+      }
     name_list = rep(g_list[i], length(learn_list))
     m = data.frame(
       factor = name_list,
