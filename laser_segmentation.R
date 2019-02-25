@@ -23,8 +23,6 @@ for (i in 2:nrow(ofls)){
 laser_T = ofls[ofls$Session=="E1T1E1T1" & ofls$Laser_Count < 45, ]
 laser_R = ofls[ofls$Session=="E1R1E1R1" & ofls$Laser_Count < 45, ]
 
-
-
 # Remember to remove flies that receive more than 45 clicks
 med = median(laser_T$Laser_Exposure)
 T_med_abv = laser_T[laser_T$Laser_Exposure >= med, ]
@@ -78,21 +76,16 @@ R_bel_test = subset(all_ofs_WT,
 )
 
 
-# Prepare boxplot 
-num = c(length(T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active),
-        length(T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active),
-        length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active),
+
+# Raw data plot 
+num = c(length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active),
         length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))
 
 m = data.frame(
-  factor = c(rep("T-Top50", length(T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active)),
-             rep("T-Bottom50", length(T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active)),
-             rep("R-Top50", length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)),
-             rep("R-Bottom50", length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))),
+  factor = c(
+    rep("R-Top50", length(R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active)),
+    rep("R-Bottom50", length(R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active))),
   value = as.numeric(c(
-    
-    T_abv_test[T_abv_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active,
-    T_bel_test[T_bel_test$Session=="E1T1E1T1E1", ]$Percentage.Time.Active,
     R_abv_test[R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active,
     R_bel_test[R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active
   ))
@@ -100,11 +93,12 @@ m = data.frame(
 
 
 colnames(m) = c("Segment", "Value")
-m$Segment = factor(m$Segment, levels = c("T-Top50", "T-Bottom50", "R-Top50", "R-Bottom50"))
+m$Segment = factor(m$Segment, levels = c("R-Top50", "R-Bottom50"))
 
 a = dunn.test(x = m$Value, g = m$Segment, method = c("bonferroni"))
 
-col.pool = c("indianred2", "indianred3", "light blue", "dark blue")
+col.pool = c(
+  "light blue", "dark blue")
 
 boxplot(
   Value ~ Segment,
@@ -123,6 +117,77 @@ stripchart(
   col =  col.pool
 )
 
+# Get diff boxplot
+
+R_bel_diff = c()
+
+for (i in 1:nrow(R_med_bel)){
+  temp = R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number & R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter & R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
+    R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number & R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter & R_bel_test$Session=="E1", ]$Percentage.Time.Active
+  R_bel_diff = c(R_bel_diff, temp)
+  }
+
+R_abv_diff = c()
+
+for (i in 1:nrow(R_med_abv)){
+  temp = R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number & R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter & R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
+    R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number & R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter & R_abv_test$Session=="E1", ]$Percentage.Time.Active
+  R_abv_diff = c(R_abv_diff, temp)
+}
+
+num = c(
+  length(R_abv_diff),
+  length(R_bel_diff))
+
+m = data.frame(
+  factor = c(
+    rep("R-Top50", length(R_abv_diff)),
+    rep("R-Bottom50", length(R_bel_diff))),
+  value = as.numeric(c(
+    R_abv_diff,
+    R_bel_diff
+  ))
+)
+
+colnames(m) = c("Segment", "Value")
+m$Segment = factor(m$Segment, levels = c("R-Top50", "R-Bottom50"))
+
+col.pool = c("light blue", "dark blue")
+
+boxplot(
+  Value ~ Segment,
+  data = m
+)
+
+stripchart(
+  Value ~ Segment,
+  vertical = TRUE,
+  data = m,
+  method = "jitter",
+  add = TRUE,
+  pch = 15,
+  cex = 0.5,
+  col =  col.pool
+)
 
 
+# Regression of laser exposure to activity level
 
+laser_vs_pta = data.frame()
+pta_R = c()
+for (i in 1:nrow(laser_R)){
+  temp = all_ofs[all_ofs$Experimenter==laser_R[i, ]$Experimenter & all_ofs$Fly.Number == laser_R[i, ]$Fly.Number & 
+                   all_ofs$Genotype == laser_R[i, ]$Genotype & all_ofs$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
+         all_ofs[all_ofs$Experimenter==laser_R[i, ]$Experimenter & all_ofs$Fly.Number == laser_R[i, ]$Fly.Number & 
+               all_ofs$Genotype == laser_R[i, ]$Genotype & all_ofs$Session == "E1", ]$Percentage.Time.Active 
+  pta_R = c(pta_R, temp)
+}
+laser_vs_pta = cbind(laser_R, pta_R)
+
+cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))
+model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+
+
+# Segment R-Control group by initial activity level and regress the activity change to laser exposure
