@@ -176,10 +176,10 @@ stripchart(
 laser_vs_pta = data.frame()
 pta_R = c()
 for (i in 1:nrow(laser_R)){
-  temp = all_ofs[all_ofs$Experimenter==laser_R[i, ]$Experimenter & all_ofs$Fly.Number == laser_R[i, ]$Fly.Number & 
-                   all_ofs$Genotype == laser_R[i, ]$Genotype & all_ofs$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
-         all_ofs[all_ofs$Experimenter==laser_R[i, ]$Experimenter & all_ofs$Fly.Number == laser_R[i, ]$Fly.Number & 
-               all_ofs$Genotype == laser_R[i, ]$Genotype & all_ofs$Session == "E1", ]$Percentage.Time.Active 
+  temp = all_ofs_WT[all_ofs_WT$Experimenter==laser_R[i, ]$Experimenter & all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & 
+                    all_ofs_WT$Genotype == laser_R[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
+         all_ofs_WT[all_ofs_WT$Experimenter==laser_R[i, ]$Experimenter & all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & 
+                    all_ofs_WT$Genotype == laser_R[i, ]$Genotype & all_ofs_WT$Session == "E1", ]$Percentage.Time.Active 
   pta_R = c(pta_R, temp)
 }
 laser_vs_pta = cbind(laser_R, pta_R)
@@ -191,3 +191,38 @@ coef(summary(model))
 
 
 # Segment R-Control group by initial activity level and regress the activity change to laser exposure
+
+activity_med = median(all_ofs_WT[all_ofs_WT$Type=="R" & all_ofs_WT$Session=="E1", ]$Percentage.Time.Active)
+initial_act_laser = data.frame()
+
+for (i in 1:nrow(laser_R)){
+  # get diff
+  initial = all_ofs_WT[all_ofs_WT$Type=="R" & all_ofs_WT$Session=="E1" & 
+                         all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
+                         all_ofs_WT$Genotype == laser_R[i, ]$Genotype, ]$Percentage.Time.Active
+  end_test = all_ofs_WT[all_ofs_WT$Type=="R" & all_ofs_WT$Session=="E1R1E1R1E1" & 
+                           all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
+                           all_ofs_WT$Genotype == laser_R[i, ]$Genotype, ]$Percentage.Time.Active
+  difference = end_test - initial
+  temp = cbind(laser_R[i, ], initial, end_test, difference)
+  initial_act_laser = rbind(initial_act_laser, temp)
+}
+initial_med = median(initial_act_laser$initial)
+
+plot(initial_act_laser[initial_act_laser$initial>=initial_med,]$Laser_Exposure,
+     initial_act_laser[initial_act_laser$initial>=initial_med,]$difference, main="Flies Initially More Active")
+
+cor(initial_act_laser[initial_act_laser$initial>=initial_med,]$Laser_Exposure, 
+    initial_act_laser[initial_act_laser$initial>=initial_med,]$difference, 
+    method = c("pearson"))
+model = lm(formula = initial_act_laser[initial_act_laser$initial>=initial_med,]$difference ~ 
+             initial_act_laser[initial_act_laser$initial>=initial_med,]$Laser_Exposure)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+
+plot(initial_act_laser[initial_act_laser$initial<initial_med,]$Laser_Exposure,
+     initial_act_laser[initial_act_laser$initial<initial_med,]$difference, main="Flies Initially Less Active")
+cor(initial_act_laser[initial_act_laser$initial<initial_med,]$Laser_Exposure, 
+    initial_act_laser[initial_act_laser$initial<initial_med,]$difference, 
+    method = c("pearson"))
+
