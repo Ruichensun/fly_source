@@ -2261,12 +2261,11 @@ chance_of_being_hit_by_laser = function(input_file){
     fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
     fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
     fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
-    
     for (i in 1:length(fly.moving.status)){
-      if ((fly.position[i]<50)){
+      if (fly.position[i] < 60){
         fly.moving.status[i] = 1
       }
-      if ((fly.position[i]>717)){
+      if (fly.position[i] > 708){
         fly.moving.status[i] = 1
       }
     }
@@ -2296,7 +2295,6 @@ chance_of_being_hit_by_laser = function(input_file){
 Hit_by_laser = function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
-  # for (ind in 100:110) {
     if(fly.info.movement$Genotype[ind]=="WT"){
       input.file = list.files(
         path = paste0("data/",fly.info.movement$Experimenter[ind],"/CS/"),
@@ -2311,11 +2309,11 @@ Hit_by_laser = function(file_name_filter, fly.info.movement) {
         full.names = T)
       if(length(input.file)==0){next()}
     }
-    laser_chance = rbind(laser_chance, chance_of_being_hit_by_laser(input.file))
+    laser_profile = chance_of_being_hit_by_laser(input.file)
+    temp = cbind(fly.info.movement[ind, ], laser_profile[1], laser_profile[2], laser_profile[3])
+    laser_chance = rbind(laser_chance, temp)
   }
-  names(laser_chance) = c("Chances of being hit during walking", 
-                          "Chances of being hit during pause ", 
-                          "Laser ON duration percentage")
+  names(laser_chance) = c(names(fly.info.movement[ind, ]), "Hit_W", "Hit_P", "Hit_All")
   return(laser_chance)
 }
 
@@ -2357,20 +2355,12 @@ get_sequence_length = function(file_name) {
 get_cumsums_total = function(file_name_filter, fly.info.movement) {
   file_names = c()
   for (ind in 1:nrow(fly.info.movement)) {
-    # if(fly.info.movement$Genotype[ind]=="WT"){
       input.file = list.files(
         path = paste0("data/", fly.info.movement$Experimenter[ind], "/CS_constant/CSV"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
                          file_name_filter, "_*"),
         full.names = T
       )
-    # }
-    # if(fly.info.movement$Genotype[ind]=="CS"){
-    #   input.file = list.files(
-    #     path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
-    #     pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
-    #     full.names = T)
-    # }
     if(length(input.file)==0){next()}
     if (!is.na(get_sequence_length(input.file))){
       file_names = c(file_names, input.file) 
@@ -2399,33 +2389,6 @@ get_Wald_CI = function(data){
   )
   return(c(CI$t0, CI$normal[2], CI$normal[3]))
 }
-
-
-###
-
-# Use_T_find_R = function(fly.info, Tindex){
-#   if (fly.info[Tindex, ]$Category != "T"){
-#     return(c())
-#   }else{
-#     Rlst = c()
-#     setup_T = fly.info[Tindex, ]$Setup
-#     for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
-#       if ((i < 1) | (i > nrow(fly.info))){
-#         next
-#       }
-#       if (fly.info[i, ]$Category == "R" & 
-#           fly.info[i, ]$Genotype == fly.info[Tindex, ]$Genotype &
-#           fly.info[i, ]$Exp.date == fly.info[Tindex, ]$Exp.date &
-#           fly.info[i, ]$Experimenter == fly.info[Tindex, ]$Experimenter & 
-#           fly.info[i, ]$Setup != fly.info[Tindex, ]$Setup){
-#         Rlst = c(Rlst, i)
-#       }
-#     }
-#     return (Rlst)
-
-#   }
-#   
-# }
 
 
 get_learning_index_normalized = function(fly.info.end, all_ofs, g_list){
@@ -2508,7 +2471,6 @@ get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_lis
                                      fly.info.end$Category == category, ]
       metric.df = all_ofs[(all_ofs$Genotype=="WT"|all_ofs$Genotype=="CS") &
                             all_ofs$Type==category, ]
-      print(head(metric.df))
     }else{
       fly.info.temp = fly.info.end[fly.info.end$Genotype == g_list[i] &
                                      fly.info.end$Category == category , ]
@@ -2522,8 +2484,8 @@ get_learning_index = function(fly.info.end, all_ofs, metric.ind, category, g_lis
       E5 = metric.df[metric.df$Fly.Number== fly.info.temp[j, ]$Fly &
                      metric.df$Experimenter == fly.info.temp[j, ]$Experimenter &
                      metric.df$Session==paste0("E1", category, "1E1", category, "1E1"), ][, metric.ind]
-      learn_index = (as.numeric(E1) - as.numeric(E5))/(as.numeric(E1))
-      # learn_index = (as.numeric(E5))/(as.numeric(E1))
+      # learn_index = (as.numeric(E1) - as.numeric(E5))/(as.numeric(E1))
+      learn_index = as.numeric(E5) - as.numeric(E1)
       learn_list = c(learn_list, learn_index)
     }
     name_list = rep(g_list[i], length(learn_list))

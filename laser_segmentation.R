@@ -105,7 +105,6 @@ boxplot(
   data = m
 )
 
-
 stripchart(
   Value ~ Segment,
   vertical = TRUE,
@@ -170,7 +169,6 @@ stripchart(
   col =  col.pool
 )
 
-
 # Regression of laser exposure to activity level
 
 laser_vs_pta = data.frame()
@@ -185,6 +183,7 @@ for (i in 1:nrow(laser_R)){
 laser_vs_pta = cbind(laser_R, pta_R)
 
 cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))
+plot(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R)
 model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
@@ -198,17 +197,21 @@ initial_act_laser = data.frame()
 for (i in 1:nrow(laser_R)){
   # get diff
   initial = all_ofs_WT[all_ofs_WT$Type=="R" & all_ofs_WT$Session=="E1" & 
-                         all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
+                         all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & 
+                         all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
                          all_ofs_WT$Genotype == laser_R[i, ]$Genotype, ]$Percentage.Time.Active
   end_test = all_ofs_WT[all_ofs_WT$Type=="R" & all_ofs_WT$Session=="E1R1E1R1E1" & 
-                           all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
-                           all_ofs_WT$Genotype == laser_R[i, ]$Genotype, ]$Percentage.Time.Active
+                          all_ofs_WT$Fly.Number == laser_R[i, ]$Fly.Number & 
+                          all_ofs_WT$Experimenter == laser_R[i, ]$Experimenter &
+                          all_ofs_WT$Genotype == laser_R[i, ]$Genotype, ]$Percentage.Time.Active
   difference = end_test - initial
   temp = cbind(laser_R[i, ], initial, end_test, difference)
   initial_act_laser = rbind(initial_act_laser, temp)
 }
 initial_med = median(initial_act_laser$initial)
 
+
+# Plot Flies with More Initial Activity
 plot(initial_act_laser[initial_act_laser$initial>=initial_med,]$Laser_Exposure,
      initial_act_laser[initial_act_laser$initial>=initial_med,]$difference, main="Flies Initially More Active")
 
@@ -219,10 +222,25 @@ model = lm(formula = initial_act_laser[initial_act_laser$initial>=initial_med,]$
              initial_act_laser[initial_act_laser$initial>=initial_med,]$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
+text(x = 1000, y = -0.4, paste0("Slope = ",model$coefficients[[2]], ", s.e. = ", coef(summary(model))[2,2]))
 
+
+# Plot Flies with Less Initial Activity
 plot(initial_act_laser[initial_act_laser$initial<initial_med,]$Laser_Exposure,
      initial_act_laser[initial_act_laser$initial<initial_med,]$difference, main="Flies Initially Less Active")
 cor(initial_act_laser[initial_act_laser$initial<initial_med,]$Laser_Exposure, 
     initial_act_laser[initial_act_laser$initial<initial_med,]$difference, 
     method = c("pearson"))
 
+model = lm(formula = initial_act_laser[initial_act_laser$initial<initial_med,]$difference ~ 
+             initial_act_laser[initial_act_laser$initial<initial_med,]$Laser_Exposure)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+text(x = 1000, y = -0.4, paste0("Slope = ",model$coefficients[[2]], ", s.e. = ", coef(summary(model))[2,2]))
+
+a = get_learning_index(fly.info.end, all_ofs, 9, "T", "WT")
+b = get_learning_index(fly.info.end, all_ofs, 9, "R", "WT")
+c = get_learning_index(fly.info.end, all_ofs, 9, "N", "WT")
+plot(density(a$Learning), col = "red", ylim = c(0, 6))
+lines(density(b$Learning), col = "blue")
+lines(density(c$Learning), col = "black")

@@ -11,16 +11,16 @@ fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") |
 
 
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
-R1 = R1[complete.cases(R1), ]
+# R1 = R1[complete.cases(R1), ]
 
 R2 = Hit_by_laser("E1R1E1R1", fly.info.movement.R)
-R2 = R2[complete.cases(R2), ]
+# R2 = R2[complete.cases(R2), ]
 
 T1 = Hit_by_laser("E1T1", fly.info.movement.T)
-T1 = T1[complete.cases(T1), ]
+# T1 = T1[complete.cases(T1), ]
 
 T2 = Hit_by_laser( "E1T1E1T1",fly.info.movement.T)
-T2 = T2[complete.cases(T2), ]
+# T2 = T2[complete.cases(T2), ]
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)
