@@ -187,6 +187,12 @@ plot(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R)
 model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
+text(x = 1400, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
+
+text(x = 1400, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
+
+text(x = 1400, y = -0.6, paste0("correlation = ", cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))))
+
 
 
 # Segment R-Control group by initial activity level and regress the activity change to laser exposure
@@ -238,9 +244,16 @@ abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
 text(x = 1000, y = -0.4, paste0("Slope = ",model$coefficients[[2]], ", s.e. = ", coef(summary(model))[2,2]))
 
-a = get_learning_index(fly.info.end, all_ofs, 9, "T", "WT")
-b = get_learning_index(fly.info.end, all_ofs, 9, "R", "WT")
-c = get_learning_index(fly.info.end, all_ofs, 9, "N", "WT")
-plot(density(a$Learning), col = "red", ylim = c(0, 6))
+
+
+
+plot_diff = function(gene){
+pdf(paste0(gene, "_difference_plot.pdf"), width = 8)
+a = get_learning_index(fly.info.end, all_ofs, 9, "T", gene)
+b = get_learning_index(fly.info.end, all_ofs, 9, "R", gene)
+c = get_learning_index(fly.info.end, all_ofs, 9, "N", gene)
+plot(density(a$Learning), col = "red", ylim = c(0, 6), xlim = c(-1, 1), main = gene)
 lines(density(b$Learning), col = "blue")
 lines(density(c$Learning), col = "black")
+dev.off()
+}

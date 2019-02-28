@@ -8,25 +8,70 @@ fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") |
 fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
                                       (fly.info.end$Genotype == "CS")) & 
                                      (fly.info.end$Category == "R") , ]
-
+all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
-# R1 = R1[complete.cases(R1), ]
+R1 = R1[!is.na(R1$Hit_W), ]
+R1$Diff = R1$Hit_W - R1$Hit_P
+R1$ActDiff = NA
+for (i in 1:nrow(R1)){
+  R1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter & all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
+                            all_ofs_WT$Genotype == R1[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1", ]$Percentage.Time.Active -
+               all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter & all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
+                            all_ofs_WT$Genotype == R1[i, ]$Genotype & all_ofs_WT$Session == "E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+}
+plot(R1$Diff, R1$ActDiff, main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
+     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
+     ylab = "Activity Difference")
+
+model = lm(formula = R1$ActDiff ~ R1$Diff)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
+text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
+text(x = -0.3, y = -0.6, paste0("correlation = ", cor(R1$Diff, R1$ActDiff, method = c("pearson"))))
+
+
 
 R2 = Hit_by_laser("E1R1E1R1", fly.info.movement.R)
-# R2 = R2[complete.cases(R2), ]
+R2 = R2[!is.na(R2$Hit_W), ]
+R2$Diff = R2$Hit_W - R2$Hit_P
+a = c()
+R2$ActDiff = NA
+for (i in 1:nrow(R2)){
+  temp = all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & all_ofs_WT$Fly.Number == R2[i, ]$Fly &
+                            all_ofs_WT$Genotype == R2[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
+               all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & all_ofs_WT$Fly.Number == R2[i, ]$Fly & 
+                            all_ofs_WT$Genotype == R2[i, ]$Genotype & all_ofs_WT$Session == "E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+
+  R2[i, ]$ActDiff = temp
+}
+plot(R2$Diff, R2$ActDiff, main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
+     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
+     ylab = "Activity Difference")
+
+A = c(R2$Diff[1:30], R2$Diff[32:144])
+B = c(R2$ActDiff[1:30], R2$ActDiff[32:144])
+model = lm(formula = B ~ A)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
+text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
+
+
+text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
+
+
+
 
 T1 = Hit_by_laser("E1T1", fly.info.movement.T)
 # T1 = T1[complete.cases(T1), ]
-
 T2 = Hit_by_laser( "E1T1E1T1",fly.info.movement.T)
 # T2 = T2[complete.cases(T2), ]
-
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)
 
 Chance_of_being_hit = list(
-  
   T1$`Chances of being hit during walking`,
   T1$`Chances of being hit during pause `,
   R1$`Chances of being hit during walking`,
