@@ -22,6 +22,7 @@ for (i in 2:nrow(ofls)){
 
 laser_T = ofls[ofls$Session=="E1T1E1T1" & ofls$Laser_Count < 45, ]
 laser_R = ofls[ofls$Session=="E1R1E1R1" & ofls$Laser_Count < 45, ]
+laser_R31 = ofls[ofls$Session=="E1R1", ]
 
 # Remember to remove flies that receive more than 45 clicks
 med = median(laser_T$Laser_Exposure)
@@ -182,18 +183,34 @@ for (i in 1:nrow(laser_R)){
 }
 laser_vs_pta = cbind(laser_R, pta_R)
 
+laser_vs_pta31 = data.frame()
+pta_R31 = c()
+for (i in 1:nrow(laser_R31)){
+  temp31 = all_ofs_WT[all_ofs_WT$Experimenter==laser_R31[i, ]$Experimenter & all_ofs_WT$Fly.Number == laser_R31[i, ]$Fly.Number & 
+                        all_ofs_WT$Genotype == laser_R31[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1", ]$Percentage.Time.Active -
+    all_ofs_WT[all_ofs_WT$Experimenter==laser_R31[i, ]$Experimenter & all_ofs_WT$Fly.Number == laser_R31[i, ]$Fly.Number & 
+                 all_ofs_WT$Genotype == laser_R31[i, ]$Genotype & all_ofs_WT$Session == "E1", ]$Percentage.Time.Active 
+  pta_R31 = c(pta_R31, temp31)
+}
+
+laser_vs_pta31 = cbind(laser_R31, pta_R31)
+
 cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))
-plot(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R)
+plot(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, ylim = c(-1, 1))
 model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
 text(x = 1400, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
-
 text(x = 1400, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
-
 text(x = 1400, y = -0.6, paste0("correlation = ", cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))))
 
-
+plot(laser_vs_pta31$Laser_Exposure, laser_vs_pta31$pta_R31, ylim = c(-1, 1))
+model = lm(formula = laser_vs_pta31$pta_R31 ~ laser_vs_pta31$Laser_Exposure)
+abline(model$coefficients[[1]], model$coefficients[[2]])
+coef(summary(model))
+text(x = 500, y = 0.5, paste0("Slope = ",model$coefficients[[2]]))
+text(x = 500, y = 0.6, paste0("s.e. = ", coef(summary(model))[2,2]))
+text(x = 500, y = 0.7, paste0("correlation = ", cor(laser_vs_pta31$Laser_Exposure, laser_vs_pta31$pta_R31, method = c("pearson"))))
 
 # Segment R-Control group by initial activity level and regress the activity change to laser exposure
 
@@ -243,8 +260,6 @@ model = lm(formula = initial_act_laser[initial_act_laser$initial<initial_med,]$d
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
 text(x = 1000, y = -0.4, paste0("Slope = ",model$coefficients[[2]], ", s.e. = ", coef(summary(model))[2,2]))
-
-
 
 
 plot_diff = function(gene){
