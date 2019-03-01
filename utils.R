@@ -1378,8 +1378,33 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
 }
 
 #Plot only the initial and test 2 behavioral data and test only T-R pairs
-plot_single_15 = function(genotype, metric.ind, all_ofs){
+plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
   g_list = genotype
+  if (g_list == "WT"){
+    fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category =="T"), ]
+    fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category == "R") , ]
+    fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category == "N") , ]
+    R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+    T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+    N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+    RT = rbind(R1, T1, N1)
+    RT.include = RT[!is.na(RT$Hit_W), ]
+    RT.exclude = RT[is.na(RT$Hit_W), ]
+    temp = data.frame()
+    for (i in 1:nrow(RT.include)){
+      temp = rbind(temp, 
+                   all_ofs_WT[all_ofs_WT$Fly.Number == RT.include[i, ]$Fly & 
+                                all_ofs_WT$Experimenter==RT.include[i, ]$Experimenter,])
+    }
+    all_ofs = temp
+  }
+  
   pdf(paste0("15_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )

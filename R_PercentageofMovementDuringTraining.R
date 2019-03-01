@@ -10,28 +10,6 @@ fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") |
                                      (fly.info.end$Category == "R") , ]
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 
-# Use_T_find_R = function(fly.info, Tindex){
-#   if (fly.info[Tindex, ]$Category != "T"){
-#     return(c())
-#   }else{
-#     Rlst = c()
-#     setup_T = fly.info[Tindex, ]$Setup
-#     for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
-#       if ((i < 1) | (i > nrow(fly.info))){
-#         next
-#       }
-#       if (fly.info[i, ]$Category == "R" & 
-#           fly.info[i, ]$Genotype == fly.info[Tindex, ]$Genotype &
-#           fly.info[i, ]$Exp.date == fly.info[Tindex, ]$Exp.date &
-#           fly.info[i, ]$Experimenter == fly.info[Tindex, ]$Experimenter & 
-#           fly.info[i, ]$Setup != fly.info[Tindex, ]$Setup){
-#         Rlst = c(Rlst, i)
-#       }
-#     }
-#     return (Rlst)
-#   }
-# }
-
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
 for (i in 1:nrow(fly.info.movement.T)){}
@@ -118,10 +96,14 @@ R2$Diff = R2$Hit_W - R2$Hit_P
 a = c()
 R2$ActDiff = NA
 for (i in 1:nrow(R2)){
-  temp = all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & all_ofs_WT$Fly.Number == R2[i, ]$Fly &
-                            all_ofs_WT$Genotype == R2[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
-               all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & all_ofs_WT$Fly.Number == R2[i, ]$Fly & 
-                            all_ofs_WT$Genotype == R2[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+  temp = all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & 
+                      all_ofs_WT$Fly.Number == R2[i, ]$Fly &
+                      all_ofs_WT$Genotype == R2[i, ]$Genotype & 
+                      all_ofs_WT$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
+               all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & 
+                            all_ofs_WT$Fly.Number == R2[i, ]$Fly & 
+                            all_ofs_WT$Genotype == R2[i, ]$Genotype & 
+                            all_ofs_WT$Session == "E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
 
   R2[i, ]$ActDiff = temp
 }
@@ -152,11 +134,12 @@ for (i in 1:nrow(fly.info.end)){
         experimenter = fly.info.end[Rflies[k], ]$Experimenter
         genotype = fly.info.end[Rflies[k], ]$Genotype
         fly.num = fly.info.end[Rflies[k], ]$Fly
-        diff = R2[R2$Experimenter == experimenter &
+        difference = R2[R2$Experimenter == experimenter &
                     R2$Genotype == genotype &
                     R2$Fly == fly.num, ]$Diff
-        if (length(diff) > 0){
-          if (abs(diff) <= 0.2){
+        print(difference)
+        if (length(difference) > 0 && !is.na(difference)){
+          if (abs(difference) <= 0.2){
             R2_sub = rbind(R2_sub,
                            R2[R2$Experimenter == experimenter &
                                 R2$Genotype == genotype &
@@ -173,9 +156,6 @@ for (i in 1:nrow(fly.info.end)){
 }
 boxplot(T2$ActDiff, R2$ActDiff, T2_sub$ActDiff, R2_sub$ActDiff)
 
-
-
-
 plot(R2$Diff, R2$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
      xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
@@ -190,10 +170,12 @@ text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
 text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
 text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
 
+par(mfrow = c(1,1))
+pdf("ActivityDifference_WT_recent_batch.pdf")
 
-
-
-
+# plot(density(T2$ActDiff), ylim = c(0, 6), col = "red")
+# lines(density(R2$ActDiff), col = "red")
+# lines
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)
