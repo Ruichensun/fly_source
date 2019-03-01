@@ -33,18 +33,40 @@ all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 # }
 
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
+# After 1st training session
 for (i in 1:nrow(fly.info.movement.T)){}
-
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
 R1$Diff = R1$Hit_W - R1$Hit_P
 R1$ActDiff = NA
 for (i in 1:nrow(R1)){
-  R1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter & all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
-                                 all_ofs_WT$Genotype == R1[i, ]$Genotype & all_ofs_WT$Session == "E1R1E1", ]$Percentage.Time.Active -
-    all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter & all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
-                 all_ofs_WT$Genotype == R1[i, ]$Genotype & all_ofs_WT$Session == "E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+  R1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter &
+                               all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
+                               all_ofs_WT$Genotype == R1[i, ]$Genotype & 
+                               all_ofs_WT$Session == "E1R1E1", ]$Percentage.Time.Active -
+                    all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter &
+                               all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
+                               all_ofs_WT$Genotype == R1[i, ]$Genotype & 
+                               all_ofs_WT$Session == "E1" & 
+                               all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
 }
+
+T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+T1 = T1[!is.na(T1$Hit_W), ]
+T1$Diff = T1$Hit_W - T1$Hit_P
+T1$ActDiff = NA
+for (i in 1:nrow(T1)){
+  T1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == T1[i, ]$Experimenter &
+                               all_ofs_WT$Fly.Number == T1[i, ]$Fly &
+                               all_ofs_WT$Genotype == T1[i, ]$Genotype &
+                               all_ofs_WT$Session == "E1T1E1", ]$Percentage.Time.Active -
+                    all_ofs_WT[all_ofs_WT$Experimenter == T1[i, ]$Experimenter &
+                               all_ofs_WT$Fly.Number == T1[i, ]$Fly &
+                               all_ofs_WT$Genotype == T1[i, ]$Genotype &
+                               all_ofs_WT$Session == "E1" &
+                               all_ofs_WT$Type == "T", ]$Percentage.Time.Active
+}
+
 R1_sub = data.frame()
 T1_sub = data.frame()
 for (i in 1:nrow(fly.info.end)){
@@ -64,14 +86,17 @@ for (i in 1:nrow(fly.info.end)){
                             R1[R1$Experimenter == experimenter &
                                R1$Genotype == genotype &
                                R1$Fly == fly.num, ])
-             
+             T1_sub = rbind(T1_sub,
+                            T1[T1$Experimenter == fly.info.end[i, ]$Experimenter &
+                               T1$Genotype == fly.info.end[i, ]$Genotype &
+                               T1$Fly == fly.info.end[i, ]$Fly, ])
            }
          }
       }
     }
   }
 }
-
+boxplot(T1$ActDiff, R1$ActDiff, T1_sub$ActDiff, R1_sub$ActDiff)
 
 plot(R1$Diff, R1$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
@@ -84,6 +109,8 @@ coef(summary(model))
 text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
 text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
 text(x = -0.3, y = -0.6, paste0("correlation = ", cor(R1$Diff, R1$ActDiff, method = c("pearson"))))
+
+# After second training session
 
 R2 = Hit_by_laser("E1R1E1R1", fly.info.movement.R)
 R2 = R2[!is.na(R2$Hit_W), ]
@@ -98,6 +125,57 @@ for (i in 1:nrow(R2)){
 
   R2[i, ]$ActDiff = temp
 }
+
+T2 = Hit_by_laser( "E1T1E1T1",fly.info.movement.T)
+T2 = T2[!is.na(T2$Hit_W), ]
+T2$Diff = T2$Hit_W - T2$Hit_P
+T2$ActDiff = NA
+for (i in 1:nrow(T2)){
+  T2[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == T2[i, ]$Experimenter &
+                               all_ofs_WT$Fly.Number == T2[i, ]$Fly &
+                               all_ofs_WT$Genotype == T2[i, ]$Genotype &
+                               all_ofs_WT$Session == "E1T1E1T1E1", ]$Percentage.Time.Active -
+    all_ofs_WT[all_ofs_WT$Experimenter == T2[i, ]$Experimenter &
+               all_ofs_WT$Fly.Number == T2[i, ]$Fly &
+               all_ofs_WT$Genotype == T2[i, ]$Genotype &
+               all_ofs_WT$Session == "E1" &
+               all_ofs_WT$Type == "T", ]$Percentage.Time.Active
+}
+
+R2_sub = data.frame()
+T2_sub = data.frame()
+for (i in 1:nrow(fly.info.end)){
+  if(fly.info.end[i, ]$Category=="T"){
+    Rflies = Use_T_find_R(fly.info.end, i)
+    if (length(Rlst) > 0){
+      for (k in 1:length(Rflies)){
+        experimenter = fly.info.end[Rflies[k], ]$Experimenter
+        genotype = fly.info.end[Rflies[k], ]$Genotype
+        fly.num = fly.info.end[Rflies[k], ]$Fly
+        diff = R2[R2$Experimenter == experimenter &
+                    R2$Genotype == genotype &
+                    R2$Fly == fly.num, ]$Diff
+        if (length(diff) > 0){
+          if (abs(diff) <= 0.2){
+            R2_sub = rbind(R2_sub,
+                           R2[R2$Experimenter == experimenter &
+                                R2$Genotype == genotype &
+                                R2$Fly == fly.num, ])
+            T2_sub = rbind(T2_sub,
+                           T2[T2$Experimenter == fly.info.end[i, ]$Experimenter &
+                                T2$Genotype == fly.info.end[i, ]$Genotype &
+                                T2$Fly == fly.info.end[i, ]$Fly, ])
+          }
+        }
+      }
+    }
+  }
+}
+boxplot(T2$ActDiff, R2$ActDiff, T2_sub$ActDiff, R2_sub$ActDiff)
+
+
+
+
 plot(R2$Diff, R2$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
      xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
@@ -112,10 +190,7 @@ text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
 text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
 text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
 
-T1 = Hit_by_laser("E1T1", fly.info.movement.T)
-# T1 = T1[complete.cases(T1), ]
-T2 = Hit_by_laser( "E1T1E1T1",fly.info.movement.T)
-# T2 = T2[complete.cases(T2), ]
+
 
 
 

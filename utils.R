@@ -427,7 +427,6 @@ shuffle_is_pause = function(is_pause) {
   }
 }
 
-
 Use_T_find_R = function(fly.info, Tindex){
   if (fly.info[Tindex, ]$Category != "T"){
     return(c())
@@ -945,8 +944,32 @@ plot_all_raw_metrics = function(query.genotype, query.fly, query.experimenter, f
 }
 
 #Plot only the initial and test 2 behavioral data and test all pairwise combinations
-plot_single = function(genotype, metric.ind, all_ofs){
+plot_single = function(genotype, metric.ind, all_ofs, fly.info.end){
   g_list = genotype
+  if (g_list == "WT"){
+    fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                       (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category =="T"), ]
+    fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category == "R") , ]
+    fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "N") , ]
+    R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+    T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+    N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+    RT = rbind(R1, T1, N1)
+    RT.include = RT[!is.na(RT$Hit_W), ]
+    RT.exclude = RT[is.na(RT$Hit_W), ]
+    temp = data.frame()
+    for (i in 1:nrow(RT.include)){
+      temp = rbind(temp, 
+                   all_ofs_WT[all_ofs_WT$Fly.Number == RT.include[i, ]$Fly & 
+                              all_ofs_WT$Experimenter==RT.include[i, ]$Experimenter,])
+    }
+    all_ofs = temp
+  }
   pdf(paste0("Single_", genotype, "_", Sys.Date(), ".pdf"),
       onefile = T, width = 8
   )
@@ -955,7 +978,7 @@ plot_single = function(genotype, metric.ind, all_ofs){
   #Prep data
   num = c()
   for (i in 1:length(g_list)){
-    num = c(num, 
+    num = c(num,
             length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]),
             length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]),
             length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])
@@ -968,24 +991,24 @@ plot_single = function(genotype, metric.ind, all_ofs){
                  rep(paste0("E5_R_", g_list[i]), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind])),
                  rep(paste0("E5_N_", g_list[i]), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]))
                  ),
-      value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+      value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
                            all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
                            all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
-                           all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind], 
+                           all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
                            all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind],
                            all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==g_list[i], ][, metric.ind]
                            )
                          )
       )
     colnames(m) = c("Session", "Value")
-    m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]), 
+    m$Session = factor(m$Session, levels=c(paste0("E1_T_", g_list[i]), paste0("E1_R_",g_list[i]), paste0("E1_N_", g_list[i]),
                                            paste0("E5_T_", g_list[i]), paste0("E5_R_",g_list[i]), paste0("E5_N_", g_list[i])))
     a = test_initial_condition(metric.ind, g_list[i], all_ofs)
     b = test_after_training(metric.ind, g_list[i], all_ofs)
-    
     comp = test_all(metric.ind, g_list[i], all_ofs)
     # p = c(p, a$P.adjusted, b$P.adjusted)
     p = c(comp$P.adjusted)
+    
     metric.df = rbind(metric.df, m)
   }                           
   
@@ -1280,7 +1303,6 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
   y_base_TN = y_top_base - 5.6 * vertical_gap
   y_base_TR = y_top_base
   
-  
   for (i in 1:length(p)){
     if (p[i] >= 0.05){
       significance = "n.s."
@@ -1294,16 +1316,13 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
       significance = "****"
     }
     if (i%%3==0){
-      
       text(((i - 2) + (i - 1))/2, y_base_TR + vertical_gap, significance, xpd = NA)
       lines(c(i - 2, i - 1), 
             c(y_base_TR,  y_base_TR), 
             xpd = NA)
       lines(c(i - 1, i - 1), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
       lines(c(i - 2, i - 2), c(y_base_TR, y_base_TR - v_gap), xpd = NA)
-   
     }
-    
   }
   
   text(x = seq(0.85, length(num) * 2, by = 6),
@@ -1939,7 +1958,6 @@ get_learning_index_normalized = function(fly.info.end, all_ofs, g_list){
                                    all_ofs$Experimenter == fly.info.temp[Rlst[k],]$Experimenter &
                                    all_ofs$Session == "E1" &
                                    all_ofs$Type == "R", ]$Percentage.Time.Active)
-                                    
             E5_R = c(E5_R, all_ofs[all_ofs$Fly.Number == fly.info.temp[Rlst[k],]$Fly &
                                      all_ofs$Genotype == fly.info.temp[Rlst[k],]$Genotype &
                                      all_ofs$Experimenter == fly.info.temp[Rlst[k],]$Experimenter &
@@ -1962,7 +1980,6 @@ get_learning_index_normalized = function(fly.info.end, all_ofs, g_list){
           # LI_T = (E1_T - E5_T) / E1_T
           learning_index5 = E5_R - E5_T
           learning_index1 = E1_R - E1_T
-          
           # learn_index = ((E1_T - E5_T)/E1_T - (E1_R - E5_R)/E1_R)
           # learn_index = LI_T - LI_R
           # learn_index = (E1_T - E5_T) / E1_T

@@ -34,35 +34,35 @@ R_med_bel = laser_R[laser_R$Laser_Exposure < med, ]
 # Get fly activity for the two groups
 T_abv_test = subset(all_ofs_WT, 
                     ((all_ofs_WT$Experimenter=="ES") & 
-                       (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="ES",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="RS") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="RS",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="JD") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="JD",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="SW") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="SW",]$Fly.Number))
+                      (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="ES",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="RS") & 
+                      (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="RS",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="JD") & 
+                      (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="JD",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="SW") & 
+                      (all_ofs_WT$Fly.Number %in% T_med_abv[T_med_abv$Experimenter=="SW",]$Fly.Number))
 )
 
 T_bel_test = subset(all_ofs_WT, 
                     ((all_ofs_WT$Experimenter=="ES") & 
                        (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="ES",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="RS") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="RS",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="JD") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="JD",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="SW") & 
-                         (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="SW",]$Fly.Number))
+                    ((all_ofs_WT$Experimenter=="RS") & 
+                       (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="RS",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="JD") & 
+                       (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="JD",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="SW") & 
+                       (all_ofs_WT$Fly.Number %in% T_med_bel[T_med_bel$Experimenter=="SW",]$Fly.Number))
 )
 
 R_abv_test = subset(all_ofs_WT, 
                     ((all_ofs_WT$Experimenter=="ES") & 
                        (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="ES",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="RS") & 
-                         (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="RS",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="JD") & 
-                         (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="JD",]$Fly.Number))|
-                      ((all_ofs_WT$Experimenter=="SW") & 
-                         (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="SW",]$Fly.Number))
+                    ((all_ofs_WT$Experimenter=="RS") & 
+                       (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="RS",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="JD") & 
+                       (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="JD",]$Fly.Number))|
+                    ((all_ofs_WT$Experimenter=="SW") & 
+                       (all_ofs_WT$Fly.Number %in% R_med_abv[R_med_abv$Experimenter=="SW",]$Fly.Number))
 )
 
 R_bel_test = subset(all_ofs_WT, 
@@ -122,16 +122,24 @@ stripchart(
 R_bel_diff = c()
 
 for (i in 1:nrow(R_med_bel)){
-  temp = R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number & R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter & R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
-    R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number & R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter & R_bel_test$Session=="E1", ]$Percentage.Time.Active
+  temp = R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number &
+                    R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter &
+                    R_bel_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
+         R_bel_test[R_bel_test$Fly.Number==R_med_bel[i,]$Fly.Number & 
+                    R_bel_test$Experimenter == R_med_bel[i, ]$Experimenter & 
+                    R_bel_test$Session=="E1", ]$Percentage.Time.Active
   R_bel_diff = c(R_bel_diff, temp)
   }
 
 R_abv_diff = c()
 
 for (i in 1:nrow(R_med_abv)){
-  temp = R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number & R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter & R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
-    R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number & R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter & R_abv_test$Session=="E1", ]$Percentage.Time.Active
+  temp = R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number &
+                    R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter &
+                    R_abv_test$Session=="E1R1E1R1E1", ]$Percentage.Time.Active -
+         R_abv_test[R_abv_test$Fly.Number==R_med_abv[i,]$Fly.Number &
+                    R_abv_test$Experimenter == R_med_abv[i, ]$Experimenter &
+                    R_abv_test$Session=="E1", ]$Percentage.Time.Active
   R_abv_diff = c(R_abv_diff, temp)
 }
 
