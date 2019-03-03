@@ -269,14 +269,3 @@ abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
 text(x = 1000, y = -0.4, paste0("Slope = ",model$coefficients[[2]], ", s.e. = ", coef(summary(model))[2,2]))
 
-
-plot_diff = function(gene){
-pdf(paste0(gene, "_difference_plot.pdf"), width = 8)
-a = get_learning_index(fly.info.end, all_ofs, 9, "T", gene)
-b = get_learning_index(fly.info.end, all_ofs, 9, "R", gene)
-c = get_learning_index(fly.info.end, all_ofs, 9, "N", gene)
-plot(density(a$Learning), col = "red", ylim = c(0, 6), xlim = c(-1, 1), main = gene)
-lines(density(b$Learning), col = "blue")
-lines(density(c$Learning), col = "black")
-dev.off()
-}
