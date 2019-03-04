@@ -12,7 +12,6 @@ all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
-for (i in 1:nrow(fly.info.movement.T)){}
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
 R1$Diff = R1$Hit_W - R1$Hit_P
@@ -45,36 +44,11 @@ for (i in 1:nrow(T1)){
                                all_ofs_WT$Type == "T", ]$Percentage.Time.Active
 }
 
-R1_sub = data.frame()
-T1_sub = data.frame()
-for (i in 1:nrow(fly.info.end)){
-  if(fly.info.end[i, ]$Category=="T"){
-    Rflies = Use_T_find_R(fly.info.end, i)
-    if (length(Rlst) > 0){
-      for (k in 1:length(Rflies)){
-         experimenter = fly.info.end[Rflies[k], ]$Experimenter
-         genotype = fly.info.end[Rflies[k], ]$Genotype
-         fly.num = fly.info.end[Rflies[k], ]$Fly
-         diff = R1[R1$Experimenter == experimenter &
-                   R1$Genotype == genotype &
-                   R1$Fly == fly.num, ]$Diff 
-         if (length(diff) > 0){
-           if (abs(diff) <= 0.2){
-             R1_sub = rbind(R1_sub, 
-                            R1[R1$Experimenter == experimenter &
-                               R1$Genotype == genotype &
-                               R1$Fly == fly.num, ])
-             T1_sub = rbind(T1_sub,
-                            T1[T1$Experimenter == fly.info.end[i, ]$Experimenter &
-                               T1$Genotype == fly.info.end[i, ]$Genotype &
-                               T1$Fly == fly.info.end[i, ]$Fly, ])
-           }
-         }
-      }
-    }
-  }
-}
-boxplot(T1$ActDiff, R1$ActDiff, T1_sub$ActDiff, R1_sub$ActDiff)
+RT_val = subset_laser_expo(fly.info.end, Random = R1, Training = T1, threshold = 0.2)
+
+boxplot(T1$ActDiff, R1$ActDiff, 
+        RT_val[RT_val$Category=="T", ]$ActDiff, 
+        RT_val[RT_val$Category=="R", ]$ActDiff)
 
 plot(R1$Diff, R1$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
@@ -103,7 +77,7 @@ for (i in 1:nrow(R2)){
                all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & 
                             all_ofs_WT$Fly.Number == R2[i, ]$Fly & 
                             all_ofs_WT$Genotype == R2[i, ]$Genotype & 
-                            all_ofs_WT$Session == "E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+                            all_ofs_WT$Session == "E1R1E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
 
   R2[i, ]$ActDiff = temp
 }
@@ -120,41 +94,15 @@ for (i in 1:nrow(T2)){
     all_ofs_WT[all_ofs_WT$Experimenter == T2[i, ]$Experimenter &
                all_ofs_WT$Fly.Number == T2[i, ]$Fly &
                all_ofs_WT$Genotype == T2[i, ]$Genotype &
-               all_ofs_WT$Session == "E1" &
+               all_ofs_WT$Session == "E1T1E1" &
                all_ofs_WT$Type == "T", ]$Percentage.Time.Active
 }
 
-R2_sub = data.frame()
-T2_sub = data.frame()
-for (i in 1:nrow(fly.info.end)){
-  if(fly.info.end[i, ]$Category=="T"){
-    Rflies = Use_T_find_R(fly.info.end, i)
-    if (length(Rlst) > 0){
-      for (k in 1:length(Rflies)){
-        experimenter = fly.info.end[Rflies[k], ]$Experimenter
-        genotype = fly.info.end[Rflies[k], ]$Genotype
-        fly.num = fly.info.end[Rflies[k], ]$Fly
-        difference = R2[R2$Experimenter == experimenter &
-                    R2$Genotype == genotype &
-                    R2$Fly == fly.num, ]$Diff
-        print(difference)
-        if (length(difference) > 0 && !is.na(difference)){
-          if (abs(difference) <= 0.2){
-            R2_sub = rbind(R2_sub,
-                           R2[R2$Experimenter == experimenter &
-                                R2$Genotype == genotype &
-                                R2$Fly == fly.num, ])
-            T2_sub = rbind(T2_sub,
-                           T2[T2$Experimenter == fly.info.end[i, ]$Experimenter &
-                                T2$Genotype == fly.info.end[i, ]$Genotype &
-                                T2$Fly == fly.info.end[i, ]$Fly, ])
-          }
-        }
-      }
-    }
-  }
-}
-boxplot(T2$ActDiff, R2$ActDiff, T2_sub$ActDiff, R2_sub$ActDiff)
+RT2_val = subset_laser_expo(fly.info.end, Random = R2, Training = T2, threshold = 0.2)
+
+boxplot(T2$ActDiff, R2$ActDiff, 
+        RT2_val[RT2_val$Category=="T", ]$ActDiff, 
+        RT2_val[RT2_val$Category=="R", ]$ActDiff)
 
 plot(R2$Diff, R2$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
@@ -169,13 +117,6 @@ coef(summary(model))
 text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
 text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
 text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
-
-par(mfrow = c(1,1))
-pdf("ActivityDifference_WT_recent_batch.pdf")
-
-# plot(density(T2$ActDiff), ylim = c(0, 6), col = "red")
-# lines(density(R2$ActDiff), col = "red")
-# lines
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)

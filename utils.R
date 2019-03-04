@@ -521,7 +521,6 @@ checking_fly_numbers = function(fly.info, filter, filename){
   write.csv(mutant_info, file = filename , row.names = FALSE)
 }
 
-
 pass_fly_QC = function(input_file,
                         framerate = 50,
                         speed_max_thres = 50,
@@ -715,6 +714,40 @@ one_fly_laser_statistics = function(input_file, framerate){
       "Laser_Exposure")
     return(ret)
   }
+}
+
+subset_laser_expo = function(fly.info.end, Random, Training, threshold = 0.2){
+  R_sub = data.frame()
+  T_sub = data.frame()
+  for (i in 1:nrow(fly.info.end)){
+    if(fly.info.end[i, ]$Category=="T"){
+      Rflies = Use_T_find_R(fly.info.end, i)
+      if (length(Rflies) > 0){
+        for (k in 1:length(Rflies)){
+          experimenter = fly.info.end[Rflies[k], ]$Experimenter
+          genotype = fly.info.end[Rflies[k], ]$Genotype
+          fly.num = fly.info.end[Rflies[k], ]$Fly
+          DIFF = Random[Random$Experimenter == experimenter &
+                        Random$Genotype == genotype &
+                        Random$Fly == fly.num, ]$Diff 
+          if (length(DIFF) > 0 && !is.na(DIFF)){
+            if (abs(DIFF) <= threshold){
+              R_sub = rbind(R_sub, 
+                            Random[Random$Experimenter == experimenter &
+                                   Random$Genotype == genotype &
+                                   Random$Fly == fly.num, ])
+              T_sub = rbind(T_sub,
+                            Training[Training$Experimenter == fly.info.end[i, ]$Experimenter &
+                                     Training$Genotype == fly.info.end[i, ]$Genotype &
+                                     Training$Fly == fly.info.end[i, ]$Fly, ])
+            }
+          }
+        }
+      }
+    }
+  }
+  return_Val = rbind(R_sub, T_sub)
+  return(return_Val)
 }
 
 Delay_of_Laser_On_Off = function(input_file){
@@ -2383,7 +2416,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
 }
 
 # Plot learning index (difference between Test 2 and Pre-test)
-plot_diff = function(gene){
+plot_diff = function(gene, fly.info.end, all_ofs){
   pdf(paste0(gene, "_difference_plot.pdf"), width = 8)
   a = get_learning_index(fly.info.end, all_ofs, 9, "T", gene)
   b = get_learning_index(fly.info.end, all_ofs, 9, "R", gene)
