@@ -10,6 +10,13 @@ fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") |
                                      (fly.info.end$Category == "R") , ]
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 
+
+fly.info.movement.T = fly.info.end[(fly.info.end$Genotype == "SUN3") & 
+                                     (fly.info.end$Category =="T"), ]
+fly.info.movement.R = fly.info.end[(fly.info.end$Genotype == "SUN3") & 
+                                     (fly.info.end$Category =="R"), ]
+all_ofs_WT = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
+
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
@@ -46,11 +53,18 @@ for (i in 1:nrow(T1)){
 
 RT_val = subset_laser_expo(fly.info.end, Random = R1, Training = T1, threshold = 0.2)
 
-boxplot(T1$ActDiff, R1$ActDiff, 
-        RT_val[RT_val$Category=="T", ]$ActDiff, 
-        RT_val[RT_val$Category=="R", ]$ActDiff)
+boxplot(T1$ActDiff, R1$ActDiff)
+        # RT_val[RT_val$Category=="T", ]$ActDiff, 
+        # RT_val[RT_val$Category=="R", ]$ActDiff)
 
 plot(R1$Diff, R1$ActDiff, 
+     main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
+     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1))
+points(T1$Diff, T1$ActDiff, col = "red")
+
+plot(rbind(R1$Diff, T1$Diff), rbind(R1$ActDiff, T1$ActDiff), 
      main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
      xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
      ylab = "Activity Difference")
@@ -106,17 +120,22 @@ boxplot(T2$ActDiff, R2$ActDiff,
 
 plot(R2$Diff, R2$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
-     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
-     ylab = "Activity Difference")
+     xlab = "Exposure Differential: Probability of Exposure during Walking - Probability of Exposure during Pause",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1))
+
+points(T2$Diff, T2$ActDiff, col = "red")
 
 A = c(R2$Diff[1:30], R2$Diff[32:144])
 B = c(R2$ActDiff[1:30], R2$ActDiff[32:144])
-model = lm(formula = B ~ A)
+model = lm(formula = R2$ActDiff ~ R2$Diff)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
 text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
 text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
-text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
+# text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
+text(x = -0.3, y = -0.6, paste0("correlation = ", cor(R2$Diff, R2$ActDiff, method = c("pearson"))))
+
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
     onefile = T, width = 5, height = 5)

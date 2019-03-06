@@ -871,15 +871,22 @@ Hit_by_laser = function(file_name_filter, fly.info.movement) {
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
-    }
-    if(fly.info.movement$Genotype[ind]=="CS"){
+    }else if(fly.info.movement$Genotype[ind]=="CS"){
       input.file = list.files(
         path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
+    }else{
+      input.file = list.files(
+      path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
+      pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter,"_", fly.info.movement[ind,]$Genotype, ".csv"),
+      full.names = T)
+      if(length(input.file)==0){next()}
+      print(input.file)
     }
     laser_profile = chance_of_being_hit_by_laser(input.file)
+    print(laser_profile)
     temp = cbind(fly.info.movement[ind, ], laser_profile[1], laser_profile[2], laser_profile[3])
     laser_chance = rbind(laser_chance, temp)
   }
@@ -1765,6 +1772,7 @@ plot_single = function(genotype, metric.ind, all_ofs, fly.info.end){
       onefile = T, width = 8
   )
   p = c()
+  num = c()
   metric.df = data.frame()
   #Prep data
   if (g_list == "WT"){
@@ -1972,6 +1980,7 @@ plot_single = function(genotype, metric.ind, all_ofs, fly.info.end){
   }
   
   dev.off()
+  return(p)
 }
 
 # Plot multiple relevant genotypes' data together
@@ -2418,9 +2427,37 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
 # Plot learning index (difference between Test 2 and Pre-test)
 plot_diff = function(gene, fly.info.end, all_ofs){
   pdf(paste0(gene, "_difference_plot.pdf"), width = 8)
+  if (gene == "WT"){
+    all_ofs = all_ofs[all_ofs$Genotype == "WT" | all_ofs$Genotype == "CS", ]
+    fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category =="T"), ]
+    fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category == "R") , ]
+    fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                          (fly.info.end$Genotype == "CS")) & 
+                                         (fly.info.end$Category == "N") , ]
+    R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+    T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+    N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+    RT = rbind(R1, T1, N1)
+    RT.include = RT[!is.na(RT$Hit_W), ]
+    RT.exclude = RT[is.na(RT$Hit_W), ]
+    temp = data.frame()
+    for (i in 1:nrow(RT.include)){
+      temp = rbind(temp, 
+                   all_ofs[all_ofs$Fly.Number == RT.include[i, ]$Fly & 
+                             all_ofs$Experimenter==RT.include[i, ]$Experimenter &
+                             all_ofs$Genotype == RT.include[i, ]$Genotype, ])
+    }
+    all_ofs = temp
+  }
+  
   a = get_learning_index(fly.info.end, all_ofs, 9, "T", gene)
   b = get_learning_index(fly.info.end, all_ofs, 9, "R", gene)
   c = get_learning_index(fly.info.end, all_ofs, 9, "N", gene)
+  print(t.test(a$Learning, b$Learning))
   plot(density(a$Learning), col = "red", ylim = c(0, 6), xlim = c(-1, 1), main = gene)
   lines(density(b$Learning), col = "blue")
   lines(density(c$Learning), col = "black")
