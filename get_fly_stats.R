@@ -128,8 +128,8 @@ for(ind in 1:nrow(fly.info)){
   }
 }
 
-write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
-all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+# write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+# all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
 
 write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
