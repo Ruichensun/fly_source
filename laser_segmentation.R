@@ -3,7 +3,7 @@ source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils
 
 # Segmenting WT flies into long-exposure group and short-exposure group 
 
-# Load  training data and test data
+# Load training data and test data
 all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 

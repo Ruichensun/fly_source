@@ -70,6 +70,10 @@ for(ind in 1:nrow(fly.info)){
   }
 }
 
+write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
+print("Done-WT")
+
 ## Mutants
 all_ofs_mutants = data.frame()
 fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
@@ -94,6 +98,10 @@ for(ind in 1:nrow(fly.info.mutant)){
       }
   }
 }
+
+write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
+print("Done-Mutants")
 
 # laser segmentation
 all_ofls_WT = data.frame()
@@ -128,14 +136,9 @@ for(ind in 1:nrow(fly.info)){
   }
 }
 
-# write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
-# all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
-
-write.table(all_ofs_WT, file = "all_ofs_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
-all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
-
-write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
-all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
+write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+print("Done - laser")
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 

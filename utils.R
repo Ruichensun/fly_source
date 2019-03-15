@@ -1,4 +1,3 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 library(zoo)
 library(boot)
 library(dunn.test)
@@ -831,15 +830,19 @@ chance_of_being_hit_by_laser = function(input_file){
     fly.position = fly.position.raw[starting_point:length(fly.position.raw)]
     fly.laser.status = fly.laser.raw[starting_point:length(fly.laser.raw)]
     fly.moving.status = fly.moving.status.raw[(starting_point-1):length(fly.moving.status.raw)]
-    for (i in 1:length(fly.moving.status)){
-      if (fly.position[i] < 60){
-        fly.moving.status[i] = 1
-      }
-      if (fly.position[i] > 708){
-        fly.moving.status[i] = 1
+    if (sum(fly.position.raw)==0){
+      fly.moving.status = rep(0, length(fly.moving.status))
+  
+    }else{
+      for (i in 1:length(fly.moving.status)){
+        if (fly.position[i] < 60){
+          fly.moving.status[i] = 1
+        }
+        if (fly.position[i] > 708){
+          fly.moving.status[i] = 1
+        }
       }
     }
-    
     moving_status_summary = rle(fly.moving.status)
     
     total_frame_moving = sum(moving_status_summary$lengths[moving_status_summary$values!=0])
@@ -851,10 +854,15 @@ chance_of_being_hit_by_laser = function(input_file){
     moving_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==1])
     pause_laser_ON = sum(moving_status_during_laser_ON$lengths[moving_status_during_laser_ON$values==0])
     
-    chance_of_being_hit_by_laser_during_moving = moving_laser_ON/total_frame_moving
-    chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
-    laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
-    
+    if (total_frame_moving == 0){
+      chance_of_being_hit_by_laser_during_moving = 0
+      chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
+      laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
+    }else{
+      chance_of_being_hit_by_laser_during_moving = moving_laser_ON/total_frame_moving
+      chance_of_being_hit_by_laser_during_pause = pause_laser_ON/total_frame_pause
+      laser_on_percentage = length(moving_laser_status.df$fly.moving.status[moving_laser_status.df$fly.laser.status!=0])/length(fly.moving.status)
+    }
     return(c(chance_of_being_hit_by_laser_during_moving,
              chance_of_being_hit_by_laser_during_pause,
              laser_on_percentage))
@@ -2212,7 +2220,7 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
 }
 
 # Plot only the initial and test 2 behavioral data and test only T-R pairs
-plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
+plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
   if (genotype == "WT"){
     all_ofs = all_ofs[all_ofs$Genotype == "WT" | all_ofs$Genotype == "CS", ]
     fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
@@ -2240,14 +2248,116 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
     all_ofs = temp
   }
   
-  pdf(paste0("15_", genotype, "_", metric.ind, "_", Sys.Date(), ".pdf"),
-      width = 6
-  )
+  pdf(paste0("15_", genotype, "_", metric.ind, "_", Sys.Date(), ".pdf"), width = 8)
   p = c()
   metric.df = data.frame()
   
   #Prep data
   num = c()
+  if (noN == T){
+    if (genotype == "WT"){
+      num = c(num, 
+              length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind]),
+              length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind])
+      )
+      m1 = data.frame(
+        factor = c(rep("E1_T_WT", length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind])),
+                   rep("E1_R_WT", length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind]))
+        ),
+        value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" , ][, metric.ind], 
+                             all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" , ][, metric.ind]
+        )
+        )
+      )
+      colnames(m1) = c("Session", "Value")
+      m1$Session = factor(m1$Session, levels=c("E1_T_WT", "E1_R_WT"))
+      
+      result = wilcox.test(Value~Session, data = m1)
+      
+      if (result$p.value >= 0.05){
+          significance1 = "n.s."
+        }else if (result$p.value < 0.05 & result$p.value >= 0.01){
+          significance1 = "*"
+        }else if (result$p.value < 0.01 & result$p.value >= 0.001){
+          significance1 = "**"
+        }else if (result$p.value < 0.001 & result$p.value >= 0.0001){
+          significance1 = "***"
+        }else if (result$p.value < 0.0001){
+          significance1 = "****"
+        }
+      m2 = data.frame(
+        factor = c(rep("E5_T_WT", length(all_ofs[all_ofs$Session=="E1T1E1T1E1", ][, metric.ind])),
+                   rep("E5_R_WT", length(all_ofs[all_ofs$Session=="E1R1E1R1E1", ][, metric.ind]))
+        ),
+        value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" , ][, metric.ind],
+                             all_ofs[all_ofs$Session=="E1R1E1R1E1" , ][, metric.ind]
+        ))
+      )
+      colnames(m2) = c("Session", "Value")
+      m2$Session = factor(m2$Session, levels=c("E5_T_WT", "E5_R_WT"))
+      result2 = wilcox.test(Value~Session, data = m2)
+      if (result2$p.value >= 0.05){
+        significance2 = "n.s."
+      }else if (result2$p.value < 0.05 & result2$p.value >= 0.01){
+        significance2 = "*"
+      }else if (result2$p.value < 0.01 & result2$p.value >= 0.001){
+        significance2 = "**"
+      }else if (result2$p.value < 0.001 & result2$p.value >= 0.0001){
+        significance2 = "***"
+      }else if (result2$p.value < 0.0001){
+        significance2 = "****"
+      }
+      
+    }else{
+      num = c(length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]),
+              length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+      m1 = data.frame(
+        factor = c(rep(paste0("E1_T_", genotype), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E1_R_", genotype), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+        ),
+        value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind], 
+                             all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        ))
+      )
+      colnames(m1) = c("Session", "Value")
+      m1$Session = factor(m1$Session, levels=c(paste0("E1_T_", genotype), paste0("E1_R_",genotype))
+      )
+      result = wilcox.test(Value~Session, data = m1)
+      if (result$p.value >= 0.05){
+        significance1 = "n.s."
+      }else if (result$p.value < 0.05 & result$p.value >= 0.01){
+        significance1 = "*"
+      }else if (result$p.value < 0.01 & result$p.value >= 0.001){
+        significance1 = "**"
+      }else if (result$p.value < 0.001 & result$p.value >= 0.0001){
+        significance1 = "***"
+      }else if (result$p.value < 0.0001){
+        significance1 = "****"
+      }
+      m2 = data.frame(
+        factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E5_R_", genotype), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+                   ),
+        value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind],
+                             all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        ))
+      )
+      colnames(m2) = c("Session", "Value")
+      m2$Session = factor(m2$Session, levels=c(paste0("E5_T_", genotype), paste0("E5_R_",genotype)))
+      result2 = wilcox.test(Value~Session, data = m2)
+      if (result2$p.value >= 0.05){
+        significance2 = "n.s."
+      }else if (result2$p.value < 0.05 & result2$p.value >= 0.01){
+        significance2 = "*"
+      }else if (result2$p.value < 0.01 & result2$p.value >= 0.001){
+        significance2 = "**"
+      }else if (result2$p.value < 0.001 & result2$p.value >= 0.0001){
+        significance2 = "***"
+      }else if (result2$p.value < 0.0001){
+        significance2 = "****"
+      }
+    }
+  }else{
   if (genotype == "WT"){
     num = c(num, 
             length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind]),
@@ -2269,6 +2379,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
     m1$Session = factor(m1$Session, levels=c("E1_T_WT", "E1_R_WT", "E1_N_WT"))
     
     result = kruskal.test(Value~Session, data = m1)
+    print(result)
     if (result$p.value < 0.05){
       print("Difference")
       pairwise_result = pairwise.wilcox.test(m1$Value, m1$Session, p.adjust.method = "BH")
@@ -2288,7 +2399,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
         }}
     }else{
       significance1 = c(rep("n.s.", 3))
-      print("There is no significant difference between groups")
+      print(paste0(result$p.value, "_There is no significant difference between groups"))
     }
     
     m2 = data.frame(
@@ -2305,6 +2416,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
     colnames(m2) = c("Session", "Value")
     m2$Session = factor(m2$Session, levels=c("E5_T_WT", "E5_R_WT", "E5_N_WT"))
     result2 = kruskal.test(Value~Session, data = m2)
+    print(result2)
     if (result2$p.value < 0.05){
       print("Difference")
       pairwise_result2 = pairwise.wilcox.test(m2$Value, m2$Session, p.adjust.method = "BH")
@@ -2324,7 +2436,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
         }}
     }else{
       significance2 = c(rep("n.s.", 3))
-      print("There is no significant difference between groups")
+      print(paste0(result2$p.value, "_There is no significant difference between groups"))
     }
     
   }else{
@@ -2346,6 +2458,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
       m1$Session = factor(m1$Session, levels=c(paste0("E1_T_", genotype), paste0("E1_R_",genotype), paste0("E1_N_", genotype))
                           )
       result = kruskal.test(Value~Session, data = m1)
+      print(result)
       if (result$p.value < 0.05){
         print("Difference")
         pairwise_result = pairwise.wilcox.test(m1$Value, m1$Session, p.adjust.method = "BH")
@@ -2380,6 +2493,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
       colnames(m2) = c("Session", "Value")
       m2$Session = factor(m2$Session, levels=c(paste0("E5_T_", genotype), paste0("E5_R_",genotype), paste0("E5_N_", genotype)))
       result2 = kruskal.test(Value~Session, data = m2)
+      print(result2)
       if (result2$p.value < 0.05){
         print("Difference")
         pairwise_result2 = pairwise.wilcox.test(m2$Value, m2$Session, p.adjust.method = "BH")
@@ -2402,216 +2516,308 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end){
         print("There is no significant difference between groups")
       }
     }                        
+  }
+  
   yrange = c(0, 1)
   y_text = 1.1
   
   metric.df = rbind(m1, m2)
   
-  col.pool = rep(c("indianred3", "light blue", "grey80"), 2)
-  
-  boxplot(
-    Value ~ Session,
-    data = metric.df,
-    ylim = yrange,
-    outline = F,
-    notch = F,
-    lwd = 1,
-    ylab = "",
-    xlab = "",
-    medlwd = 1,
-    xaxt = "n",
-    axes=F
-  )
-  axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
-  
-  text(2.0,
-       -0.02,
-       "Before",
-       cex = 1.5)
-       
-  text(5.0,
-       -0.02,
-       "After",
-       cex = 1.5)
-  stripchart(
-    Value ~ Session,
-    vertical = TRUE,
-    data = metric.df,
-    method = "jitter",
-    add = TRUE,
-    pch = 15,
-    cex = 0.5,
-    col =  col.pool
-  )
-  y_top_base = 1
-  vertical_gap = 0.01
-  v_gap = 0.02
-  y_base_RN = y_top_base - 2.0 * vertical_gap
-  y_base_TN = y_top_base - 6.0 * vertical_gap
-  y_base_TR = y_top_base
-  
-  if (result$p.value >= 0.05){
-    lines(c(1,3), 
-          c(y_base_RN, y_base_RN),
-          xpd = NA)
-    lines(c(1,1), c(y_base_RN, y_base_RN - vertical_gap))
-    lines(c(2,2), c(y_base_RN, y_base_RN - vertical_gap))
-    lines(c(3,3), c(y_base_RN, y_base_RN - vertical_gap))
+  if (noN == T){
+    col.pool = rep(c("indianred3", "light blue"), 2)
+    boxplot(
+      Value ~ Session,
+      data = metric.df,
+      ylim = yrange,
+      outline = F,
+      notch = F,
+      lwd = 1,
+      ylab = "",
+      xlab = "",
+      medlwd = 1,
+      xaxt = "n",
+      axes=F
+    )
+    axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
     
-    text(2, 
-         y_base_RN + v_gap, 
-         significance1[1], 
-         xpd = NA,
+    text(1.5,
+         -0.02,
+         "Before",
          cex = 1.5)
-  }else{
-    if (any(significance1 != "n.s.")){
-      # T - R
-      lines(c(1, 2),
-            c(y_base_TR, y_base_TR),
-            xpd = NA)
-      lines(c(1, 1), c(y_base_TR, y_base_TR - vertical_gap))
-      lines(c(2, 2), c(y_base_TR, y_base_TR - vertical_gap))
-      text(1.5,
-           y_base_TR + v_gap,
-           significance1[1],
-           xpd = NA,
-           cex = 1.5
-      )
-      # T - N
-      lines(c(1, 3),
-            c(y_base_TN, y_base_TN),
-            xpd = NA)
-      lines(c(1, 1), c(y_base_TN, y_base_TN - vertical_gap))
-      lines(c(3, 3), c(y_base_TN, y_base_TN - vertical_gap))
-      text(2,
-           y_base_TN + v_gap,
-           significance1[2],
-           xpd = NA,
-           cex = 1.5
-      )
-      # R - N
-      lines(c(2, 3),
-            c(y_base_RN, y_base_RN),
-            xpd = NA)
-      lines(c(2, 2), c(y_base_RN, y_base_RN - vertical_gap))
-      lines(c(3, 3), c(y_base_RN, y_base_RN - vertical_gap))
-      text(2.5,
-           y_base_RN + v_gap,
-           significance1[3],
-           xpd = NA,
-           cex = 1.5)
-    }else{
-      lines(c(1,3), 
+    
+    text(3.5,
+         -0.02,
+         "After",
+         cex = 1.5)
+    stripchart(
+      Value ~ Session,
+      vertical = TRUE,
+      data = metric.df,
+      method = "jitter",
+      add = TRUE,
+      pch = 15,
+      cex = 0.5,
+      col =  col.pool
+    )
+    y_top_base = 1
+    vertical_gap = 0.01
+    v_gap = 0.02
+    y_base_RN = y_top_base - 2.0 * vertical_gap
+    y_base_TN = y_top_base - 6.0 * vertical_gap
+    y_base_TR = y_top_base
+    
+    if (result$p.value >= 0.05){
+      lines(c(1,2), 
             c(y_base_RN, y_base_RN),
             xpd = NA)
       lines(c(1,1), c(y_base_RN, y_base_RN - vertical_gap))
       lines(c(2,2), c(y_base_RN, y_base_RN - vertical_gap))
-      lines(c(3,3), c(y_base_RN, y_base_RN - vertical_gap))
-      
-      text(2, 
+      text(1.5, 
            y_base_RN + v_gap, 
            significance1[1], 
            xpd = NA,
-           cex = 1.5) 
-    }
-  }
-  
-  if (result2$p.value >= 0.05){
-    lines(c(4,6), 
-          c(y_base_RN, y_base_RN),
-          xpd = NA)
-    text(5, 
-         y_top_base + v_gap, 
-         significance2[1], 
-         xpd = NA,
-         cex = 1.5)
-    lines(c(4, 4), c(y_base_RN, y_base_RN - vertical_gap))
-    lines(c(5, 5), c(y_base_RN, y_base_RN - vertical_gap))
-    lines(c(6, 6), c(y_base_RN, y_base_RN - vertical_gap))
-  }else{
-    
-    if (any(significance2 != "n.s.")){
-    # T - R
-    lines(c(4, 5),
-          c(y_base_TR, y_base_TR),
-          xpd = NA)
-    lines(c(4, 4), c(y_base_TR, y_base_TR - vertical_gap))
-    lines(c(5, 5), c(y_base_TR, y_base_TR - vertical_gap))
-    
-    text(4.5,
-         y_base_TR + v_gap,
-         significance2[1],
-         xpd = NA,
-         cex = 1.5
-    )
-    # T - N
-    lines(c(4, 6),
-          c(y_base_TN, y_base_TN),
-          xpd = NA)
-    lines(c(4, 4), c(y_base_TN, y_base_TN - vertical_gap))
-    lines(c(6, 6), c(y_base_TN, y_base_TN - vertical_gap))
-    
-    text(5,
-         y_base_TN + v_gap,
-         significance2[2],
-         xpd = NA,
-         cex = 1.5
-    )
-    # R - N
-    lines(c(5, 6),
-          c(y_base_RN, y_base_RN),
-          xpd = NA)
-    lines(c(5, 5), c(y_base_RN, y_base_RN - vertical_gap))
-    lines(c(6, 6), c(y_base_RN, y_base_RN - vertical_gap))
-    text(5.5,
-         y_base_RN + v_gap,
-         significance1[3],
-         xpd = NA,
-         cex = 1.5)
+           cex = 1.5)
     }else{
-      lines(c(4,6), 
+      if (any(significance1 != "n.s.")){
+        # T - R
+        lines(c(1, 2),
+              c(y_base_RN, y_base_RN),
+              xpd = NA)
+        lines(c(1, 1), c(y_base_RN, y_base_RN - vertical_gap))
+        lines(c(2, 2), c(y_base_RN, y_base_RN - vertical_gap))
+        text(1.5,
+             y_base_RN + v_gap,
+             significance1[1],
+             xpd = NA,
+             cex = 1.5
+        )
+      }else{
+        lines(c(1,2), 
+              c(y_base_RN, y_base_RN),
+              xpd = NA)
+        lines(c(1,1), c(y_base_RN, y_base_RN - vertical_gap))
+        lines(c(2,2), c(y_base_RN, y_base_RN - vertical_gap))
+        
+        text(2, 
+             y_base_RN + v_gap, 
+             significance1[1], 
+             xpd = NA,
+             cex = 1.5) 
+      }
+    }
+    
+    if (result2$p.value >= 0.05){
+      lines(c(3,4), 
             c(y_base_RN, y_base_RN),
             xpd = NA)
-      lines(c(4,4), c(y_base_RN, y_base_RN - vertical_gap))
-      lines(c(5,5), c(y_base_RN, y_base_RN - vertical_gap))
-      lines(c(6,6), c(y_base_RN, y_base_RN - vertical_gap))
-      
-      text(5, 
+      text(3.5, 
            y_base_RN + v_gap, 
            significance2[1], 
            xpd = NA,
-           cex = 1.5) 
-    }
-    }
-  text(x = 0.85, 
-       y = y_text,
-       num[1],
-       xpd = T,
-       srt = 0,
-       cex = 1.5,
-       adj = 0
-  )
-  text(x = 1.75,
-       y = y_text,
-       num[2],
-       xpd = T,
-       srt = 0,
-       cex = 1.5,
-       adj = 0
-  )
-  text(x = 2.85,
-       y = y_text,
-       num[3],
-       xpd = T,
-       srt = 0,
-       cex = 1.5,
-       adj = 0
-  )
-  lines(c(3,3) + 0.5,
-        c(0, 1),
-        col = "light grey",
-        lty = 1
+           cex = 1.5)
+      lines(c(4, 4), c(y_base_RN, y_base_RN - vertical_gap))
+      lines(c(3, 3), c(y_base_RN, y_base_RN - vertical_gap))
+    }else{
+      if (any(significance2 != "n.s.")){
+        # T - R
+        lines(c(3, 4),
+              c(y_base_RN, y_base_RN),
+              xpd = NA)
+        lines(c(4, 4), c(y_base_RN, y_base_RN - vertical_gap))
+        lines(c(3, 3), c(y_base_RN, y_base_RN - vertical_gap))
+        text(3.5,
+             y_base_RN + v_gap,
+             significance2[1],
+             xpd = NA,
+             cex = 1.5
         )
+      }else{
+        lines(c(3,4), 
+              c(y_base_RN, y_base_RN),
+              xpd = NA)
+        lines(c(4,4), c(y_base_RN, y_base_RN - vertical_gap))
+        lines(c(3,3), c(y_base_RN, y_base_RN - vertical_gap))
+        text(3.5, 
+             y_base_RN + v_gap, 
+             significance2[1], 
+             xpd = NA,
+             cex = 1.5) 
+      }
+    }
+    text(x = 0.85, 
+         y = y_text,
+         num[1],
+         xpd = T,
+         srt = 0,
+         cex = 1.5,
+         adj = 0
+    )
+    text(x = 1.75,
+         y = y_text,
+         num[2],
+         xpd = T,
+         srt = 0,
+         cex = 1.5,
+         adj = 0
+    )
+  
+    lines(c(2,2) + 0.5,
+          c(0, 1),
+          col = "light grey",
+          lty = 1
+    )
+  }else{
+    col.pool = rep(c("indianred3", "light blue", "grey80"), 2)
+    boxplot(
+      Value ~ Session,
+      data = metric.df,
+      ylim = yrange,
+      outline = F,
+      notch = F,
+      lwd = 1,
+      ylab = "",
+      xlab = "",
+      medlwd = 1,
+      xaxt = "n",
+      axes=F
+    )
+    axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
+    
+    text(2.0,
+         -0.02,
+         "Before",
+         cex = 1.5)
+         
+    text(5.0,
+         -0.02,
+         "After",
+         cex = 1.5)
+    stripchart(
+      Value ~ Session,
+      vertical = TRUE,
+      data = metric.df,
+      method = "jitter",
+      add = TRUE,
+      pch = 15,
+      cex = 0.5,
+      col =  col.pool
+    )
+      y_top_base = 1
+      vertical_gap = 0.01
+      v_gap = 0.02
+      y_base_RN = y_top_base - 2.0 * vertical_gap
+      y_base_TN = y_top_base - 6.0 * vertical_gap
+      y_base_TR = y_top_base
+    
+      if (result$p.value >= 0.05){
+        lines(c(1,2), 
+              c(y_base_TR, y_base_TR),
+              xpd = NA)
+        lines(c(1,1), c(y_base_TR, y_base_TR - vertical_gap))
+        lines(c(2,2), c(y_base_TR, y_base_TR - vertical_gap))
+        text(1.5, 
+             y_base_TR + v_gap, 
+             significance1[1], 
+             xpd = NA,
+             cex = 1.5)
+      }else{
+        if (any(significance1 != "n.s.")){
+          # T - R
+          lines(c(1, 2),
+                c(y_base_TR, y_base_TR),
+                xpd = NA)
+          lines(c(1, 1), c(y_base_TR, y_base_TR - vertical_gap))
+          lines(c(2, 2), c(y_base_TR, y_base_TR - vertical_gap))
+          text(1.5,
+               y_base_TR + v_gap,
+               significance1[1],
+               xpd = NA,
+               cex = 1.5
+          )
+        }else{
+          lines(c(1,2), 
+                c(y_base_TR, y_base_TR),
+                xpd = NA)
+          lines(c(1,1), c(y_base_TR, y_base_TR - vertical_gap))
+          lines(c(2,2), c(y_base_TR, y_base_TR - vertical_gap))
+  
+          text(1.5, 
+               y_base_TR + v_gap, 
+               significance1[1], 
+               xpd = NA,
+               cex = 1.5) 
+          }
+      }
+      
+      if (result2$p.value >= 0.05){
+        lines(c(4,5), 
+              c(y_base_TR, y_base_TR),
+              xpd = NA)
+        text(4.5, 
+             y_top_base + v_gap, 
+             significance2[1], 
+             xpd = NA,
+             cex = 1.5)
+        lines(c(4, 4), c(y_base_TR, y_base_TR - vertical_gap))
+        lines(c(5, 5), c(y_base_TR, y_base_TR - vertical_gap))
+      }else{
+        if (any(significance2 != "n.s.")){
+        # T - R
+        lines(c(4, 5),
+              c(y_base_TR, y_base_TR),
+              xpd = NA)
+        lines(c(4, 4), c(y_base_TR, y_base_TR - vertical_gap))
+        lines(c(5, 5), c(y_base_TR, y_base_TR - vertical_gap))
+      
+        text(4.5,
+             y_base_TR + v_gap,
+             significance2[1],
+             xpd = NA,
+             cex = 1.5
+        )
+        }else{
+          lines(c(4,5), 
+                c(y_base_TR, y_base_TR),
+                xpd = NA)
+          lines(c(4,4), c(y_base_TR, y_base_TR - vertical_gap))
+          lines(c(5,5), c(y_base_TR, y_base_TR - vertical_gap))
+          text(4.5, 
+               y_base_RN + v_gap, 
+               significance2[1], 
+               xpd = NA,
+               cex = 1.5) 
+        }
+      }
+    text(x = 0.85, 
+         y = y_text,
+         num[1],
+         xpd = T,
+         srt = 0,
+         cex = 1.5,
+         adj = 0
+    )
+    text(x = 1.75,
+         y = y_text,
+         num[2],
+         xpd = T,
+         srt = 0,
+         cex = 1.5,
+         adj = 0
+    )
+    text(x = 2.85,
+         y = y_text,
+         num[3],
+         xpd = T,
+         srt = 0,
+         cex = 1.5,
+         adj = 0
+    )
+    lines(c(3,3) + 0.5,
+          c(0, 1),
+          col = "light grey",
+          lty = 1
+          )
+    }
   dev.off()
 }
 

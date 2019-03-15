@@ -1,5 +1,5 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+setwd("G:/Behavioral_project/behavior_experiment_data/Analysis")
+source("G:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 ## Fly info
 fly.info.CS = read.csv("data/fly_info_CS_preprocessed.csv", header = T, stringsAsFactors = F)
@@ -72,5 +72,6 @@ for (genotype in unique(fly.info$Genotype)) {
 
 fly.info.end = fly.info[ind.include,]
 write.csv(fly.info.end, "data/fly_info_end.csv", quote = F, row.names = F)
+fly.info.end = read.csv("data/fly_info_end.csv", header = T, stringsAsFactors = F)
 
 checking_fly_numbers(fly.info.end, 1, filename="Mutants_headcount.csv")

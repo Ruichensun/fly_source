@@ -10,13 +10,6 @@ fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") |
                                      (fly.info.end$Category == "R") , ]
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 
-
-fly.info.movement.T = fly.info.end[(fly.info.end$Genotype == "D2R-1 x 51635") & 
-                                     (fly.info.end$Category =="T"), ]
-fly.info.movement.R = fly.info.end[(fly.info.end$Genotype == "D2R-1 x 51635") & 
-                                     (fly.info.end$Category =="R"), ]
-all_ofs_WT = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
-
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
@@ -53,28 +46,21 @@ for (i in 1:nrow(T1)){
 
 RT_val = subset_laser_expo(fly.info.end, Random = R1, Training = T1, threshold = 0.2)
 
-boxplot(T1$ActDiff, R1$ActDiff)
-        # RT_val[RT_val$Category=="T", ]$ActDiff, 
-        # RT_val[RT_val$Category=="R", ]$ActDiff)
-
 plot(R1$Diff, R1$ActDiff, 
      main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
      xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
      ylab = "Activity Difference",
-     xlim = c(-1, 1), ylim = c(-1, 1))
-points(T1$Diff, T1$ActDiff, col = "red")
-
-plot(rbind(R1$Diff, T1$Diff), rbind(R1$ActDiff, T1$ActDiff), 
-     main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
-     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
-     ylab = "Activity Difference")
-
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "light blue",
+     pch = 15)
+# points(T1$Diff, T1$ActDiff, col = "indianred3",  pch = 15)
 model = lm(formula = R1$ActDiff ~ R1$Diff)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
-text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
-text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
-text(x = -0.3, y = -0.6, paste0("correlation = ", cor(R1$Diff, R1$ActDiff, method = c("pearson"))))
+text(x = -0.6, y = -0.4, paste0("Slope = ", sprintf("%.3f",model$coefficients[[2]])))
+text(x = -0.6, y = -0.5, paste0("s.e. = ", sprintf("%.3f",coef(summary(model))[2,2])))
+text(x = -0.6, y = -0.6, paste0("correlation = ", sprintf("%.3f", 
+                                                          cor(R1$Diff, R1$ActDiff, method = c("pearson")))))
 
 # After second training session
 
@@ -119,36 +105,161 @@ boxplot(T2$ActDiff, R2$ActDiff,
         RT2_val[RT2_val$Category=="R", ]$ActDiff)
 
 plot(R2$Diff, R2$ActDiff, 
-     main = "Exposure Probability Difference vs Changes in Activity After 2nd Training",
-     xlab = "Exposure Differential: Probability of Exposure during Walking - Probability of Exposure during Pause",
+     main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
+     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
      ylab = "Activity Difference",
-     xlim = c(-1, 1), ylim = c(-1, 1))
+     xlim = c(-1, 1), ylim = c(-1, 1), 
+     col = "light blue",
+     pch = 15)
+# points(T2$Diff, T2$ActDiff, col = "red")
 
-points(T2$Diff, T2$ActDiff, col = "red")
-
-A = c(R2$Diff[1:30], R2$Diff[32:144])
-B = c(R2$ActDiff[1:30], R2$ActDiff[32:144])
 model = lm(formula = R2$ActDiff ~ R2$Diff)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
-text(x = -0.3, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
-text(x = -0.3, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
-# text(x = -0.3, y = -0.6, paste0("correlation = ", cor(A, B, method = c("pearson"))))
-text(x = -0.3, y = -0.6, paste0("correlation = ", cor(R2$Diff, R2$ActDiff, method = c("pearson"))))
 
+text(x = -0.6, y = -0.4, paste0("Slope = ", sprintf("%.3f",model$coefficients[[2]])))
+text(x = -0.6, y = -0.5, paste0("s.e. = ", sprintf("%.3f",coef(summary(model))[2,2])))
+text(x = -0.6, y = -0.6, paste0("correlation = ", sprintf("%.3f", 
+                                                          cor(R2$Diff, R2$ActDiff, method = c("pearson")))))
+
+pdf("ExpoDiff_and_ActDiff.pdf", onefile = T, width = 8, height = 8)
+R1_with_laser = R1[R1$Hit_All>0, ]
+plot(R1_with_laser$Diff, R1_with_laser$ActDiff, 
+     xlab = "Exposure Differential",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "light blue",
+     pch = 20,
+     cex.lab = 1.5,
+     xaxt = "n",
+     yaxt = "n")
+axis(1, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+axis(2, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+model_R1_with_Laser = lm(formula = R1_with_laser$ActDiff ~ R1_with_laser$Diff)
+abline(model_R1_with_Laser$coefficients[[1]], model_R1_with_Laser$coefficients[[2]])
+coef(summary(model_R1_with_Laser))
+text(x = -0.6, 
+     y = 0.6, 
+     paste0("Slope = ",sprintf("%.3f",model_R1_with_Laser$coefficients[[2]])),
+     cex = 1.5
+)
+text(x = -0.6, 
+     y = 0.5, 
+     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_R1_with_Laser))[2,2])),
+     cex = 1.5)
+text(x = -0.6, 
+     y = 0.4, 
+     paste0("Correlation = ", 
+            sprintf("%.3f", cor(R1_with_laser$Diff, R1_with_laser$ActDiff, method = c("pearson")))),
+     cex = 1.5)
+
+R2_with_laser = R2[R2$Hit_All>0, ]
+plot(R2_with_laser$Diff, R2_with_laser$ActDiff, 
+     xlab = "Exposure Differential",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "light blue",
+     pch = 20,
+     cex.lab = 1.5,
+     xaxt = "n",
+     yaxt = "n")
+axis(1, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+axis(2, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+model_with_laser = lm(formula = R2_with_laser$ActDiff ~ R2_with_laser$Diff)
+abline(model_with_laser$coefficients[[1]], model_with_laser$coefficients[[2]])
+coef(summary(model_with_laser))
+text(x = -0.6, 
+     y = 0.6, 
+     paste0("Slope = ",sprintf("%.3f",model_with_laser$coefficients[[2]])),
+     cex = 1.5
+)
+text(x = -0.6, 
+     y = 0.5, 
+     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_with_laser))[2,2])),
+     cex = 1.5)
+text(x = -0.6, 
+     y = 0.4, 
+     paste0("Correlation = ", 
+            sprintf("%.3f", cor(R2_with_laser$Diff, R2_with_laser$ActDiff, method = c("pearson")))),
+     cex = 1.5)
+dev.off()
+
+pdf("ExpoDiff_and_ActDiff_T.pdf", onefile = T, width = 8, height = 8)
+T1_with_laser = T1[T1$Hit_All>0, ]
+T1_with_laser = T1
+plot(T1_with_laser$Diff, T1_with_laser$ActDiff, 
+     xlab = "Exposure Differential",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "indianred3",
+     pch = 20,
+     cex.lab = 1.5,
+     xaxt = "n",
+     yaxt = "n")
+axis(1, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+axis(2, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+model_T1_with_Laser = lm(formula = T1_with_laser$ActDiff ~ T1_with_laser$Diff)
+abline(model_T1_with_Laser$coefficients[[1]], model_T1_with_Laser$coefficients[[2]])
+coef(summary(model_T1_with_Laser))
+text(x = -0.6, 
+     y = 0.6, 
+     paste0("Slope = ",sprintf("%.3f",model_T1_with_Laser$coefficients[[2]])),
+     cex = 1.5
+)
+text(x = -0.6, 
+     y = 0.5, 
+     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_T1_with_Laser))[2,2])),
+     cex = 1.5)
+text(x = -0.6, 
+     y = 0.4, 
+     paste0("Correlation = ", 
+            sprintf("%.3f", cor(T1_with_laser$Diff, T1_with_laser$ActDiff, method = c("pearson")))),
+     cex = 1.5)
+
+T2_with_laser = T2[T2$Hit_All>0, ]
+T2_with_laser = T2
+plot(T2_with_laser$Diff, T2_with_laser$ActDiff, 
+     xlab = "Exposure Differential",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "indianred3",
+     pch = 20,
+     cex.lab = 1.5,
+     xaxt = "n",
+     yaxt = "n")
+axis(1, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+axis(2, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
+model_with_laser = lm(formula = T2_with_laser$ActDiff ~ T2_with_laser$Diff)
+abline(model_with_laser$coefficients[[1]], model_with_laser$coefficients[[2]])
+coef(summary(model_with_laser))
+text(x = -0.6, 
+     y = 0.6, 
+     paste0("Slope = ",sprintf("%.3f",model_with_laser$coefficients[[2]])),
+     cex = 1.5
+)
+text(x = -0.6, 
+     y = 0.5, 
+     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_with_laser))[2,2])),
+     cex = 1.5)
+text(x = -0.6, 
+     y = 0.4, 
+     paste0("Correlation = ", 
+            sprintf("%.3f", cor(T2_with_laser$Diff, T2_with_laser$ActDiff, method = c("pearson")))),
+     cex = 1.5)
+dev.off()
 
 pdf(paste0("ChanceofBeingHitCS_", Sys.Date(),".pdf"),
-    onefile = T, width = 5, height = 5)
+    onefile = T, width = 8, height = 8)
 
 Chance_of_being_hit = list(
-  T1$`Chances of being hit during walking`,
-  T1$`Chances of being hit during pause `,
-  R1$`Chances of being hit during walking`,
-  R1$`Chances of being hit during pause `,
-  T2$`Chances of being hit during walking`,
-  T2$`Chances of being hit during pause `,
-  R2$`Chances of being hit during walking`,
-  R2$`Chances of being hit during pause `
+  T1$Hit_W,
+  T1$Hit_P,
+  R1$Hit_W,
+  R1$Hit_P,
+  T2$Hit_W,
+  T2$Hit_P,
+  R2$Hit_W,
+  R2$Hit_P
 )
 
 p = c(wilcox.test(Chance_of_being_hit[[1]], Chance_of_being_hit[[2]])$p.value,
@@ -183,12 +294,13 @@ boxplot(
   outline = F,
   notch = F,
   medlwd = 1,
-  ylab = "Percentage",
+  ylab = "Likelihood",
   xaxt = "n",
   ann = FALSE,
-  axes=F
+  axes=F,
+  cex.lab = 1.45
 )
-axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
+axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
 stripchart(
   vertical = TRUE,
   x = Chance_of_being_hit[1:4],
@@ -200,20 +312,21 @@ stripchart(
 )
 
 text(
-  x = c(1.35, 3.35),
-  y = 1.2,
+  x = c(1.3, 3.3),
+  y = 1.08,
   labels = c(
     paste0("n = ", length(Chance_of_being_hit[[1]])),
     paste0("n = ", length(Chance_of_being_hit[[3]]))
   ),
   xpd = T,
   srt = 0,
-  adj = 0
+  adj = 0,
+  cex = 1.5
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[1:4])) - 0.1,
-  y = -0.1,
+  x = (1:length(Chance_of_being_hit[1:4])) - 0.25,
+  y = -0.05,
   labels = c(
     "Walking",
     "Pause",
@@ -222,19 +335,21 @@ text(
   ),
   xpd = T,
   srt = 0,
-  adj = 0
+  adj = 0,
+  cex = 1.5
 )
 
 text(
-  x = c(1.35, 3.35),
-  y = -0.2,
+  x = c(1.3, 3),
+  y = -0.1,
   labels = c(
-    "Training",
+    "Train",
     "Yoked Control"
   ),
   xpd = T,
   srt = 0,
-  adj = 0
+  adj = 0,
+  cex = 1.5
 )
 
 lines(c(2.5, 2.5), c(-1, 1.2),
@@ -243,17 +358,21 @@ lines(c(2.5, 2.5), c(-1, 1.2),
 
 text(
      x = c(1.5, 3.5),
-     y = 1.1,
+     y = 1.03,
      c(sig[1], sig[2]),
-     xpd = NA)
+     xpd = NA, cex = 1.5)
 
 lines(c(1, 2), 
-      y = c(1.07, 1.07), 
+      y = c(1.01, 1.01), 
       xpd = NA)
 
 lines(c(3, 4), 
-      y = c(1.07, 1.07), 
+      y = c(1.01, 1.01), 
       xpd = NA)
+lines(c(1,1), c(1.00, 1.01))
+lines(c(2,2), c(1.00, 1.01))
+lines(c(3,3), c(1.00, 1.01))
+lines(c(4,4), c(1.00, 1.01))
 
 boxplot(
   Chance_of_being_hit[5:8],
@@ -261,13 +380,13 @@ boxplot(
   outline = F,
   notch = F,
   medlwd = 1,
-  ylab = "Percentage",
+  ylab = "Likelihood",
   xaxt = "n",
   ann = FALSE,
-  axes=F
+  axes=F,
+  cex.lab = 1.5
 )
-axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0))
-
+axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
 stripchart(
   vertical = TRUE,
   x = Chance_of_being_hit[5:8],
@@ -275,24 +394,25 @@ stripchart(
   add = TRUE,
   pch = 15,
   cex = 0.5,
-  col = col.pool
+  col =  col.pool
 )
 
 text(
-  x = c(1.35, 3.35),
-  y = 1.2,
+  x = c(1.3, 3.3),
+  y = 1.08,
   labels = c(
     paste0("n = ", length(Chance_of_being_hit[[5]])),
     paste0("n = ", length(Chance_of_being_hit[[7]]))
   ),
   xpd = T,
   srt = 0,
-  adj = 0
+  adj = 0,
+  cex = 1.5
 )
 
 text(
-  x = (1:length(Chance_of_being_hit[5:8])) - 0.1,
-  y = -0.1,
+  x = (1:length(Chance_of_being_hit[5:8])) - 0.25,
+  y = -0.05,
   labels = c(
     "Walking",
     "Pause",
@@ -301,39 +421,45 @@ text(
   ),
   xpd = T,
   srt = 0,
-  adj = 0
+  adj = 0,
+  cex = 1.5
+)
+
+text(
+  x = c(1.3, 3),
+  y = -0.1,
+  labels = c(
+    "Train",
+    "Yoked Control"
+  ),
+  xpd = T,
+  srt = 0,
+  adj = 0,
+  cex = 1.5
 )
 
 lines(c(2.5, 2.5), c(-1, 1.2),
       col = "light grey",
       lty = 1)
 
-
-text(
-  x = c(1.35, 3.35),
-  y = -0.2,
-  labels = c(
-    "Training",
-    "Yoked Control"
-  ),
-  xpd = T,
-  srt = 0,
-  adj = 0
-)
-
 text(
   x = c(1.5, 3.5),
-  y = 1.1,
+  y = 1.03,
   c(sig[3], sig[4]),
-  xpd = NA)
+  xpd = NA, cex = 1.5)
 
 lines(c(1, 2), 
-      y = c(1.07, 1.07), 
+      y = c(1.01, 1.01), 
       xpd = NA)
 
 lines(c(3, 4), 
-      y = c(1.07, 1.07), 
+      y = c(1.01, 1.01), 
       xpd = NA)
+lines(c(1,1), c(1.00, 1.01))
+lines(c(2,2), c(1.00, 1.01))
+lines(c(3,3), c(1.00, 1.01))
+lines(c(4,4), c(1.00, 1.01))
+
 dev.off()
 
 
@@ -381,7 +507,7 @@ chance_df_1st = rbind(
                  )
 
 colnames(chance_df_1st) = c("Probability", "Sessions")
-dunn.test(x=as.numeric(chance_df_1st[,1]), g=chance_df_1st[,2], method=c("bonferroni"))
+dunn.test(x=as.numeric(chance_df_1st[,1]), g=chance_df_1st[,2], method=c("BH"))
 
 chance_df_2nd = rbind(
                   cbind(chance_5, chance_5_lab),
@@ -391,5 +517,5 @@ chance_df_2nd = rbind(
                 )
 
 colnames(chance_df_2nd) = c("Probability", "Sessions")
-dunn.test(x=as.numeric(chance_df_2nd[,1]), g=chance_df_2nd[,2], method=c("bonferroni"))
+dunn.test(x=as.numeric(chance_df_2nd[,1]), g=chance_df_2nd[,2], method=c("BH"))
 
