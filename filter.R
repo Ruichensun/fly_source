@@ -42,9 +42,9 @@ excl.fly.WT = data.frame(
   cbind(
   # Batch 1 ES-WT: 1-276; Batch 2 ES-WT: 276-400; Batch 3 ES-WT: 400-present (as of June 28, 2017)
   # Only Batch 3 data is for the current project. All prior data was for prototyping
-  c(1:400, 1:100, 1:34),
-  c(rep("ES", 400), rep("RS", 100), rep("SW",34)),
-  c(rep("WT", 534))
+  c(1:400, 1:100, 1:34, 57),
+  c(rep("ES", 400), rep("RS", 100), rep("SW",35)),
+  c(rep("WT", 535))
 )
 )
 colnames(excl.fly.WT) = colnames(excl.fly.Mutant)

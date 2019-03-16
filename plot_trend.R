@@ -6,14 +6,27 @@ library(dunn.test)
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos; Output: a vector of 0 and 1 of (length of input) - 1 
 fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                        (fly.info.end$Genotype == "CS")) & 
-                                        (fly.info.end$Category =="T"), ]
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "T") , ]
+
+T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+T1 = T1[!is.na(T1$Hit_W), ]
+T1 = T1[, 1:6]
+
 fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                        (fly.info.end$Genotype == "CS")) & 
-                                        (fly.info.end$Category == "R") , ]
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "R") , ]
+R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+R1 = R1[!is.na(R1$Hit_W), ]
+R1 = R1[, 1:6]
 fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
                                         (fly.info.end$Genotype == "CS")) & 
                                         (fly.info.end$Category == "N") , ]
+
+N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+N1 = N1[!is.na(N1$Hit_W), ]
+N1 = N1[, 1:6]
+
 
 ###Including All Relevant Sessions
 sessions <- c(
@@ -24,12 +37,12 @@ sessions <- c(
   "E1R1E1R1",
   "E1N1E1N1"
   )
-cumsums_total = list(get_cumsums_total(sessions[1], fly.info.movement.T),
-                     get_cumsums_total(sessions[2], fly.info.movement.R),
-                     get_cumsums_total(sessions[3], fly.info.movement.N),
-                     get_cumsums_total(sessions[4], fly.info.movement.T),
-                     get_cumsums_total(sessions[5], fly.info.movement.R),
-                     get_cumsums_total(sessions[6], fly.info.movement.N))
+cumsums_total = list(get_cumsums_total(sessions[1], T1),
+                     get_cumsums_total(sessions[2], R1),
+                     get_cumsums_total(sessions[3], N1),
+                     get_cumsums_total(sessions[4], T1),
+                     get_cumsums_total(sessions[5], R1),
+                     get_cumsums_total(sessions[6], N1))
 
 min_sequence_length = min(dim(cumsums_total[[1]])[1],
                           dim(cumsums_total[[2]])[1],
@@ -97,12 +110,12 @@ p = c(first_training_test$P.adjusted, second_training_test$P.adjusted)
 
 # Confidence Interval
 
-CI_df = data.frame()
+CI_df_cumsum = data.frame()
 for (i in 1:6){
-  CI_df = rbind.data.frame(CI_df, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
+  CI_df_cumsum = rbind.data.frame(CI_df_cumsum, get_Wald_CI(cumsums_total[[i]][min_sequence_length, ] / framerate ))
 }
 
-colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
+colnames(CI_df_cumsum) = c("Median", "CI_Lower", "CI_Upper")
 
 ##X axis coordinate
 forward_index = c((1:min_sequence_length) / framerate)

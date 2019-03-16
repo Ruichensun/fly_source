@@ -123,7 +123,7 @@ text(x = -0.6, y = -0.6, paste0("correlation = ", sprintf("%.3f",
                                                           cor(R2$Diff, R2$ActDiff, method = c("pearson")))))
 
 pdf("ExpoDiff_and_ActDiff.pdf", onefile = T, width = 8, height = 8)
-R1_with_laser = R1[R1$Hit_All>0, ]
+R1_with_laser = R1
 plot(R1_with_laser$Diff, R1_with_laser$ActDiff, 
      xlab = "Exposure Differential",
      ylab = "Activity Difference",
@@ -135,25 +135,25 @@ plot(R1_with_laser$Diff, R1_with_laser$ActDiff,
      yaxt = "n")
 axis(1, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
 axis(2, at=c(-1, -0.5, 0, 0.5, 1), cex.axis = 1.5)
-model_R1_with_Laser = lm(formula = R1_with_laser$ActDiff ~ R1_with_laser$Diff)
-abline(model_R1_with_Laser$coefficients[[1]], model_R1_with_Laser$coefficients[[2]])
-coef(summary(model_R1_with_Laser))
+model_R1_with_laser = lm(formula = R1_with_laser$ActDiff ~ R1_with_laser$Diff)
+abline(model_R1_with_laser$coefficients[[1]], model_R1_with_laser$coefficients[[2]])
+coef(summary(model_R1_with_laser))
 text(x = -0.6, 
      y = 0.6, 
-     paste0("Slope = ",sprintf("%.3f",model_R1_with_Laser$coefficients[[2]])),
+     paste0("Slope = ",sprintf("%.3f",model_R1_with_laser$coefficients[[2]])),
      cex = 1.5
 )
 text(x = -0.6, 
      y = 0.5, 
-     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_R1_with_Laser))[2,2])),
+     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_R1_with_laser))[2,2])),
      cex = 1.5)
 text(x = -0.6, 
      y = 0.4, 
-     paste0("Correlation = ", 
-            sprintf("%.3f", cor(R1_with_laser$Diff, R1_with_laser$ActDiff, method = c("pearson")))),
+     paste0("R^2 = ",
+            sprintf("%.3f", summary(model_R1_with_laser)$r.squared)),
      cex = 1.5)
 
-R2_with_laser = R2[R2$Hit_All>0, ]
+R2_with_laser = R2
 plot(R2_with_laser$Diff, R2_with_laser$ActDiff, 
      xlab = "Exposure Differential",
      ylab = "Activity Difference",
@@ -179,13 +179,12 @@ text(x = -0.6,
      cex = 1.5)
 text(x = -0.6, 
      y = 0.4, 
-     paste0("Correlation = ", 
-            sprintf("%.3f", cor(R2_with_laser$Diff, R2_with_laser$ActDiff, method = c("pearson")))),
+     paste0("R^2 = ", 
+            sprintf("%.3f", summary(model_with_laser)$r.squared)),
      cex = 1.5)
 dev.off()
 
 pdf("ExpoDiff_and_ActDiff_T.pdf", onefile = T, width = 8, height = 8)
-T1_with_laser = T1[T1$Hit_All>0, ]
 T1_with_laser = T1
 plot(T1_with_laser$Diff, T1_with_laser$ActDiff, 
      xlab = "Exposure Differential",
@@ -243,7 +242,7 @@ text(x = -0.6,
      cex = 1.5)
 text(x = -0.6, 
      y = 0.4, 
-     paste0("Correlation = ", 
+     paste0("r = ", 
             sprintf("%.3f", cor(T2_with_laser$Diff, T2_with_laser$ActDiff, method = c("pearson")))),
      cex = 1.5)
 dev.off()
@@ -298,7 +297,7 @@ boxplot(
   xaxt = "n",
   ann = FALSE,
   axes=F,
-  cex.lab = 1.45
+  cex.lab = 1.5
 )
 axis(side=2, at=c(0, 0.2, 0.4, 0.6, 0.8, 1.0), cex.axis = 1.5)
 stripchart(
@@ -462,7 +461,6 @@ lines(c(4,4), c(1.00, 1.01))
 
 dev.off()
 
-
 chance_df = data.frame()
 
 chance_1 = Chance_of_being_hit[[1]][!is.na(Chance_of_being_hit[[1]])]
@@ -490,32 +488,10 @@ chance_7_lab = rep("R2-W", length(chance_7))
 chance_8 = Chance_of_being_hit[[8]][!is.na(Chance_of_being_hit[[8]])]
 chance_8_lab = rep("R2-P", length(chance_8))
 
-
 # Confidence Interval
 CI_df = data.frame()
 for (i in 1:8){
   CI_df = rbind.data.frame(CI_df, get_Wald_CI(Chance_of_being_hit[[i]][!is.na(Chance_of_being_hit[[i]])]))
 }
 colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
-
-
-chance_df_1st = rbind(
-                  cbind(chance_1, chance_1_lab),
-                  cbind(chance_2, chance_2_lab),
-                  cbind(chance_3, chance_3_lab),
-                  cbind(chance_4, chance_4_lab)
-                 )
-
-colnames(chance_df_1st) = c("Probability", "Sessions")
-dunn.test(x=as.numeric(chance_df_1st[,1]), g=chance_df_1st[,2], method=c("BH"))
-
-chance_df_2nd = rbind(
-                  cbind(chance_5, chance_5_lab),
-                  cbind(chance_6, chance_6_lab),
-                  cbind(chance_7, chance_7_lab),
-                  cbind(chance_8, chance_8_lab)
-                )
-
-colnames(chance_df_2nd) = c("Probability", "Sessions")
-dunn.test(x=as.numeric(chance_df_2nd[,1]), g=chance_df_2nd[,2], method=c("BH"))
 

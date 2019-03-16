@@ -941,7 +941,7 @@ get_cumsums_total = function(file_name_filter, fly.info.movement) {
   file_names = c()
   for (ind in 1:nrow(fly.info.movement)) {
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$Experimenter[ind], "/CS_constant/CSV"),
+        path = paste0("data/", fly.info.movement$Experimenter[ind], "/CS/CSV"),
         pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
                          file_name_filter, "_*"),
         full.names = T
