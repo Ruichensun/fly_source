@@ -5,24 +5,22 @@ library(Hmisc)
 library(ggplot2)
 library(rafalib)
 
-# fly.info = read.csv("data/fly_info_mutants_preprocessed.csv",header=T,stringsAsFactors=F)
+fly.info.end = read.csv("data/fly_info_end.csv", header = T, stringsAsFactors = F)
+geno = "MB131B x CS"
+pdf(paste0(geno,"_", Sys.Date(), ".pdf"))
 
-pdf("DopR1-IR-51635_traces_111418.pdf")
-for (ind in 1:nrow(fly.info.include[fly.info.include$Genotype == "UAS-DopR1-IR x 51635", ])) {
+for (ind in 1:nrow(fly.info.end[fly.info.end$Genotype == geno, ])) {
   path = paste0("data/",
-                fly.info.include[fly.info.include$Genotype == "UAS-DopR1-IR x 51635", ]$experimenter[ind],
-                "/mutants/CSV")
+                fly.info.end[fly.info.end$Genotype == geno, ]$Experimenter[ind],
+                "/mutants/")
   input.file = list.files(path)
-  dbf.files <- input.file[grep(paste0("Fly", fly.info.include[fly.info.include$Genotype ==
-                                                                "UAS-DopR1-IR x 51635", ]$Fly[ind], "_"),
-                               input.file,
-                               fixed = T)]
+  dbf.files <- input.file[grep(paste0("Fly", fly.info.end[fly.info.end$Genotype ==geno, ]$Fly[ind], "_"),
+                               input.file, fixed = T)]
   print(dbf.files)
   mypar(length(dbf.files), 1)
   for (ind.session in 1:length(dbf.files)) {
     input.file.plotting = read.csv(paste0(path, dbf.files[ind.session]),
-                                   header = T,
-                                   stringsAsFactors = F)
+                                   header = T, stringsAsFactors = F)
     framerate = 50
     fly_pos = input.file.plotting$fly_pos.framerate.50
     starting_point = 21
@@ -39,17 +37,7 @@ for (ind in 1:nrow(fly.info.include[fly.info.include$Genotype == "UAS-DopR1-IR x
          ylim = c(0, 800),
          col = "black",
          yaxt = "n"
-         # xaxt = "n"
-         # xlim = c(0,length(fly_pos)/framerate),
-         # axis(2,
-         #      c(0,767),
-         #      labels=c("0","767")
-         #  ),
-         # axis(1,
-         #      c(0,length(fly_pos)/framerate),
-         #      labels=c("0",as.character(length(fly_pos)/framerate)))
     )
-    # lines(t,pos_fly_position_info,col="blue")
     axis(2, c(0, 767), labels = c("0", "767"))
   }
 }
