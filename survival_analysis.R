@@ -45,13 +45,14 @@ for (ind in 1:nrow(total)){
 
 total_fit = survfit(Surv(as.numeric(Age), Status) ~ Category, data = total)
 
-plot("Survival_plot.pdf",width = 8, height = 8)
-graph = autoplot(total_fit, pval = TRUE, CI = TRUE, surv.size = 2, xlab = "", ylab = "") + 
-        theme_bw() +
-        theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-        theme(text = element_text(size=20),
-        axis.text.x = element_text(angle=0, hjust=1))+
-        scale_fill_manual(values=c("grey", "indianred3", "light blue")) + 
-        scale_color_manual(values=c("black", "red", "blue"))
+pdf("Survival_plot.pdf",width = 10, height = 8)
+autoplot(total_fit, pval = TRUE, CI = TRUE, surv.size = 1, 
+         xlab = "", ylab = "", xlim = c(0, 80)) + 
+theme_bw() +
+theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+theme(text = element_text(size=20),
+axis.text.x = element_text(angle=0, hjust=1))+
+scale_fill_manual(values=c("grey", "indianred3", "light blue")) + 
+scale_color_manual(values=c("black", "red", "blue"))
 dev.off()
