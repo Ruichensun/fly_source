@@ -140,17 +140,17 @@ abline(model_R1_with_laser$coefficients[[1]], model_R1_with_laser$coefficients[[
 coef(summary(model_R1_with_laser))
 text(x = -0.6, 
      y = 0.6, 
-     paste0("Slope = ",sprintf("%.3f",model_R1_with_laser$coefficients[[2]])),
+     paste0("Slope = ",sprintf("%.4f",model_R1_with_laser$coefficients[[2]])),
      cex = 1.5
 )
 text(x = -0.6, 
      y = 0.5, 
-     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_R1_with_laser))[2,2])),
+     paste0("s.e. = ", sprintf("%.4f",coef(summary(model_R1_with_laser))[2,2])),
      cex = 1.5)
 text(x = -0.6, 
      y = 0.4, 
      paste0("R^2 = ",
-            sprintf("%.3f", summary(model_R1_with_laser)$r.squared)),
+            sprintf("%.4f", summary(model_R1_with_laser)$r.squared)),
      cex = 1.5)
 
 R2_with_laser = R2
@@ -170,17 +170,17 @@ abline(model_with_laser$coefficients[[1]], model_with_laser$coefficients[[2]])
 coef(summary(model_with_laser))
 text(x = -0.6, 
      y = 0.6, 
-     paste0("Slope = ",sprintf("%.3f",model_with_laser$coefficients[[2]])),
+     paste0("Slope = ",sprintf("%.4f",model_with_laser$coefficients[[2]])),
      cex = 1.5
 )
 text(x = -0.6, 
      y = 0.5, 
-     paste0("Standard Error = ", sprintf("%.3f",coef(summary(model_with_laser))[2,2])),
+     paste0("s.e. = ", sprintf("%.4f",coef(summary(model_with_laser))[2,2])),
      cex = 1.5)
 text(x = -0.6, 
      y = 0.4, 
      paste0("R^2 = ", 
-            sprintf("%.3f", summary(model_with_laser)$r.squared)),
+            sprintf("%.4f", summary(model_with_laser)$r.squared)),
      cex = 1.5)
 dev.off()
 
@@ -493,5 +493,6 @@ CI_df = data.frame()
 for (i in 1:8){
   CI_df = rbind.data.frame(CI_df, get_Wald_CI(Chance_of_being_hit[[i]][!is.na(Chance_of_being_hit[[i]])]))
 }
+
 colnames(CI_df) = c("Median", "CI_Lower", "CI_Upper")
 

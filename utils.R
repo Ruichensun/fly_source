@@ -1623,7 +1623,7 @@ plot_WT = function(all_ofs, genotype, i){
   if (i == 9){
     yrange = c(0, 1)
     y_text = 1
-  }else if (i == 26){
+  }else if (i == 25){
     yrange = c(0, 120)
     y_text = 120
   }else if (i == 18){
@@ -1668,7 +1668,7 @@ plot_WT = function(all_ofs, genotype, i){
     vertical_gap = 0.01
     v_gap = 0.005
   }
-  else if (i == 26){
+  else if (i == 25){
     axis(side=2, at=c(0, 20, 40, 60, 80, 100, 120), cex.axis = 1.5)
     text(x = c(0.8, 1.8, 2.8),
          y = 125,

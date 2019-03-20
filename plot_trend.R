@@ -104,9 +104,12 @@ colnames(N2_df) = c("Value", "Session")
 
 Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
 Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
-first_training_test = dunn.test(x = Session1_df$Value, g = Session1_df$Session, method = c("bonferroni"))
-second_training_test = dunn.test(x = Session2_df$Value, g = Session2_df$Session, method = c("bonferroni"))
-p = c(first_training_test$P.adjusted, second_training_test$P.adjusted)
+
+CAD = kruskal.test(Value~Session, data = Session1_df)
+pairwise_CAD = pairwise.wilcox.test(Session1_df$Value, Session1_df$Session, p.adjust.method = "BH")
+CAD2 = kruskal.test(Value~Session, data = Session2_df)
+pairwise_CAD2 = pairwise.wilcox.test(Session2_df$Value, Session2_df$Session, p.adjust.method = "BH")
+p = c(pairwise_CAD$p.value[1], pairwise_CAD2$p.value[1])
 
 # Confidence Interval
 
@@ -139,10 +142,15 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       1,
       type = "n",
       xlab = "Time (sec)",
-      ylab = "Cumulative Walking Duration (sec)",
-      xlim = c(0, 180),
-      ylim = c(0, 100)
+      ylab = "Cumulative Activity Duration (sec)",
+      xlim = c(0, 200),
+      ylim = c(0, 100),
+      cex.lab = 1.5,
+      xaxt = "n",
+      yaxt = "n"
     )
+    axis(side=1, at=c(0, 50, 100, 150, 200), cex.axis = 1.5)
+    axis(side=2, at=c(0, 20, 40, 60, 80, 100), cex.axis = 1.5)
     
     polygon(
       index,
@@ -289,15 +297,15 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       col = "grey"
     )
     
-    if (p[3] >= 0.05){
+    if (p[1] >= 0.05){
       significance = "n.s."
-    }else if (p[3] < 0.05 & p[3] >= 0.01){
+    }else if (p[1] < 0.05 & p[1] >= 0.01){
       significance = "*"
-    }else if (p[3] < 0.01 & p[3] >= 0.001){
+    }else if (p[1] < 0.01 & p[1] >= 0.001){
       significance = "**"
-    }else if (p[3] < 0.001 & p[3] >= 0.0001){
+    }else if (p[1] < 0.001 & p[1] >= 0.0001){
       significance = "***"
-    }else if (p[3] < 0.0001){
+    }else if (p[1] < 0.0001){
       significance = "****"
     }
     
@@ -306,7 +314,8 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
          significance, 
          xpd = NA,
          srt = 270,
-         font = 24
+         # font = 24
+         cex = 1.5
     )
     lines(c(176, 178), 
           c(c(cumsums_CI[[1]][1,][min_sequence_length],cumsums_CI[[1]][1,][min_sequence_length])), 
@@ -321,16 +330,20 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
 
     # Second training session
+    
     plot(
       1,
       type = "n",
-      xlab = "",
-      ylab = "",
-      # xlab = "Time (sec)",
-      # ylab = "Cumulative Walking Duration (sec)",
-      xlim = c(0, 180),
-      ylim = c(0, 100)
+      xlab = "Time (sec)",
+      ylab = "Cumulative Activity Duration (sec)",
+      xlim = c(0, 200),
+      ylim = c(0, 100),
+      cex.lab = 1.5,
+      xaxt = "n",
+      yaxt = "n"
     )
+    axis(side=1, at=c(0, 50, 100, 150, 200), cex.axis = 1.5)
+    axis(side=2, at=c(0, 20, 40, 60, 80, 100), cex.axis = 1.5)
     
     polygon(
       index,
@@ -476,15 +489,15 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       col = "grey"
     )
     
-    if (p[6] >= 0.05){
+    if (p[2] >= 0.05){
       significance = "n.s."
-    }else if (p[6] < 0.05 & p[6] >= 0.01){
+    }else if (p[2] < 0.05 & p[2] >= 0.01){
       significance = "*"
-    }else if (p[6] < 0.01 & p[6] >= 0.001){
+    }else if (p[2] < 0.01 & p[2] >= 0.001){
       significance = "**"
-    }else if (p[6] < 0.001 & p[6] >= 0.0001){
+    }else if (p[2] < 0.001 & p[2] >= 0.0001){
       significance = "***"
-    }else if (p[6] < 0.0001){
+    }else if (p[2] < 0.0001){
       significance = "****"
     }
       
@@ -493,7 +506,8 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
          significance, 
          xpd = NA,
          srt = 90,
-         font = 24
+         # font = 24
+         cex = 1.5
          )
     lines(c(176, 178), 
           c(c(cumsums_CI[[4]][1,][min_sequence_length],cumsums_CI[[4]][1,][min_sequence_length])), 

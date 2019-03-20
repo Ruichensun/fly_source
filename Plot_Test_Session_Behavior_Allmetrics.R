@@ -2,6 +2,110 @@
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 load('all_ofs.Rdata')
 
+
+all_ofs = all_ofs[all_ofs$Genotype == "WT" | all_ofs$Genotype == "CS", ]
+fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category =="T"), ]
+fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "R") , ]
+fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
+                                      (fly.info.end$Genotype == "CS")) & 
+                                     (fly.info.end$Category == "N") , ]
+R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+RT = rbind(R1, T1, N1)
+RT.include = RT[!is.na(RT$Hit_W), ]
+RT.exclude = RT[is.na(RT$Hit_W), ]
+temp = data.frame()
+for (j in 1:nrow(RT.include)){
+  temp = rbind(temp, 
+               all_ofs[all_ofs$Fly.Number == RT.include[j, ]$Fly & 
+                         all_ofs$Experimenter == RT.include[j, ]$Experimenter &
+                         all_ofs$Genotype == RT.include[j, ]$Genotype,])
+}
+df = temp
+
+WT_9 = list(
+T_E1 = df[df$Type=="T" & df$Session =="E1", ]$Percentage.Time.Active,
+R_E1 = df[df$Type=="R" & df$Session =="E1", ]$Percentage.Time.Active,
+N_E1 = df[df$Type=="N" & df$Session =="E1", ]$Percentage.Time.Active,
+T_E3 = df[df$Type=="T" & df$Session =="E1T1E1", ]$Percentage.Time.Active,
+R_E3 = df[df$Type=="R" & df$Session =="E1R1E1", ]$Percentage.Time.Active,
+N_E3 = df[df$Type=="N" & df$Session =="E1N1E1", ]$Percentage.Time.Active,
+T_E5 = df[df$Type=="T" & df$Session =="E1T1E1T1E1", ]$Percentage.Time.Active,
+R_E5 = df[df$Type=="R" & df$Session =="E1R1E1R1E1", ]$Percentage.Time.Active,
+N_E5 = df[df$Type=="N" & df$Session =="E1N1E1N1E1", ]$Percentage.Time.Active
+)
+
+CI_df_WT9 = data.frame()
+for (i in 1:9){
+  CI_df_WT9 = rbind.data.frame(CI_df_WT9, get_Wald_CI(WT_9[[i]]))
+}
+colnames(CI_df_WT9) = c("Median", "CI_Lower", "CI_Upper")
+
+WT_25 = list(
+  T_E1 = df[df$Type=="T" & df$Session =="E1", ]$Average.Pause.Duration,
+  R_E1 = df[df$Type=="R" & df$Session =="E1", ]$Average.Pause.Duration,
+  N_E1 = df[df$Type=="N" & df$Session =="E1", ]$Average.Pause.Duration,
+  T_E3 = df[df$Type=="T" & df$Session =="E1T1E1", ]$Average.Pause.Duration,
+  R_E3 = df[df$Type=="R" & df$Session =="E1R1E1", ]$Average.Pause.Duration,
+  N_E3 = df[df$Type=="N" & df$Session =="E1N1E1", ]$Average.Pause.Duration,
+  T_E5 = df[df$Type=="T" & df$Session =="E1T1E1T1E1", ]$Average.Pause.Duration,
+  R_E5 = df[df$Type=="R" & df$Session =="E1R1E1R1E1", ]$Average.Pause.Duration,
+  N_E5 = df[df$Type=="N" & df$Session =="E1N1E1N1E1", ]$Average.Pause.Duration
+)
+
+CI_df_WT25 = data.frame()
+for (i in 1:9){
+  CI_df_WT25 = rbind.data.frame(CI_df_WT25, get_Wald_CI(WT_25[[i]]))
+}
+colnames(CI_df_WT25) = c("Median", "CI_Lower", "CI_Upper")
+
+WT_7 = list(
+  T_E1 = df[df$Type=="T" & df$Session =="E1", ]$Number.of.Pause,
+  R_E1 = df[df$Type=="R" & df$Session =="E1", ]$Number.of.Pause,
+  N_E1 = df[df$Type=="N" & df$Session =="E1", ]$Number.of.Pause,
+  T_E3 = df[df$Type=="T" & df$Session =="E1T1E1", ]$Number.of.Pause,
+  R_E3 = df[df$Type=="R" & df$Session =="E1R1E1", ]$Number.of.Pause,
+  N_E3 = df[df$Type=="N" & df$Session =="E1N1E1", ]$Number.of.Pause,
+  T_E5 = df[df$Type=="T" & df$Session =="E1T1E1T1E1", ]$Number.of.Pause,
+  R_E5 = df[df$Type=="R" & df$Session =="E1R1E1R1E1", ]$Number.of.Pause,
+  N_E5 = df[df$Type=="N" & df$Session =="E1N1E1N1E1", ]$Number.of.Pause
+)
+
+CI_df_WT7 = data.frame()
+for (i in 1:9){
+  CI_df_WT7 = rbind.data.frame(CI_df_WT7, get_Wald_CI(WT_7[[i]]))
+}
+colnames(CI_df_WT7) = c("Median", "CI_Lower", "CI_Upper")
+
+WT_22 = list(
+  T_E1 = df[df$Type=="T" & df$Session =="E1", ]$Number.of.Turns,
+  R_E1 = df[df$Type=="R" & df$Session =="E1", ]$Number.of.Turns,
+  N_E1 = df[df$Type=="N" & df$Session =="E1", ]$Number.of.Turns,
+  T_E3 = df[df$Type=="T" & df$Session =="E1T1E1", ]$Number.of.Turns,
+  R_E3 = df[df$Type=="R" & df$Session =="E1R1E1", ]$Number.of.Turns,
+  N_E3 = df[df$Type=="N" & df$Session =="E1N1E1", ]$Number.of.Turns,
+  T_E5 = df[df$Type=="T" & df$Session =="E1T1E1T1E1", ]$Number.of.Turns,
+  R_E5 = df[df$Type=="R" & df$Session =="E1R1E1R1E1", ]$Number.of.Turns,
+  N_E5 = df[df$Type=="N" & df$Session =="E1N1E1N1E1", ]$Number.of.Turns
+)
+
+CI_df_WT22 = data.frame()
+for (i in 1:9){
+  CI_df_WT22 = rbind.data.frame(CI_df_WT22, get_Wald_CI(WT_22[[i]]))
+}
+colnames(CI_df_WT22) = c("Median", "CI_Lower", "CI_Upper")
+
+
+
+
+
+
+
 # Plotting All Metrics for each genotype
 # WT flies
 query.genotype <- c("WT")

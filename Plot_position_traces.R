@@ -7,44 +7,43 @@ library(rafalib)
 
 fly.info.end = read.csv("data/fly_info_end.csv", header = T, stringsAsFactors = F)
 geno = "MB131B x CS"
-pdf(paste0(geno,"_", Sys.Date(), ".pdf"))
 
-for (ind in 1:nrow(fly.info.end[fly.info.end$Genotype == geno, ])) {
-  path = paste0("data/",
-                fly.info.end[fly.info.end$Genotype == geno, ]$Experimenter[ind],
-                "/mutants/")
-  input.file = list.files(path)
-  dbf.files <- input.file[grep(paste0("Fly", fly.info.end[fly.info.end$Genotype ==geno, ]$Fly[ind], "_"),
-                               input.file, fixed = T)]
-  print(dbf.files)
-  mypar(length(dbf.files), 1)
-  for (ind.session in 1:length(dbf.files)) {
-    input.file.plotting = read.csv(paste0(path, dbf.files[ind.session]),
-                                   header = T, stringsAsFactors = F)
-    framerate = 50
-    fly_pos = input.file.plotting$fly_pos.framerate.50
-    starting_point = 21
-    fly_pos = fly_pos[starting_point:length(fly_pos)]
-    print(length(fly_pos) / framerate)
-    plot((c(1:length(fly_pos) / framerate)),
-         fly_pos,
-         type = 'l',
-         pch = 16,
-         cex = 0.4,
-         main = paste0(path, dbf.files[ind.session]),
-         ylab = "",
-         xlab = "Time (sec)",
-         ylim = c(0, 800),
-         col = "black",
-         yaxt = "n"
-    )
-    axis(2, c(0, 767), labels = c("0", "767"))
-  }
+plot_traces = function(geno, fly.info.end){
+  pdf(paste0(geno,"_", Sys.Date(), ".pdf"))
+    for (ind in 1:nrow(fly.info.end[fly.info.end$Genotype == geno, ])) {
+      path = paste0("data/",
+                    fly.info.end[fly.info.end$Genotype == geno, ]$Experimenter[ind],
+                    "/mutants/")
+      input.file = list.files(path)
+      dbf.files <- input.file[grep(paste0("Fly", fly.info.end[fly.info.end$Genotype==geno, ]$Fly[ind], "_"),
+                                   input.file, fixed = T)]
+      print(dbf.files)
+      mypar(length(dbf.files), 1)
+      for (ind.session in 1:length(dbf.files)) {
+        input.file.plotting = read.csv(paste0(path, dbf.files[ind.session]),
+                                       header = T, stringsAsFactors = F)
+        framerate = 50
+        fly_pos = input.file.plotting$fly_pos.framerate.50
+        starting_point = 21
+        fly_pos = fly_pos[starting_point:length(fly_pos)]
+        print(length(fly_pos) / framerate)
+        plot((c(1:length(fly_pos) / framerate)),
+             fly_pos,
+             type = 'l',
+             pch = 16,
+             cex = 0.4,
+             main = paste0(path, dbf.files[ind.session]),
+             ylab = "",
+             xlab = "Time (sec)",
+             ylim = c(0, 800),
+             col = "black",
+             yaxt = "n"
+        )
+        axis(2, c(0, 767), labels = c("0", "767"))
+      }
+    }
+    dev.off()
 }
-dev.off()
-
-
-
 
 # For spontaneous behavior's long recording
 setwd(
@@ -75,11 +74,9 @@ plot((c(1:length(fly_pos)) / (framerate * 60)),
      yaxt = "n"
      # xaxt =
 )
-# lines(t,pos_fly_position_info,col="blue")
+
 axis(2, c(0, 767), labels = c("0", "767"))
 dev.off()
-
-
 
 filename = "ProcessedData_Fly467_E1_M_2015Nov5.csv"
 input.file.plotting = read.csv(filename, header = T, stringsAsFactors =

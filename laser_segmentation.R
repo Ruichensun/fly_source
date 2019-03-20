@@ -204,21 +204,47 @@ for (i in 1:nrow(laser_R31)){
 laser_vs_pta31 = cbind(laser_R31, pta_R31)
 
 cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))
-plot(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, ylim = c(-1, 1))
+
+pdf("Exposure_Duration_vs_Activity_Change.pdf", width = 10, height = 8)
+plot(laser_vs_pta$Laser_Exposure, 
+     laser_vs_pta$pta_R, 
+     ylim = c(-1, 1),
+     col = "light blue",
+     pch = 15,
+     yaxt = "n",
+     xaxt = "n",
+     cex.lab = 1.5,
+     xlab = "Duration (sec)",
+     ylab = "Activity Difference")
+
+axis(side=2, at=c(-1, -0.5, 0, 0.5, 1.0), cex.axis = 1.5)
+axis(side=1, at=c(0, 500, 1000, 1500, 2000), cex.axis = 1.5)
 model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
-text(x = 1400, y = -0.4, paste0("Slope = ",model$coefficients[[2]]))
-text(x = 1400, y = -0.5, paste0("s.e. = ", coef(summary(model))[2,2]))
-text(x = 1400, y = -0.6, paste0("correlation = ", cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))))
+text(x = 1400, y = -0.4, paste0("Slope = ",sprintf("%.4f", model$coefficients[[2]])), cex = 1.5)
+text(x = 1400, y = -0.5, paste0("s.e. = ", sprintf("%.4f", coef(summary(model))[2,2])), cex = 1.5)
+text(x = 1400, y = -0.6, paste0("R^2 = ", sprintf("%.4f", summary(model)$r.squared)), cex = 1.5)
+dev.off()
 
-plot(laser_vs_pta31$Laser_Exposure, laser_vs_pta31$pta_R31, ylim = c(-1, 1))
+
+plot(laser_vs_pta31$Laser_Exposure, 
+     laser_vs_pta31$pta_R31, 
+     ylim = c(-1, 1),
+     col = "light blue",
+     pch = 15,
+     yaxt = "n",
+     xaxt = "n",
+     cex.lab = 1.5,
+     xlab = "Time (sec)",
+     ylab = "Activity Difference")
 model = lm(formula = laser_vs_pta31$pta_R31 ~ laser_vs_pta31$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
-text(x = 500, y = 0.5, paste0("Slope = ",model$coefficients[[2]]))
-text(x = 500, y = 0.6, paste0("s.e. = ", coef(summary(model))[2,2]))
-text(x = 500, y = 0.7, paste0("correlation = ", cor(laser_vs_pta31$Laser_Exposure, laser_vs_pta31$pta_R31, method = c("pearson"))))
+text(x = 500, y = 0.7, paste0("Slope = ",sprintf("%.4f", model$coefficients[[2]])), cex = 1.5)
+text(x = 500, y = 0.6, paste0("s.e. = ", sprintf("%.4f", coef(summary(model))[2,2])), cex = 1.5)
+text(x = 500, y = 0.5, paste0("R^2 = ", sprintf("%.4f", summary(model)$r.squared)), cex = 1.5)
+
 
 # Segment R-Control group by initial activity level and regress the activity change to laser exposure
 
