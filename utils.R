@@ -2460,7 +2460,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
     
     text(3.5,
          -0.02,
-         "Test 2",
+         "Test-2",
          cex = 1.5)
     stripchart(
       Value ~ Session,
@@ -2604,7 +2604,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
          
     text(5.0,
          -0.02,
-         "Test 2",
+         "Test-2",
          cex = 1.5)
     stripchart(
       Value ~ Session,
