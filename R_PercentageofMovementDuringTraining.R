@@ -123,7 +123,7 @@ text(x = -0.6, y = -0.6, paste0("correlation = ", sprintf("%.3f",
                                                           cor(R2$Diff, R2$ActDiff, method = c("pearson")))))
 
 pdf("ExpoDiff_and_ActDiff.pdf", onefile = T, width = 8, height = 8)
-R1_with_laser = R1
+R1_with_laser = R1[R1$Hit_All>0,]
 plot(R1_with_laser$Diff, R1_with_laser$ActDiff, 
      xlab = "Exposure Differential",
      ylab = "Activity Difference",
@@ -147,13 +147,13 @@ text(x = -0.6,
      y = 0.5, 
      paste0("s.e. = ", sprintf("%.4f",coef(summary(model_R1_with_laser))[2,2])),
      cex = 1.5)
-text(x = -0.6, 
+text(x = -0.3, 
      y = 0.4, 
-     paste0("R^2 = ",
-            sprintf("%.4f", summary(model_R1_with_laser)$r.squared)),
+     paste0("Correlation coefficient = ",
+            sprintf("%.4f", cor(R1_with_laser$Diff, R1_with_laser$ActDiff, method = c("pearson")))),
      cex = 1.5)
 
-R2_with_laser = R2
+R2_with_laser = R2[R2$Hit_All>0, ]
 plot(R2_with_laser$Diff, R2_with_laser$ActDiff, 
      xlab = "Exposure Differential",
      ylab = "Activity Difference",
@@ -169,18 +169,18 @@ model_with_laser = lm(formula = R2_with_laser$ActDiff ~ R2_with_laser$Diff)
 abline(model_with_laser$coefficients[[1]], model_with_laser$coefficients[[2]])
 coef(summary(model_with_laser))
 text(x = -0.6, 
-     y = 0.6, 
+     y = 0.8, 
      paste0("Slope = ",sprintf("%.4f",model_with_laser$coefficients[[2]])),
      cex = 1.5
 )
 text(x = -0.6, 
-     y = 0.5, 
+     y = 0.7, 
      paste0("s.e. = ", sprintf("%.4f",coef(summary(model_with_laser))[2,2])),
      cex = 1.5)
-text(x = -0.6, 
-     y = 0.4, 
-     paste0("R^2 = ", 
-            sprintf("%.4f", summary(model_with_laser)$r.squared)),
+text(x = -0.3, 
+     y = 0.6, 
+     paste0("Correlation coefficient = ", 
+            sprintf("%.4f", cor(R2_with_laser$Diff, R2_with_laser$ActDiff, method = c("pearson")))),
      cex = 1.5)
 dev.off()
 

@@ -222,9 +222,10 @@ axis(side=1, at=c(0, 500, 1000, 1500, 2000), cex.axis = 1.5)
 model = lm(formula = laser_vs_pta$pta_R ~ laser_vs_pta$Laser_Exposure)
 abline(model$coefficients[[1]], model$coefficients[[2]])
 coef(summary(model))
-text(x = 1400, y = -0.4, paste0("Slope = ",sprintf("%.4f", model$coefficients[[2]])), cex = 1.5)
-text(x = 1400, y = -0.5, paste0("s.e. = ", sprintf("%.4f", coef(summary(model))[2,2])), cex = 1.5)
-text(x = 1400, y = -0.6, paste0("R^2 = ", sprintf("%.4f", summary(model)$r.squared)), cex = 1.5)
+text(x = 500, y = 0.8, paste0("Slope = ",sprintf("%.4f", model$coefficients[[2]])), cex = 1.5)
+text(x = 600, y = 0.7, paste0("s.e. = ", sprintf("%.4f", coef(summary(model))[2,2]), " (n.s.)"), cex = 1.5)
+text(x = 800, y = 0.6, paste0("Correlation coefficient = ", sprintf("%.4f", cor(laser_vs_pta$Laser_Exposure, laser_vs_pta$pta_R, method = c("pearson"))
+)), cex = 1.5)
 dev.off()
 
 
