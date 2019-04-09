@@ -3,35 +3,33 @@ source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils
 
 ## Fly info
 fly.info.CS = read.csv("data/fly_info_CS_preprocessed.csv", header = T, stringsAsFactors = F)
-fly.info.CS$Genotype = "WT"
-
+fly.info.CS$genotype = "WT"
 fly.info.mutants = read.csv("data/fly_info_mutants_preprocessed.csv",header = T, stringsAsFactors = F)
 
-shared.info = c("Fly", 
-                "Category", 
-                "Gender", 
-                "Genotype", 
-                "Exp.date", 
-                "Experimenter", 
-                "Age", 
-                "Gender",
-                "Setup", 
+shared.info = c("fly", 
+                "genotype",
+                "gender", 
+                "category", 
+                "setup", 
+                "exp_date", 
+                "experimenter", 
+                "age", 
+                "life_span",
                 "Fly.moving.speed", 
                 "Fly.pause",
-                "Framerate", 
-                "Gap")
+                "Framerate")
 
 fly.info = rbind(fly.info.CS[, shared.info], 
                  fly.info.mutants[, shared.info])
 
 # Filter by baseline behaviors
-ind.T.excl = which((fly.info$Category=="T") & (fly.info$Fly.pause > 0.9))
+ind.T.excl = which((fly.info$category=="T") & (fly.info$Fly.pause > 0.9))
 ind.RfromT.excl = c()
 for (i in 1:length(ind.T.excl)){
   ind.RfromT.excl = c(ind.RfromT.excl, Use_T_find_R(fly.info, ind.T.excl[i]))
 }
 ind.T.excl = c(ind.T.excl, ind.RfromT.excl)
-ind.other.excl = which((fly.info$Category!="T") & (fly.info$Fly.pause > 0.9))
+ind.other.excl = which((fly.info$category!="T") & (fly.info$Fly.pause > 0.9))
 ind.all.excl = unique(c(ind.T.excl, ind.other.excl))
 
 #For Mutant data collected after Mar 20, 2017
@@ -53,19 +51,19 @@ excl.fly = rbind(excl.fly.Mutant, excl.fly.WT)
 # All data to be excluded
 ind.excl = NULL
 for (ind in 1:nrow(excl.fly)) {
-  ind.excl = c(ind.excl, which(fly.info$Genotype == excl.fly[ind, 3] & 
-                                 fly.info$Experimenter == excl.fly[ind, 2] & 
-                                 fly.info$Fly == excl.fly[ind, 1]))
+  ind.excl = c(ind.excl, which(fly.info$genotype == excl.fly[ind, 3] & 
+                                 fly.info$experimenter == excl.fly[ind, 2] & 
+                                 fly.info$fly == excl.fly[ind, 1]))
 }
 
 # All data to be included
 ind.include = NULL
-for (genotype in unique(fly.info$Genotype)) {
+for (genotype in unique(fly.info$genotype)) {
   if (genotype == "CS") {next}
   else if (genotype == "WT") {
-    ind = fly.info$Genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+    ind = fly.info$genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
   }else{
-      ind = fly.info$Genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+      ind = fly.info$genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
       }
   ind.include = c(ind.include,which(ind)) 
 }

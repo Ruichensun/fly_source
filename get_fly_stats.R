@@ -44,26 +44,26 @@ query.sessions = sessions
 
 ## WT
 all_ofs_WT = data.frame()
-fly.info = fly.info.end[fly.info.end$Genotype %in% c("WT", "CS"),]
+fly.info = fly.info.end[fly.info.end$genotype %in% c("WT", "CS"),]
 
 for(ind in 1:nrow(fly.info)){
   for(ind.session in 1:length(query.sessions)){
-    if (fly.info$Genotype[ind]=="WT"){
-      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
+    if (fly.info$genotype[ind]=="WT"){
+      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",query.sessions[ind.session], "_WT",".csv"),
                                full.names=T)
-    }else if(fly.info$Genotype[ind]=="CS"){
-      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/mutants/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",query.sessions[ind.session], "_CS",".csv"),
+    }else if(fly.info$genotype[ind]=="CS"){
+      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",query.sessions[ind.session], "_CS",".csv"),
                                full.names=T)
     }
     if(length(input.file) == 0){next
       }else{
           framerate = fly.info$Framerate[ind]        
           ofs = one_fly_statistics(input.file, framerate=framerate)
-          Type = fly.info$Category[ind]
-          Gender = fly.info$Gender[ind]
-          ofs = cbind(Type, Gender, ofs)
+          type = fly.info$category[ind]
+          gender = fly.info$gender[ind]
+          ofs = cbind(type, gender, ofs)
           all_ofs_WT = rbind(all_ofs_WT, ofs)
     }
     
@@ -76,11 +76,11 @@ print("Done-WT")
 
 ## Mutants
 all_ofs_mutants = data.frame()
-fly.info.mutant = fly.info.end[!(fly.info.end$Genotype %in% c("WT", "CS")),]
+fly.info.mutant = fly.info.end[!(fly.info.end$genotype %in% c("WT", "CS")),]
 
 for(ind in 1:nrow(fly.info.mutant)){
   for(ind.session in 1:length(query.sessions)){
-    input.file <- list.files(path = paste0("data/", fly.info.mutant$Experimenter[ind], "/mutants/"),                             
+    input.file <- list.files(path = paste0("data/", fly.info.mutant$experimenter[ind], "/mutants/"),                             
                              pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
                                               "_",query.sessions[ind.session],
                                               "_",fly.info.mutant$Genotype[ind],
@@ -91,9 +91,9 @@ for(ind in 1:nrow(fly.info.mutant)){
       }else{   
         framerate = fly.info.mutant$Framerate[ind]        
         ofs = one_fly_statistics(input.file, framerate=framerate)
-        Type = fly.info.mutant$Category[ind]
-        Gender = fly.info.mutant$Gender[ind]
-        ofs = cbind(Type, Gender, ofs)
+        Type = fly.info.mutant$category[ind]
+        Gender = fly.info.mutant$gender[ind]
+        ofs = cbind(type, gender, ofs)
         all_ofs_mutants = rbind(all_ofs_mutants, ofs)
       }
   }
@@ -115,22 +115,22 @@ sessions_laser = c(
 
 for(ind in 1:nrow(fly.info)){
   for(ind.session in 1:length(sessions_laser)){
-    if (fly.info$Genotype[ind]=="WT"){
-      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/CS/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
+    if (fly.info$genotype[ind]=="WT"){
+      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
                                full.names=T)
-    }else if(fly.info$Genotype[ind]=="CS"){
-      input.file <- list.files(path = paste0("data/", fly.info$Experimenter[ind], "/mutants/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$Fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
+    }else if(fly.info$genotype[ind]=="CS"){
+      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),                             
+                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
                                full.names=T)
     }
     if(length(input.file) == 0){next
     }else{
       framerate = fly.info$Framerate[ind]        
       ofs = one_fly_laser_statistics(input.file, framerate=framerate)
-      Type = fly.info$Category[ind]
-      Gender = fly.info$Gender[ind]
-      ofs = cbind(Type, Gender, ofs)
+      Type = fly.info$category[ind]
+      Gender = fly.info$gender[ind]
+      ofs = cbind(type, gender, ofs)
       all_ofls_WT = rbind(all_ofls_WT, ofs)
     }
   }

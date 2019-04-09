@@ -45,14 +45,14 @@ combine_flyCSV = function(experimenter, type){
            type[3], ".csv")
   for(i in 1:length(input_files)){
     info = read.csv(input_files[i],header=T,stringsAsFactors=F)
-    info$Experimenter = experimenter[i]
-    info$Fly_Exp = paste(info$Fly,experimenter[i],sep='_')
-    if (experimenter[i] != "JGLNRS"){
-      info$Gap = 0
-      info$Exp.date2 = NA
-    }else{
-      info$Age = NA
-    }
+    info$experimenter = experimenter[i]
+    info$fly_exp = paste(info$fly,experimenter[i],sep='_')
+    # if (experimenter[i] != "JGLNRS"){
+    #   info$Gap = 0
+    #   info$Exp.date2 = NA
+    # }else{
+    #   info$Age = NA
+    # }
     all_info = rbind(all_info,info)
   }
   write.table(all_info,
@@ -363,30 +363,30 @@ one_fly_statistics = function(input_file,
                             ), stringsAsFactors=FALSE)
   
       colnames(ret) = c(
-        "Experimenter", #2
-        "Genotype", #3
-        "Fly Number", #4
-        "Session", #5
-        "Number of Pause", #6
-        "Number of Middle Pause", #7
-        "Percentage Time Active", #8
-        "Percentage Time Active - Pause not at the End", #9
-        "Median Pause Duration",#10
-        "Median Middle Pause Duration", #11    
-        "Max Pause Duration", #12
-        "Max Middle Pause Duration", #13
-        "First Pause Duration", #14
-        "First Middle Pause Duration", #15
-        "Average Moving Speed", #16
-        "Average Moving Speed (excluding pause)", #17
-        "Average Speed When Enter Pause", #18
-        "Average Speed When Exit Pause",#19
-        "Moving Distance",#20
-        "Number of Turns",#21
-        "Number of Middle Turns",#22
-        "Fraction of Middle Turns Out of Total Turns",#23
-        "Average Pause Duration", #39
-        "Average Middle Pause Duration" #40
+        "experimenter", #2
+        "genotype", #3
+        "flynum", #4
+        "session", #5
+        "num of pause", #6
+        "num of middle pause", #7
+        "percentage time active", #8
+        "percentage time active - pause not at the end", #9
+        "median pause duration",#10
+        "median middle mause duration", #11    
+        "max pause duration", #12
+        "max middle pause duration", #13
+        "first pause duration", #14
+        "first middle pause duration", #15
+        "average moving speed", #16
+        "average moving speed (excluding pause)", #17
+        "average speed when enter pause", #18
+        "average speed when exit pause",#19
+        "moving distance",#20
+        "number of turns",#21
+        "number of middle turns",#22
+        "fraction of middle turns out of total turns",#23
+        "average pause duration", #39
+        "average middle pause duration" #40
       )
       return(ret)
 }
@@ -427,20 +427,20 @@ shuffle_is_pause = function(is_pause) {
 }
 
 Use_T_find_R = function(fly.info, Tindex){
-  if (fly.info[Tindex, ]$Category != "T"){
+  if (fly.info[Tindex, ]$category != "T"){
     return(c())
   }else{
     Rlst = c()
-    setup_T = fly.info[Tindex, ]$Setup
+    setup_T = fly.info[Tindex, ]$setup
     for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
       if ((i < 1) | (i > nrow(fly.info))){
         next
       }
-      if (fly.info[i, ]$Category == "R" & 
-          fly.info[i, ]$Genotype == fly.info[Tindex, ]$Genotype &
-          fly.info[i, ]$Exp.date == fly.info[Tindex, ]$Exp.date &
-          fly.info[i, ]$Experimenter == fly.info[Tindex, ]$Experimenter & 
-          fly.info[i, ]$Setup != fly.info[Tindex, ]$Setup){
+      if (fly.info[i, ]$category == "R" & 
+          fly.info[i, ]$genotype == fly.info[Tindex, ]$genotype &
+          fly.info[i, ]$exp_date == fly.info[Tindex, ]$exp_date &
+          fly.info[i, ]$experimenter == fly.info[Tindex, ]$experimenter & 
+          fly.info[i, ]$setup != fly.info[Tindex, ]$setup){
         Rlst = c(Rlst, i)
       }
     }
@@ -452,14 +452,14 @@ data_filter = function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
     ind.include = NULL
-    for (genotype in unique(fly.info$Genotype)) {
+    for (genotype in unique(fly.info$genotype)) {
       if (genotype == "CS") {
         next
       }
       else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS")
+        ind = fly.info$genotype %in% c("WT", "CS")
       }else{
-        ind = fly.info$Genotype == genotype 
+        ind = fly.info$genotype == genotype 
       }
       fms = fly.info$Fly.moving.speed[ind]
       rank_fms = rank(fms)
@@ -470,14 +470,14 @@ data_filter = function(filter, fly.info){
   # filter 2: filtering flies by pause
   if (filter == 2) {
     ind.include = NULL
-    for (genotype in unique(fly.info$Genotype)) {
+    for (genotype in unique(fly.info$genotype)) {
       if (genotype == "CS") {
         next
       }
       else if (genotype == "WT") {
-        ind = fly.info$Genotype %in% c("WT", "CS")
+        ind = fly.info$genotype %in% c("WT", "CS")
       }else{
-        ind = fly.info$Genotype == genotype
+        ind = fly.info$genotype == genotype
       }
       pause = fly.info$Fly.pause[ind]
       ind.filter =  pause <= 0.9
@@ -489,11 +489,11 @@ data_filter = function(filter, fly.info){
     ind.include = NULL
     session = "E1"
     for (ind in 1:nrow(fly.info)) {
-      if (fly.info$Genotype[ind] == "WT") {
+      if (fly.info$genotype[ind] == "WT") {
         input.file = paste0("data/", fly.info$experimenter[ind], "/CS/", "ProcessedData_Fly",
-                             fly.info$Fly[ind], "_",session,"_WT",".csv")
+                             fly.info$fly[ind], "_",session,"_WT",".csv")
       } else{input.file = paste0("data/", fly.info$experimenter[ind], "/Mutants/", "ProcessedData_Fly",
-                                  fly.info$Fly[ind], "_", session, "_", fly.info$Genotype[ind], ".csv")
+                                  fly.info$fly[ind], "_", session, "_", fly.info$genotype[ind], ".csv")
       }
       framerate =	fly.info$Framerate[ind]
       if (pass_fly_QC(input.file, framerate)) {
@@ -507,13 +507,13 @@ data_filter = function(filter, fly.info){
 checking_fly_numbers = function(fly.info, filter, filename){
   ind.include = data_filter(filter, fly.info)
   fly.info.include = fly.info[ind.include, ]
-  type_of_mutants = length(unique(fly.info.include$Genotype))
-  names_of_mutants = unique(fly.info.include$Genotype)
+  type_of_mutants = length(unique(fly.info.include$genotype))
+  names_of_mutants = unique(fly.info.include$genotype)
   n = c()
   n_QCed = c()
   for (i in 1:type_of_mutants){
-    n[i] = dim(fly.info[fly.info$Genotype==names_of_mutants[i],])[1]
-    n_QCed[i] = dim(fly.info.include[fly.info.include$Genotype==names_of_mutants[i],])[1]
+    n[i] = dim(fly.info[fly.info$genotype==names_of_mutants[i],])[1]
+    n_QCed[i] = dim(fly.info.include[fly.info.include$genotype==names_of_mutants[i],])[1]
   }
   mutant_info = data.frame(names_of_mutants,n, n_QCed)
   colnames(mutant_info) = c("Genotype", "Number of Flies", "Number of Flies QCed")
@@ -705,12 +705,12 @@ one_fly_laser_statistics = function(input_file, framerate){
       total_laser_ON 
     ))
     colnames(ret) = c(
-      "Experimenter", 
-      "Genotype", 
-      "Fly Number",
-      "Session",       
-      "Laser_Count",
-      "Laser_Exposure")
+      "experimenter", 
+      "genotype", 
+      "flynum",
+      "session",       
+      "laser_count",
+      "laser_exposure")
     return(ret)
   }
 }

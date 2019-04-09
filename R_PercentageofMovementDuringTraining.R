@@ -2,13 +2,20 @@ setwd("D:/Behavioral_project/behavior_experiment_data/Analysis/")
 source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 #Quantify the mean of delay onset/off of laser of one file
-fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                      (fly.info.end$Genotype == "CS")) & 
-                                     (fly.info.end$Category =="T"), ]
-fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                      (fly.info.end$Genotype == "CS")) & 
-                                     (fly.info.end$Category == "R") , ]
+# fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
+#                                       (fly.info.end$Genotype == "CS")) & 
+#                                      (fly.info.end$Category =="T"), ]
+# fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
+#                                       (fly.info.end$Genotype == "CS")) & 
+#                                      (fly.info.end$Category == "R") , ]
+
+fly.info.movement.T = fly.info.end[(fly.info.end$Category =="T"), ]
+fly.info.movement.R = fly.info.end[(fly.info.end$Category == "R") , ]
+
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
+all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
+all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
+
 
 # Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
@@ -17,15 +24,15 @@ R1 = R1[!is.na(R1$Hit_W), ]
 R1$Diff = R1$Hit_W - R1$Hit_P
 R1$ActDiff = NA
 for (i in 1:nrow(R1)){
-  R1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter &
-                               all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
-                               all_ofs_WT$Genotype == R1[i, ]$Genotype & 
-                               all_ofs_WT$Session == "E1R1E1", ]$Percentage.Time.Active -
-                    all_ofs_WT[all_ofs_WT$Experimenter == R1[i, ]$Experimenter &
-                               all_ofs_WT$Fly.Number == R1[i, ]$Fly & 
-                               all_ofs_WT$Genotype == R1[i, ]$Genotype & 
-                               all_ofs_WT$Session == "E1" & 
-                               all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+  R1[i, ]$ActDiff = all_ofs[all_ofs$Experimenter == R1[i, ]$Experimenter &
+                               all_ofs$Fly.Number == R1[i, ]$Fly & 
+                               all_ofs$Genotype == R1[i, ]$Genotype & 
+                               all_ofs$Session == "E1R1E1", ]$Percentage.Time.Active -
+                    all_ofs[all_ofs$Experimenter == R1[i, ]$Experimenter &
+                               all_ofs$Fly.Number == R1[i, ]$Fly & 
+                               all_ofs$Genotype == R1[i, ]$Genotype & 
+                               all_ofs$Session == "E1" & 
+                               all_ofs$Type == "R", ]$Percentage.Time.Active 
 }
 
 T1 = Hit_by_laser("E1T1", fly.info.movement.T)
@@ -33,15 +40,15 @@ T1 = T1[!is.na(T1$Hit_W), ]
 T1$Diff = T1$Hit_W - T1$Hit_P
 T1$ActDiff = NA
 for (i in 1:nrow(T1)){
-  T1[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == T1[i, ]$Experimenter &
-                               all_ofs_WT$Fly.Number == T1[i, ]$Fly &
-                               all_ofs_WT$Genotype == T1[i, ]$Genotype &
-                               all_ofs_WT$Session == "E1T1E1", ]$Percentage.Time.Active -
-                    all_ofs_WT[all_ofs_WT$Experimenter == T1[i, ]$Experimenter &
-                               all_ofs_WT$Fly.Number == T1[i, ]$Fly &
-                               all_ofs_WT$Genotype == T1[i, ]$Genotype &
-                               all_ofs_WT$Session == "E1" &
-                               all_ofs_WT$Type == "T", ]$Percentage.Time.Active
+  T1[i, ]$ActDiff = all_ofs[all_ofs$Experimenter == T1[i, ]$Experimenter &
+                               all_ofs$Fly.Number == T1[i, ]$Fly &
+                               all_ofs$Genotype == T1[i, ]$Genotype &
+                               all_ofs$Session == "E1T1E1", ]$Percentage.Time.Active -
+                    all_ofs[all_ofs$Experimenter == T1[i, ]$Experimenter &
+                               all_ofs$Fly.Number == T1[i, ]$Fly &
+                               all_ofs$Genotype == T1[i, ]$Genotype &
+                               all_ofs$Session == "E1" &
+                               all_ofs$Type == "T", ]$Percentage.Time.Active
 }
 
 RT_val = subset_laser_expo(fly.info.end, Random = R1, Training = T1, threshold = 0.2)
@@ -70,14 +77,14 @@ R2$Diff = R2$Hit_W - R2$Hit_P
 a = c()
 R2$ActDiff = NA
 for (i in 1:nrow(R2)){
-  temp = all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & 
-                      all_ofs_WT$Fly.Number == R2[i, ]$Fly &
-                      all_ofs_WT$Genotype == R2[i, ]$Genotype & 
-                      all_ofs_WT$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
-               all_ofs_WT[all_ofs_WT$Experimenter == R2[i, ]$Experimenter & 
-                            all_ofs_WT$Fly.Number == R2[i, ]$Fly & 
-                            all_ofs_WT$Genotype == R2[i, ]$Genotype & 
-                            all_ofs_WT$Session == "E1R1E1" & all_ofs_WT$Type == "R", ]$Percentage.Time.Active 
+  temp = all_ofs[all_ofs$Experimenter == R2[i, ]$Experimenter & 
+                      all_ofs$Fly.Number == R2[i, ]$Fly &
+                      all_ofs$Genotype == R2[i, ]$Genotype & 
+                      all_ofs$Session == "E1R1E1R1E1", ]$Percentage.Time.Active -
+               all_ofs[all_ofs$Experimenter == R2[i, ]$Experimenter & 
+                            all_ofs$Fly.Number == R2[i, ]$Fly & 
+                            all_ofs$Genotype == R2[i, ]$Genotype & 
+                            all_ofs$Session == "E1R1E1" & all_ofs$Type == "R", ]$Percentage.Time.Active 
 
   R2[i, ]$ActDiff = temp
 }
@@ -87,15 +94,15 @@ T2 = T2[!is.na(T2$Hit_W), ]
 T2$Diff = T2$Hit_W - T2$Hit_P
 T2$ActDiff = NA
 for (i in 1:nrow(T2)){
-  T2[i, ]$ActDiff = all_ofs_WT[all_ofs_WT$Experimenter == T2[i, ]$Experimenter &
-                               all_ofs_WT$Fly.Number == T2[i, ]$Fly &
-                               all_ofs_WT$Genotype == T2[i, ]$Genotype &
-                               all_ofs_WT$Session == "E1T1E1T1E1", ]$Percentage.Time.Active -
-    all_ofs_WT[all_ofs_WT$Experimenter == T2[i, ]$Experimenter &
-               all_ofs_WT$Fly.Number == T2[i, ]$Fly &
-               all_ofs_WT$Genotype == T2[i, ]$Genotype &
-               all_ofs_WT$Session == "E1T1E1" &
-               all_ofs_WT$Type == "T", ]$Percentage.Time.Active
+  T2[i, ]$ActDiff = all_ofs[all_ofs$Experimenter == T2[i, ]$Experimenter &
+                               all_ofs$Fly.Number == T2[i, ]$Fly &
+                               all_ofs$Genotype == T2[i, ]$Genotype &
+                               all_ofs$Session == "E1T1E1T1E1", ]$Percentage.Time.Active -
+    all_ofs[all_ofs$Experimenter == T2[i, ]$Experimenter &
+               all_ofs$Fly.Number == T2[i, ]$Fly &
+               all_ofs$Genotype == T2[i, ]$Genotype &
+               all_ofs$Session == "E1T1E1" &
+               all_ofs$Type == "T", ]$Percentage.Time.Active
 }
 
 RT2_val = subset_laser_expo(fly.info.end, Random = R2, Training = T2, threshold = 0.2)
