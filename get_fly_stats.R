@@ -79,11 +79,12 @@ all_ofs_mutants = data.frame()
 fly.info.mutant = fly.info.end[!(fly.info.end$genotype %in% c("WT", "CS")),]
 
 for(ind in 1:nrow(fly.info.mutant)){
-  for(ind.session in 1:length(query.sessions)){
+# for(ind in 2651:2653){
+    for(ind.session in 1:length(query.sessions)){
     input.file <- list.files(path = paste0("data/", fly.info.mutant$experimenter[ind], "/mutants/"),                             
-                             pattern = paste0("ProcessedData_Fly",fly.info.mutant$Fly[ind],
+                             pattern = paste0("ProcessedData_Fly",fly.info.mutant$fly[ind],
                                               "_",query.sessions[ind.session],
-                                              "_",fly.info.mutant$Genotype[ind],
+                                              "_",fly.info.mutant$genotype[ind],
                                               ".csv"),
                              full.names=T
     )
@@ -91,9 +92,10 @@ for(ind in 1:nrow(fly.info.mutant)){
       }else{   
         framerate = fly.info.mutant$Framerate[ind]        
         ofs = one_fly_statistics(input.file, framerate=framerate)
-        Type = fly.info.mutant$category[ind]
-        Gender = fly.info.mutant$gender[ind]
+        type = fly.info.mutant$category[ind]
+        gender = fly.info.mutant$gender[ind]
         ofs = cbind(type, gender, ofs)
+        print(ofs[,3:4])
         all_ofs_mutants = rbind(all_ofs_mutants, ofs)
       }
   }

@@ -873,22 +873,22 @@ chance_of_being_hit_by_laser = function(input_file){
 Hit_by_laser = function(file_name_filter, fly.info.movement) {
   laser_chance = data.frame()
   for (ind in 1:nrow(fly.info.movement)) {
-    if(fly.info.movement$Genotype[ind]=="WT"){
+    if(fly.info.movement$genotype[ind]=="WT"){
       input.file = list.files(
-        path = paste0("data/",fly.info.movement$Experimenter[ind],"/CS/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_WT", ".csv"),
+        path = paste0("data/",fly.info.movement$experimenter[ind],"/CS/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_", file_name_filter, "_WT", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
-    }else if(fly.info.movement$Genotype[ind]=="CS"){
+    }else if(fly.info.movement$genotype[ind]=="CS"){
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter, "_CS", ".csv"),
+        path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_", file_name_filter, "_CS", ".csv"),
         full.names = T)
       if(length(input.file)==0){next()}
     }else{
       input.file = list.files(
-      path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
-      pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_", file_name_filter,"_", fly.info.movement[ind,]$Genotype, ".csv"),
+      path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+      pattern = paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_", file_name_filter,"_", fly.info.movement[ind,]$genotype, ".csv"),
       full.names = T)
       if(length(input.file)==0){next()}
       print(input.file)
@@ -2133,16 +2133,16 @@ plot_comparison = function(genotype, metric.ind, all_ofs){
 # Plot only the initial and test 2 behavioral data and test only T-R pairs
 plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
   if (genotype == "WT"){
-    all_ofs = all_ofs[all_ofs$Genotype == "WT" | all_ofs$Genotype == "CS", ]
-    fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category =="T"), ]
-    fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category == "R") , ]
-    fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category == "N") , ]
+    all_ofs = all_ofs[all_ofs$genotype == "WT" | all_ofs$genotype == "CS", ]
+    fly.info.movement.T = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category =="T"), ]
+    fly.info.movement.R = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category == "R") , ]
+    fly.info.movement.N = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category == "N") , ]
     R1 = Hit_by_laser("E1R1", fly.info.movement.R)
     T1 = Hit_by_laser("E1T1", fly.info.movement.T)
     N1 = Hit_by_laser("E1N1", fly.info.movement.N)
@@ -2152,9 +2152,9 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
     temp = data.frame()
     for (i in 1:nrow(RT.include)){
       temp = rbind(temp, 
-                   all_ofs[all_ofs$Fly.Number == RT.include[i, ]$Fly & 
-                             all_ofs$Experimenter == RT.include[i, ]$Experimenter &
-                             all_ofs$Genotype == RT.include[i, ]$Genotype,])
+                   all_ofs[all_ofs$flynum == RT.include[i, ]$fly & 
+                             all_ofs$experimenter == RT.include[i, ]$experimenter &
+                             all_ofs$genotype == RT.include[i, ]$genotype,])
     }
     all_ofs = temp
   }
@@ -2168,15 +2168,15 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
   if (noN == T){
     if (genotype == "WT"){
       num = c(num, 
-              length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind]),
-              length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind])
+              length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1", ][, metric.ind]),
+              length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1", ][, metric.ind])
       )
       m1 = data.frame(
-        factor = c(rep("E1_T_WT", length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind])),
-                   rep("E1_R_WT", length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind]))
+        factor = c(rep("E1_T_WT", length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1", ][, metric.ind])),
+                   rep("E1_R_WT", length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1", ][, metric.ind]))
         ),
-        value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" , ][, metric.ind], 
-                             all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" , ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" , ][, metric.ind], 
+                             all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" , ][, metric.ind]
         )
         )
       )
@@ -2197,11 +2197,11 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
           significance1 = "****"
         }
       m2 = data.frame(
-        factor = c(rep("E5_T_WT", length(all_ofs[all_ofs$Session=="E1T1E1T1E1", ][, metric.ind])),
-                   rep("E5_R_WT", length(all_ofs[all_ofs$Session=="E1R1E1R1E1", ][, metric.ind]))
+        factor = c(rep("E5_T_WT", length(all_ofs[all_ofs$session=="E1T1E1T1E1", ][, metric.ind])),
+                   rep("E5_R_WT", length(all_ofs[all_ofs$session=="E1R1E1R1E1", ][, metric.ind]))
         ),
-        value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" , ][, metric.ind],
-                             all_ofs[all_ofs$Session=="E1R1E1R1E1" , ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$session=="E1T1E1T1E1" , ][, metric.ind],
+                             all_ofs[all_ofs$session=="E1R1E1R1E1" , ][, metric.ind]
         ))
       )
       colnames(m2) = c("Session", "Value")
@@ -2220,14 +2220,14 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
       }
       
     }else{
-      num = c(length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]),
-              length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+      num = c(length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]),
+              length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]))
       m1 = data.frame(
-        factor = c(rep(paste0("E1_T_", genotype), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E1_R_", genotype), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+        factor = c(rep(paste0("E1_T_", genotype), length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E1_R_", genotype), length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]))
         ),
-        value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind], 
-                             all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind], 
+                             all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]
         ))
       )
       colnames(m1) = c("Session", "Value")
@@ -2246,11 +2246,11 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
         significance1 = "****"
       }
       m2 = data.frame(
-        factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E5_R_", genotype), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+        factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$session=="E1T1E1T1E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E5_R_", genotype), length(all_ofs[all_ofs$session=="E1R1E1R1E1" & all_ofs$genotype==genotype, ][, metric.ind]))
                    ),
-        value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind],
-                             all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$session=="E1T1E1T1E1" & all_ofs$genotype==genotype, ][, metric.ind],
+                             all_ofs[all_ofs$session=="E1R1E1R1E1" & all_ofs$genotype==genotype, ][, metric.ind]
         ))
       )
       colnames(m2) = c("Session", "Value")
@@ -2271,18 +2271,18 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
   }else{
   if (genotype == "WT"){
     num = c(num, 
-            length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind]),
-            length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind]),
-            length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1", ][, metric.ind])
+            length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1", ][, metric.ind]),
+            length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1", ][, metric.ind]),
+            length(all_ofs[all_ofs$type=="N" & all_ofs$session=="E1", ][, metric.ind])
     )
     m1 = data.frame(
-      factor = c(rep("E1_T_WT", length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1", ][, metric.ind])),
-                 rep("E1_R_WT", length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1", ][, metric.ind])),
-                 rep("E1_N_WT", length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1", ][, metric.ind]))
+      factor = c(rep("E1_T_WT", length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1", ][, metric.ind])),
+                 rep("E1_R_WT", length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1", ][, metric.ind])),
+                 rep("E1_N_WT", length(all_ofs[all_ofs$type=="N" & all_ofs$session=="E1", ][, metric.ind]))
       ),
-      value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" , ][, metric.ind], 
-                           all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" , ][, metric.ind],
-                           all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" , ][, metric.ind]
+      value = as.numeric(c(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" , ][, metric.ind], 
+                           all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" , ][, metric.ind],
+                           all_ofs[all_ofs$type=="N" & all_ofs$session=="E1" , ][, metric.ind]
       )
       )
     )
@@ -2314,13 +2314,13 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
     }
     
     m2 = data.frame(
-      factor = c(rep("E5_T_WT", length(all_ofs[all_ofs$Session=="E1T1E1T1E1", ][, metric.ind])),
-                 rep("E5_R_WT", length(all_ofs[all_ofs$Session=="E1R1E1R1E1", ][, metric.ind])),
-                 rep("E5_N_WT", length(all_ofs[all_ofs$Session=="E1N1E1N1E1", ][, metric.ind]))
+      factor = c(rep("E5_T_WT", length(all_ofs[all_ofs$session=="E1T1E1T1E1", ][, metric.ind])),
+                 rep("E5_R_WT", length(all_ofs[all_ofs$session=="E1R1E1R1E1", ][, metric.ind])),
+                 rep("E5_N_WT", length(all_ofs[all_ofs$session=="E1N1E1N1E1", ][, metric.ind]))
       ),
-      value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" , ][, metric.ind],
-                           all_ofs[all_ofs$Session=="E1R1E1R1E1" , ][, metric.ind],
-                           all_ofs[all_ofs$Session=="E1N1E1N1E1", ][, metric.ind]
+      value = as.numeric(c(all_ofs[all_ofs$session=="E1T1E1T1E1" , ][, metric.ind],
+                           all_ofs[all_ofs$session=="E1R1E1R1E1" , ][, metric.ind],
+                           all_ofs[all_ofs$session=="E1N1E1N1E1", ][, metric.ind]
       )
       )
     )
@@ -2351,18 +2351,18 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
     }
     
   }else{
-      num = c(length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]),
-              length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]),
-              length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind])
+      num = c(length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]),
+              length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]),
+              length(all_ofs[all_ofs$type=="N" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind])
       )
       m1 = data.frame(
-        factor = c(rep(paste0("E1_T_", genotype), length(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E1_R_", genotype), length(all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E1_N_", genotype), length(all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+        factor = c(rep(paste0("E1_T_", genotype), length(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E1_R_", genotype), length(all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E1_N_", genotype), length(all_ofs[all_ofs$type=="N" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]))
         ),
-        value = as.numeric(c(all_ofs[all_ofs$Type=="T" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind], 
-                             all_ofs[all_ofs$Type=="R" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind],
-                             all_ofs[all_ofs$Type=="N" & all_ofs$Session=="E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$type=="T" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind], 
+                             all_ofs[all_ofs$type=="R" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind],
+                             all_ofs[all_ofs$type=="N" & all_ofs$session=="E1" & all_ofs$genotype==genotype, ][, metric.ind]
         ))
       )
       colnames(m1) = c("Session", "Value")
@@ -2392,13 +2392,13 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
         print("There is no significant difference between groups")
       }
       m2 = data.frame(
-        factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E5_R_", genotype), length(all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind])),
-                   rep(paste0("E5_N_", genotype), length(all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==genotype, ][, metric.ind]))
+        factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$session=="E1T1E1T1E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E5_R_", genotype), length(all_ofs[all_ofs$session=="E1R1E1R1E1" & all_ofs$genotype==genotype, ][, metric.ind])),
+                   rep(paste0("E5_N_", genotype), length(all_ofs[all_ofs$session=="E1N1E1N1E1" & all_ofs$genotype==genotype, ][, metric.ind]))
         ),
-        value = as.numeric(c(all_ofs[all_ofs$Session=="E1T1E1T1E1" & all_ofs$Genotype==genotype, ][, metric.ind],
-                             all_ofs[all_ofs$Session=="E1R1E1R1E1" & all_ofs$Genotype==genotype, ][, metric.ind],
-                             all_ofs[all_ofs$Session=="E1N1E1N1E1" & all_ofs$Genotype==genotype, ][, metric.ind]
+        value = as.numeric(c(all_ofs[all_ofs$session=="E1T1E1T1E1" & all_ofs$genotype==genotype, ][, metric.ind],
+                             all_ofs[all_ofs$session=="E1R1E1R1E1" & all_ofs$genotype==genotype, ][, metric.ind],
+                             all_ofs[all_ofs$session=="E1N1E1N1E1" & all_ofs$genotype==genotype, ][, metric.ind]
         ))
       )
       colnames(m2) = c("Session", "Value")
