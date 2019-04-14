@@ -133,6 +133,7 @@ plot_comparison("CS x PKCi", 9, all_ofs)
 plot_comparison("UAS-DopR1-IR x 51635", 9, all_ofs)
 plot_comparison("CS x JU30", 9, all_ofs)
 
+#
 category = "T"
 par(mfrow = c(3, 1))
 g_list = c("WT", "SUN1", "SUN1 x CS", "SUN2", "SUN2 x CS", "SUN3", "SUN3 x CS",  "THGAL4 x JU29", "THGAL4 x JU30")
@@ -159,10 +160,45 @@ g_list6 = c("WT", "W1118", "R5", "R3", "Empty-Gal4 x JU30", "DopR2 x JU30", "Dop
 learning_index6 = get_learning_index(fly.info.end, all_ofs, 8, category, g_list6)
 boxplot(Learning~Genotype, learning_index6, ylim = c(-1, 1), notch = F)
 
+#
 fly.info.end_3 = fly.info.end[fly.info.end$age==3,] 
 fly.info.end_5 = fly.info.end[fly.info.end$age==5,] 
 
-
+#
 sample(nrow(fly.WT.T), size = 29, replace = TRUE)
 fly.WT.T[sample(nrow(fly.WT.T), size = 29, replace = TRUE), ]
 
+# Plot new data
+metric.ind = 9
+plot_single_15("MB009B x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB131B x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB419B x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB607B x CS", metric.ind, all_ofs, fly.info.end)
+
+plot_single_15("51635 x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("UAS-DopR1-IR x 51635", metric.ind, all_ofs, fly.info.end)
+plot_single_15("UAS-DopR1-IR x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("D2R-1 x 51635", metric.ind, all_ofs, fly.info.end)
+
+plot_single_15("MB009B x JU30", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB131B x JU30", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB419B x JU30", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB607B x JU30", metric.ind, all_ofs, fly.info.end)
+
+plot_single_15("MB009B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB131B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB419B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
+plot_single_15("MB607B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
+
+# Bootstrap
+ind_of_interest = 9
+N = 10000
+mb009xcs = get_bootstrapped_WTmean_CI("MB009B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb131xcs = get_bootstrapped_WTmean_CI("MB131B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb419xcs = get_bootstrapped_WTmean_CI("MB419B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb607xcs = get_bootstrapped_WTmean_CI("MB607B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+
+mb009xJU30 = get_bootstrapped_WTmean_CI("MB009B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb131xJU30 = get_bootstrapped_WTmean_CI("MB131B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb419xJU30 = get_bootstrapped_WTmean_CI("MB419B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb607xJU30 = get_bootstrapped_WTmean_CI("MB607B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
