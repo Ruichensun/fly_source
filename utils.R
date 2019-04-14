@@ -2933,3 +2933,109 @@ plot_traces = function(geno, fly.info.end){
   dev.off()
 }
 
+
+get_mutant_numbers = function(genotype, fly.info.end){
+  num_T = nrow(fly.info.end[(fly.info.end$genotype==genotype)&(fly.info.end$category=="T"),])
+  num_R = nrow(fly.info.end[(fly.info.end$genotype==genotype)&(fly.info.end$category=="R"),])
+  num_N = nrow(fly.info.end[(fly.info.end$genotype==genotype)&(fly.info.end$category=="N"),])
+  ret = c(num_T, num_R, num_N)
+  return(ret)
+}
+
+get_WT_subset = function(genotype, ind_of_interest,  all_ofs, fly.info.end){
+  target_size = get_mutant_numbers(genotype, fly.info.end)
+  
+  fly.info.end_WT = fly.info.end[(fly.info.end$genotype=="WT")|(fly.info.end$genotype=="CS"),]
+  
+  fly.WT.T = fly.info.end_WT[fly.info.end_WT$category=="T", ]
+  fly.WT.R = fly.info.end_WT[fly.info.end_WT$category=="R", ]
+  fly.WT.N = fly.info.end_WT[fly.info.end_WT$category=="N", ]
+  WT.T = fly.WT.T[sample(nrow(fly.WT.T), size = target_size[1], replace = TRUE), ]
+  WT.R = fly.WT.R[sample(nrow(fly.WT.R), size = target_size[2], replace = TRUE), ]
+  WT.N = fly.WT.N[sample(nrow(fly.WT.N), size = target_size[3], replace = TRUE), ]
+  
+  all_ofs_WT = all_ofs[(all_ofs$genotype=="WT")|(all_ofs$genotype=="CS"), ]
+  
+  WT.T.data = data.frame()
+  
+  for (i in 1:nrow(WT.T)){
+    fly = WT.T[i, ]$fly
+    geno = WT.T[i, ]$genotype
+    cat = WT.T[i, ]$category
+    experimenter = WT.T[i, ]$experimenter
+    temp = all_ofs_WT[all_ofs_WT$flynum == fly & all_ofs_WT$type == cat &
+                        all_ofs_WT$genotype == geno & all_ofs_WT$experimenter == experimenter, ]
+    WT.T.data = rbind(WT.T.data, temp)
+  }
+  
+  WT.R.data = data.frame()
+  for (i in 1:nrow(WT.R)){
+    fly = WT.R[i, ]$fly
+    geno = WT.R[i, ]$genotype
+    cat = WT.R[i, ]$category
+    experimenter = WT.R[i, ]$experimenter
+    temp = all_ofs_WT[all_ofs_WT$flynum == fly & all_ofs_WT$type == cat &
+                        all_ofs_WT$genotype == geno & all_ofs_WT$experimenter == experimenter, ]
+    WT.R.data = rbind(WT.R.data, temp)
+  }
+  
+  WT.N.data = data.frame()
+  for (i in 1:nrow(WT.N)){
+    fly = WT.N[i, ]$fly
+    geno = WT.N[i, ]$genotype
+    cat = WT.N[i, ]$category
+    experimenter = WT.N[i, ]$experimenter
+    temp = all_ofs_WT[all_ofs_WT$flynum == fly & all_ofs_WT$type == cat &
+                        all_ofs_WT$genotype == geno & all_ofs_WT$experimenter == experimenter, ]
+    WT.N.data = rbind(WT.N.data, temp)
+  }
+  
+  ses.T.1 = WT.T.data[WT.T.data$session == "E1", ind_of_interest]
+  ses.R.1 = WT.R.data[WT.R.data$session == "E1", ind_of_interest]
+  ses.N.1 = WT.N.data[WT.N.data$session == "E1", ind_of_interest]
+  ses.T.5 = WT.T.data[WT.T.data$session == "E1T1E1T1E1", ind_of_interest]
+  ses.R.5 = WT.R.data[WT.R.data$session == "E1R1E1R1E1", ind_of_interest]
+  ses.N.5 = WT.N.data[WT.N.data$session == "E1N1E1N1E1", ind_of_interest]
+  ret = c(mean(ses.T.1), mean(ses.R.1), mean(ses.N.1), mean(ses.T.5), mean(ses.R.5), mean(ses.N.5))
+  return(ret)
+}
+
+get_bootstrapped_WTmean = function(genotype, ind_of_interest,  all_ofs, fly.info.end, N){
+  result = data.frame()
+  for (it in 1:N){
+    temp = get_WT_subset(genotype, ind_of_interest,  all_ofs, fly.info.end)
+    result = rbind(result, temp)
+  }
+  colnames(result) = c("Train1", "Yoked1", "Blank1",
+                       "Train5", "Yoked5", "Blank5")
+  return(result)
+}
+
+get_bootstrapped_WTmean_CI = function(genotype, ind_of_interest,  all_ofs, fly.info.end, N){
+  result = get_bootstrapped_WTmean(genotype, ind_of_interest,  all_ofs, fly.info.end, N)
+  
+  Train1_mean = mean(result[,1])
+  Train1_CI = qnorm(0.975) * sd(result[,1]) / sqrt(N)
+  Train5_mean = mean(result[,4])
+  Train5_CI = qnorm(0.975) * sd(result[,4]) / sqrt(N)
+  Yoked1_mean = mean(result[,2])
+  Yoked1_CI = qnorm(0.975) * sd(result[,2]) / sqrt(N)
+  Yoked5_mean = mean(result[,5])
+  Yoked5_CI = qnorm(0.975) * sd(result[,5]) / sqrt(N)
+  Blank1_mean = mean(result[,3])
+  Blank1_CI = qnorm(0.975) * sd(result[,3]) / sqrt(N)
+  Blank5_mean = mean(result[,6])
+  Blank5_CI = qnorm(0.975) * sd(result[,6]) / sqrt(N)
+  
+  ret = rbind(c(Train1_mean, Train1_mean - Train1_CI, Train1_mean + Train1_CI),
+              c(Yoked1_mean, Yoked1_mean - Yoked1_CI, Yoked1_mean + Yoked1_CI),
+              c(Blank1_mean, Blank1_mean - Blank1_CI, Blank1_mean + Blank1_CI),
+              c(Train5_mean, Train5_mean - Train5_CI, Train5_mean + Train5_CI),
+              c(Yoked5_mean, Yoked5_mean - Yoked5_CI, Yoked5_mean + Yoked5_CI),
+              c(Blank5_mean, Blank5_mean - Blank5_CI, Blank5_mean + Blank5_CI)
+  )
+  colnames(ret) = c("Mean", "Lower", "Upper")
+  rownames(ret) = c("Train1", "Yoked1", "Blank1", "Train5", "Yoked5", "Blank5")
+  return(ret)
+}
+

@@ -16,8 +16,6 @@ all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
-
-# Segmenting both the T and R flies' the Exposure Differential to [-0.2, 0.2]
 # After 1st training session
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]

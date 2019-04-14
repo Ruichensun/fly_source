@@ -100,12 +100,6 @@ for (i in 1:9){
 }
 colnames(CI_df_WT22) = c("Median", "CI_Lower", "CI_Upper")
 
-
-
-
-
-
-
 # Plotting All Metrics for each genotype
 # WT flies
 query.genotype <- c("WT")
@@ -164,3 +158,11 @@ boxplot(Learning~Genotype, learning_index5, ylim = c(-1, 1), notch = F)
 g_list6 = c("WT", "W1118", "R5", "R3", "Empty-Gal4 x JU30", "DopR2 x JU30", "DopR1 x JU30")
 learning_index6 = get_learning_index(fly.info.end, all_ofs, 8, category, g_list6)
 boxplot(Learning~Genotype, learning_index6, ylim = c(-1, 1), notch = F)
+
+fly.info.end_3 = fly.info.end[fly.info.end$age==3,] 
+fly.info.end_5 = fly.info.end[fly.info.end$age==5,] 
+
+
+sample(nrow(fly.WT.T), size = 29, replace = TRUE)
+fly.WT.T[sample(nrow(fly.WT.T), size = 29, replace = TRUE), ]
+
