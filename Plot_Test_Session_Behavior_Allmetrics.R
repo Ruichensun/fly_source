@@ -193,12 +193,12 @@ plot_single_15("MB607B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
 # Bootstrap
 ind_of_interest = 9
 N = 10000
-mb009xcs = get_bootstrapped_WTmean_CI("MB009B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
-mb131xcs = get_bootstrapped_WTmean_CI("MB131B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
-mb419xcs = get_bootstrapped_WTmean_CI("MB419B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
-mb607xcs = get_bootstrapped_WTmean_CI("MB607B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb009xcs = get_bootstrapped_WT("MB009B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb131xcs = get_bootstrapped_WT("MB131B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb419xcs = get_bootstrapped_WT("MB419B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+mb607xcs = get_bootstrapped_WT("MB607B x CS", ind_of_interest,  all_ofs, fly.info.end, N)
 
-mb009xJU30 = get_bootstrapped_WTmean_CI("MB009B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
-mb131xJU30 = get_bootstrapped_WTmean_CI("MB131B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
-mb419xJU30 = get_bootstrapped_WTmean_CI("MB419B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
-mb607xJU30 = get_bootstrapped_WTmean_CI("MB607B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb009xJU30 = get_bootstrapped_WT("MB009B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb131xJU30 = get_bootstrapped_WT("MB131B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb419xJU30 = get_bootstrapped_WT("MB419B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+mb607xJU30 = get_bootstrapped_WT("MB607B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)

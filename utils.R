@@ -3000,7 +3000,7 @@ get_WT_subset = function(genotype, ind_of_interest,  all_ofs, fly.info.end){
   return(ret)
 }
 
-get_bootstrapped_WTmean = function(genotype, ind_of_interest,  all_ofs, fly.info.end, N){
+get_bootstrapped_WT = function(genotype, ind_of_interest,  all_ofs, fly.info.end, N){
   result = data.frame()
   for (it in 1:N){
     temp = get_WT_subset(genotype, ind_of_interest,  all_ofs, fly.info.end)
@@ -3011,8 +3011,8 @@ get_bootstrapped_WTmean = function(genotype, ind_of_interest,  all_ofs, fly.info
   return(result)
 }
 
-get_bootstrapped_WTmean_CI = function(genotype, ind_of_interest,  all_ofs, fly.info.end, N){
-  result = get_bootstrapped_WTmean(genotype, ind_of_interest,  all_ofs, fly.info.end, N)
+get_bootstrapped_WTmean_CI = function(result, N){
+  #result = get_bootstrapped_WT(genotype, ind_of_interest,  all_ofs, fly.info.end, N)
   
   Train1_mean = mean(result[,1])
   Train1_CI = qnorm(0.975) * sd(result[,1]) / sqrt(N)
