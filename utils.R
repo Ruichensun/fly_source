@@ -448,6 +448,29 @@ Use_T_find_R = function(fly.info, Tindex){
   }
 }
 
+Use_T_find_N = function(fly.info, Tindex){
+  if (fly.info[Tindex, ]$category != "T"){
+    return(c())
+  }else{
+    Nlst = c()
+    setup_T = fly.info[Tindex, ]$setup
+    for (i in ((Tindex - setup_T + 1):(Tindex + 4 - setup_T))){
+      if ((i < 1) | (i > nrow(fly.info))){
+        next
+      }
+      if (fly.info[i, ]$category == "N" & 
+          fly.info[i, ]$genotype == fly.info[Tindex, ]$genotype &
+          fly.info[i, ]$exp_date == fly.info[Tindex, ]$exp_date &
+          fly.info[i, ]$experimenter == fly.info[Tindex, ]$experimenter & 
+          fly.info[i, ]$setup != fly.info[Tindex, ]$setup){
+        Nlst = c(Nlst, i)
+      }
+    }
+    return (Nlst)
+  }
+}
+
+
 data_filter = function(filter, fly.info){
   # filter 1: filtering flies by walking speed
   if (filter == 1) {
