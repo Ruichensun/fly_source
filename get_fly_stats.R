@@ -105,42 +105,42 @@ write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.n
 all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
 print("Done-Mutants")
 
-# laser segmentation
-all_ofls_WT = data.frame()
-
-sessions_laser = c(
-  "E1T1",
-  "E1T1E1T1",
-  "E1R1",
-  "E1R1E1R1"
-)
-
-for(ind in 1:nrow(fly.info)){
-  for(ind.session in 1:length(sessions_laser)){
-    if (fly.info$genotype[ind]=="WT"){
-      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
-                               full.names=T)
-    }else if(fly.info$genotype[ind]=="CS"){
-      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),                             
-                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
-                               full.names=T)
-    }
-    if(length(input.file) == 0){next
-    }else{
-      framerate = fly.info$Framerate[ind]        
-      ofs = one_fly_laser_statistics(input.file, framerate=framerate)
-      Type = fly.info$category[ind]
-      Gender = fly.info$gender[ind]
-      ofs = cbind(type, gender, ofs)
-      all_ofls_WT = rbind(all_ofls_WT, ofs)
-    }
-  }
-}
-
-write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
-all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
-print("Done - laser")
+# # laser segmentation
+# all_ofls_WT = data.frame()
+# 
+# sessions_laser = c(
+#   "E1T1",
+#   "E1T1E1T1",
+#   "E1R1",
+#   "E1R1E1R1"
+# )
+# 
+# for(ind in 1:nrow(fly.info)){
+#   for(ind.session in 1:length(sessions_laser)){
+#     if (fly.info$genotype[ind]=="WT"){
+#       input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS/"),                             
+#                                pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
+#                                full.names=T)
+#     }else if(fly.info$genotype[ind]=="CS"){
+#       input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),                             
+#                                pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
+#                                full.names=T)
+#     }
+#     if(length(input.file) == 0){next
+#     }else{
+#       framerate = fly.info$Framerate[ind]        
+#       ofs = one_fly_laser_statistics(input.file, framerate=framerate)
+#       Type = fly.info$category[ind]
+#       Gender = fly.info$gender[ind]
+#       ofs = cbind(type, gender, ofs)
+#       all_ofls_WT = rbind(all_ofls_WT, ofs)
+#     }
+#   }
+# }
+# 
+# write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+# all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+# print("Done - laser")
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
@@ -170,7 +170,7 @@ N1$Diff = N1$Hit_W - N1$Hit_P
 
 fly.info.end = rbind(temp, R1, N1)
 
-write.csv(fly.info.end, file = "headcount_filtered.csv", row.names = TRUE)
+write.csv(fly.info.end, file = "fly_info_end_final.csv", row.names = TRUE)
 
 
 

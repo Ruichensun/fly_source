@@ -174,6 +174,7 @@ plot_single_15("MB009B x CS", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB131B x CS", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB419B x CS", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB607B x CS", metric.ind, all_ofs, fly.info.end)
+plot_single_15("JG17 x JU30", metric.ind, all_ofs, fly.info.end)
 
 plot_single_15("51635 x CS", metric.ind, all_ofs, fly.info.end)
 plot_single_15("UAS-DopR1-IR x 51635", metric.ind, all_ofs, fly.info.end)
@@ -184,11 +185,16 @@ plot_single_15("MB009B x JU30", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB131B x JU30", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB419B x JU30", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB607B x JU30", metric.ind, all_ofs, fly.info.end)
+plot_single_15("Empty-Gal4 x JU30", metric.ind, all_ofs, fly.info.end)
 
 plot_single_15("MB009B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB131B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB419B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
 plot_single_15("MB607B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
+
+plot_single_15("CS x JU30", metric.ind, all_ofs, fly.info.end)
+plot_single_15("SUN1", metric.ind, all_ofs, fly.info.end)
+
 
 # Bootstrap
 ind_of_interest = 9
@@ -202,3 +208,15 @@ mb009xJU30 = get_bootstrapped_WT("MB009B x JU30", ind_of_interest,  all_ofs, fly
 mb131xJU30 = get_bootstrapped_WT("MB131B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
 mb419xJU30 = get_bootstrapped_WT("MB419B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
 mb607xJU30 = get_bootstrapped_WT("MB607B x JU30", ind_of_interest,  all_ofs, fly.info.end, N)
+
+dopr1xcs =get_bootstrapped_WT("UAS-DopR1-IR x CS", ind_of_interest,  all_ofs, fly.info.end, N)
+
+
+
+plot(R1$Diff, R1$ActDiff, 
+     main = "Exposure Probability Difference vs Changes in Activity After 1st Training",
+     xlab = "Exposure Differential =  Probability of Exposure during Walking - Probability of Exposure during Pause",
+     ylab = "Activity Difference",
+     xlim = c(-1, 1), ylim = c(-1, 1),
+     col = "light blue",
+     pch = 15)
