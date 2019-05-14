@@ -23,14 +23,14 @@ fly.info = rbind(fly.info.CS[, shared.info],
                  fly.info.mutants[, shared.info])
 
 # Filter by baseline behaviors
-ind.T.excl = which((fly.info$category=="T") & (fly.info$Fly.pause > 0.9))
-ind.RfromT.excl = c()
-for (i in 1:length(ind.T.excl)){
-  ind.RfromT.excl = c(ind.RfromT.excl, Use_T_find_R(fly.info, ind.T.excl[i]))
-}
-ind.T.excl = c(ind.T.excl, ind.RfromT.excl)
-ind.other.excl = which((fly.info$category!="T") & (fly.info$Fly.pause > 0.9))
-ind.all.excl = unique(c(ind.T.excl, ind.other.excl))
+# ind.T.excl = which((fly.info$category=="T") & (fly.info$Fly.pause > 1)) # 0.9 -> 1 5/11/19
+# ind.RfromT.excl = c()
+# for (i in 1:length(ind.T.excl)){
+#   ind.RfromT.excl = c(ind.RfromT.excl, Use_T_find_R(fly.info, ind.T.excl[i]))
+# }
+# ind.T.excl = c(ind.T.excl, ind.RfromT.excl)
+# ind.other.excl = which((fly.info$category!="T") & (fly.info$Fly.pause > 1)) # 0.9 -> 1 5/11/19
+# ind.all.excl = unique(c(ind.T.excl, ind.other.excl))
 
 #For Mutant data collected after Mar 20, 2017
 excl.fly.Mutant = na.omit(read.csv("excl_fly_mutant.csv",header = T, stringsAsFactors = F)[, 1:3])
@@ -61,10 +61,13 @@ ind.include = NULL
 for (genotype in unique(fly.info$genotype)) {
   if (genotype == "CS") {next}
   else if (genotype == "WT") {
-    ind = fly.info$genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+    # ind = fly.info$genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+    ind = fly.info$genotype %in% c("WT", "CS") &!(1:nrow(fly.info) %in% ind.excl) 
+    
   }else{
-      ind = fly.info$genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
-      }
+      # ind = fly.info$genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) & !(1:nrow(fly.info) %in% ind.all.excl)
+      ind = fly.info$genotype == genotype & !(1:nrow(fly.info) %in% ind.excl) 
+  }
   ind.include = c(ind.include,which(ind)) 
 }
 

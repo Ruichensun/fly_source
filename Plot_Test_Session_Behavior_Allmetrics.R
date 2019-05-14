@@ -194,6 +194,8 @@ plot_single_15("MB607B x DopR1-IR", metric.ind, all_ofs, fly.info.end)
 
 plot_single_15("CS x JU30", metric.ind, all_ofs, fly.info.end)
 plot_single_15("SUN1", metric.ind, all_ofs, fly.info.end)
+plot_single_15("SUN2", metric.ind, all_ofs, fly.info.end)
+plot_single_15("SUN3", metric.ind, all_ofs, fly.info.end)
 
 
 # Bootstrap
