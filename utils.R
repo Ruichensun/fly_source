@@ -688,12 +688,12 @@ one_fly_laser_statistics = function(input_file, framerate){
       total_laser_ON #in seconds
     ))
     colnames(ret) = c(
-      "Experimenter", 
-      "Genotype", 
-      "Fly Number",
-      "Session",       
-      "Laser_Count",
-      "Laser_Exposure"
+      "experimenter", 
+      "genotype", 
+      "flynum",
+      "session",       
+      "laser_count",
+      "laser_exposure"
       )
     return(ret)
   }else{
@@ -963,23 +963,23 @@ get_sequence_length = function(file_name) {
 get_cumsums_total = function(file_name_filter, fly.info.movement) {
   file_names = c()
   for (ind in 1:nrow(fly.info.movement)) {
-      if (fly.info.movement$Genotype[ind] == "WT"){
+      if (fly.info.movement$genotype[ind] == "WT"){
       input.file = list.files(
-        path = paste0("data/", fly.info.movement$Experimenter[ind], "/CS/"),
-        pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
-                         file_name_filter, "_", fly.info.movement$Genotype[ind], ".csv"),
+        path = paste0("data/", fly.info.movement$experimenter[ind], "/CS/"),
+        pattern = paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_",
+                         file_name_filter, "_", fly.info.movement$genotype[ind], ".csv"),
         full.names = T)
-      } else if (fly.info.movement$Genotype[ind] == "CS"){
+      } else if (fly.info.movement$genotype[ind] == "CS"){
         input.file = list.files(
-          path = paste0("data/", fly.info.movement$Experimenter[ind], "/mutants/"),
-          pattern = paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
-                           file_name_filter, "_", fly.info.movement$Genotype[ind], ".csv"),
+          path = paste0("data/", fly.info.movement$experimenter[ind], "/mutants/"),
+          pattern = paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_",
+                           file_name_filter, "_", fly.info.movement$genotype[ind], ".csv"),
           full.names = T)
       }
     
     if(length(input.file)==0){
-      print( paste0("ProcessedData_Fly", fly.info.movement$Fly[ind], "_",
-                    file_name_filter, "_", fly.info.movement$Genotype[ind], ".csv"))
+      print( paste0("ProcessedData_Fly", fly.info.movement$fly[ind], "_",
+                    file_name_filter, "_", fly.info.movement$genotype[ind], ".csv"))
       next()
       }
     if (!is.na(get_sequence_length(input.file))){
@@ -1490,16 +1490,16 @@ plot_gap = function(fly.info.end, all_ofs,#remember to use all_ofs_wT
 # Plotting three test sessions' raw data
 plot_WT = function(all_ofs, genotype, i){
   if (genotype == "WT"){
-    all_ofs = all_ofs[all_ofs$Genotype == "WT" | all_ofs$Genotype == "CS", ]
-    fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category =="T"), ]
-    fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category == "R") , ]
-    fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                          (fly.info.end$Genotype == "CS")) & 
-                                         (fly.info.end$Category == "N") , ]
+    all_ofs = all_ofs[all_ofs$genotype == "WT" | all_ofs$genotype == "CS", ]
+    fly.info.movement.T = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category =="T"), ]
+    fly.info.movement.R = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category == "R") , ]
+    fly.info.movement.N = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                          (fly.info.end$genotype == "CS")) & 
+                                         (fly.info.end$category == "N") , ]
     R1 = Hit_by_laser("E1R1", fly.info.movement.R)
     T1 = Hit_by_laser("E1T1", fly.info.movement.T)
     N1 = Hit_by_laser("E1N1", fly.info.movement.N)
@@ -1509,35 +1509,35 @@ plot_WT = function(all_ofs, genotype, i){
     temp = data.frame()
     for (j in 1:nrow(RT.include)){
       temp = rbind(temp, 
-                   all_ofs[all_ofs$Fly.Number == RT.include[j, ]$Fly & 
-                             all_ofs$Experimenter == RT.include[j, ]$Experimenter &
-                             all_ofs$Genotype == RT.include[j, ]$Genotype,])
+                   all_ofs[all_ofs$flynum == RT.include[j, ]$fly & 
+                             all_ofs$experimenter == RT.include[j, ]$experimenter &
+                             all_ofs$genotype == RT.include[j, ]$genotype,])
     }
     df = temp
   }else{
-    df = all_ofs[all_ofs$Genotype==genotype, ]
+    df = all_ofs[all_ofs$genotype==genotype, ]
   }
   m = data.frame(
-    factor = c(rep("E1-T", length(df[df$Type=="T" & df$Session=="E1", ][, i])),
-               rep("E1-R", length(df[df$Type=="R" & df$Session=="E1", ][, i])),
-               rep("E1-N", length(df[df$Type=="N" & df$Session=="E1", ][, i])),
-               rep("E1T1E1", length(df[df$Session=="E1T1E1", ][, i])),
-               rep("E1R1E1", length(df[df$Session=="E1R1E1", ][, i])),
-               rep("E1N1E1", length(df[df$Session=="E1N1E1", ][, i])),
-               rep("E1T1E1T1E1", length(df[df$Session=="E1T1E1T1E1", ][, i])),
-               rep("E1R1E1R1E1", length(df[df$Session=="E1R1E1R1E1", ][, i])),
-               rep("E1N1E1N1E1", length(df[df$Session=="E1N1E1N1E1", ][, i]))
+    session = c(rep("E1-T", length(df[df$type=="T" & df$session=="E1", ][, i])),
+               rep("E1-R", length(df[df$type=="R" & df$session=="E1", ][, i])),
+               rep("E1-N", length(df[df$type=="N" & df$session=="E1", ][, i])),
+               rep("E1T1E1", length(df[df$session=="E1T1E1", ][, i])),
+               rep("E1R1E1", length(df[df$session=="E1R1E1", ][, i])),
+               rep("E1N1E1", length(df[df$session=="E1N1E1", ][, i])),
+               rep("E1T1E1T1E1", length(df[df$session=="E1T1E1T1E1", ][, i])),
+               rep("E1R1E1R1E1", length(df[df$session=="E1R1E1R1E1", ][, i])),
+               rep("E1N1E1N1E1", length(df[df$session=="E1N1E1N1E1", ][, i]))
                
     ),
-    value = as.numeric(c(df[df$Type=="T" & df$Session=="E1", ][, i], 
-                         df[df$Type=="R" & df$Session=="E1", ][, i],
-                         df[df$Type=="N" & df$Session=="E1", ][, i],
-                         df[df$Session=="E1T1E1", ][, i],
-                         df[df$Session=="E1R1E1", ][, i],
-                         df[df$Session=="E1N1E1", ][, i],
-                         df[df$Session=="E1T1E1T1E1", ][, i],
-                         df[df$Session=="E1R1E1R1E1", ][, i],
-                         df[df$Session=="E1N1E1N1E1", ][, i]
+    value = as.numeric(c(df[df$type=="T" & df$session=="E1", ][, i], 
+                         df[df$type=="R" & df$session=="E1", ][, i],
+                         df[df$type=="N" & df$session=="E1", ][, i],
+                         df[df$session=="E1T1E1", ][, i],
+                         df[df$session=="E1R1E1", ][, i],
+                         df[df$session=="E1N1E1", ][, i],
+                         df[df$session=="E1T1E1T1E1", ][, i],
+                         df[df$session=="E1R1E1R1E1", ][, i],
+                         df[df$session=="E1N1E1N1E1", ][, i]
                          
     ))
   )
@@ -1559,19 +1559,24 @@ plot_WT = function(all_ofs, genotype, i){
     "light blue",
     "grey80"
   )
-  a = test_initial_condition(i, genotype, all_ofs)
-  b = test_mid_training(i, genotype, all_ofs)
-  c = test_after_training(i, genotype, all_ofs)
-  p = c(a$P.adjusted, b$P.adjusted, c$P.adjusted)
   num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
-  
-  fly_count = sum(length(df[df$Type=="T" & df$Session=="E1", ][, i]), 
-                        length(df[df$Type=="R" & df$Session=="E1", ][, i]),
-                        length(df[df$Type=="N" & df$Session=="E1", ][, i]))
+  fly_count = sum(length(df[df$type=="T" & df$session=="E1", ][, i]), 
+                        length(df[df$type=="R" & df$session=="E1", ][, i]),
+                        length(df[df$type=="N" & df$session=="E1", ][, i]))
   
   pre_test = m[1:fly_count, ]
   test_1 = m[(fly_count + 1):(fly_count * 2), ]
   test_2 = m[(2 * fly_count + 1):(fly_count * 3), ]
+  
+  CI_df_cumsum_wt = data.frame()
+  ses = c("E1-T", "E1-R", "E1-N",
+          "E1T1E1", "E1R1E1", "E1N1E1",
+          "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1")
+  for (i in 1:9){
+    CI_df_cumsum_wt = rbind.data.frame(CI_df_cumsum_wt, get_Wald_CI(m[m$Session==ses[i],]$Value))
+  }
+  
+  colnames(CI_df_cumsum_wt) = c("Median", "CI_Lower", "CI_Upper")
   
   result = kruskal.test(Value~Session, data = pre_test)
   if (result$p.value < 0.05){
@@ -1690,8 +1695,7 @@ plot_WT = function(all_ofs, genotype, i){
     y_top_base = 1
     vertical_gap = 0.01
     v_gap = 0.005
-  }
-  else if (i == 25){
+  }else if (i == 25){
     axis(side=2, at=c(0, 20, 40, 60, 80, 100, 120), cex.axis = 1.5)
     text(x = c(0.8, 1.8, 2.8),
          y = 125,
@@ -2412,7 +2416,7 @@ plot_single_15 = function(genotype, metric.ind, all_ofs, fly.info.end, noN = F){
         }}
       }else{
         significance1 = c(rep("n.s.", 3))
-        print("There is no significant difference between groups")
+        print("There is no significant difference among groups")
       }
       m2 = data.frame(
         factor = c(rep(paste0("E5_T_", genotype), length(all_ofs[all_ofs$session=="E1T1E1T1E1" & all_ofs$genotype==genotype, ][, metric.ind])),

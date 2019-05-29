@@ -10,3 +10,4 @@ combine_flyCSV(experimenter, type)
 type = rep("CS", 3)
 experimenter <- c("ES", "RS", "JD", "SW")
 combine_flyCSV(experimenter, type)
+

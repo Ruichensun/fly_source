@@ -321,17 +321,6 @@ for (i in 1:nrow(fly.info.temp)){
   if (fly.info.temp[i,]$genotype == "CS"){
     fly.info.temp[i,]$genotype = "WT"
   }
-  # genotype - 2
-  if (fly.info.temp[i, ]$genotype == "MB009B x JU30"){
-    fly.info.temp[i, ]$GAL4 = 1
-    fly.info.temp[i, ]$UAS = 1
-  }
-  if(fly.info.temp[i, ]$genotype == "MB009B x CS"){
-    fly.info.temp[i, ]$GAL4 = 1
-  }
-  if(fly.info.temp[i, ]$genotype == "CS x JU30"){
-    fly.info.temp[i, ]$UAS = 1
-  }
   # gender 
   if (fly.info.temp[i, ]$gender == "F"){
     fly.info.temp[i, ]$Female = 1
@@ -350,7 +339,8 @@ fly.info.temp$year = factor(fly.info.temp$year, levels=c("2017", "2018", "2019")
 fly.info.temp$experimenter = factor(fly.info.temp$experimenter, levels=c("JD", "ES", "SW", "RS", "XC", "LW"))
 
 
-lm.fit.WT = lm(LearnIndex ~ category + Female + year + month + experimenter + pretest + age, fly.info.temp)
+lm.fit.WT = lm(LearnIndex ~ category + Female + pretest + age + year + experimenter +
+                 pretest:category + Female:category, fly.info.temp)
 
 
 # Linear Model 009B
@@ -416,7 +406,8 @@ fly.info.temp$year = factor(fly.info.temp$year, levels=c("2017", "2018", "2019")
 fly.info.temp$experimenter = factor(fly.info.temp$experimenter, levels=c("JD", "ES", "SW", "RS", "XC", "LW"))
 
 
-lm.fit.009B = lm(LearnIndex ~ category + Female + GAL4 + UAS + GAL4UAS + pretest + age, fly.info.temp)
+lm.fit.009B = lm(LearnIndex ~ category + Female + GAL4 + UAS + GAL4UAS + pretest + age + category:pretest + Female:pretest + 
+                     GAL4:pretest + UAS:pretest + GAL4UAS:pretest + GAL4:category + UAS:category + GAL4UAS:category, fly.info.temp)
 
 
 fly.info.temp = fly.info.end[fly.info.end$genotype %in% c("WT", "CS", "MB131B x CS", "MB131B x JU30", "CS x JU30"),]
@@ -593,7 +584,7 @@ for (i in 1:nrow(fly.info.temp)){
 lm.fit.607B = lm(LearnIndex ~ Train + Random + Female + GAL4 + UAS + GAL4:UAS + pretest + age, fly.info.temp)
 
 # Linear Regression of Dopamine Data
-fly.info.temp = fly.info.end[fly.info.end$genotype %in% c("WT", "CS", "SUN1"),]
+fly.info.temp = fly.info.end[fly.info.end$genotype %in% c("WT", "CS", "SUN1", "SUN2"),]
 fly.info.temp$pretest = NA
 E1_data = all_ofs[all_ofs$session=="E1", ]
 
@@ -647,7 +638,12 @@ fly.info.temp$month = factor(fly.info.temp$month, levels=c("1", "2", "3", "4", "
                                                            "7", "8", "9", "10", "11", "12"))
 fly.info.temp$year = factor(fly.info.temp$year, levels=c("2017", "2018", "2019"))
 
-lm.fit.SUN = lm(LearnIndex ~ category + Female + DopR1 +  pretest + 
-                  DopR1:category , fly.info.temp)
+# lm.fit.SUN = lm(LearnIndex ~ category + Female + DopR1 +  pretest + 
+#                   DopR1:category , fly.info.temp)
 
-lm.fit.SUN.orig = lm(LearnIndex ~ category + Female + DopR1 + DopR2 + age + pretest, fly.info.temp)
+lm.fit.SUN.orig = lm(LearnIndex ~ category + Female + DopR1 + DopR2 + age + pretest + 
+                       DopR1:category + DopR2:category + pretest:category + 
+                       DopR1:pretest + DopR2:pretest + Female:DopR1 + Female:DopR2, fly.info.temp)
+
+
+lm.fit.SUN.orig = lm(PostTrain ~ category + Female + DopR1 + DopR2 + age + pretest, fly.info.temp)

@@ -5,27 +5,27 @@ library(dunn.test)
 
 # Finding out when the fly is moving vs not moving
 # Input: fly_pos; Output: a vector of 0 and 1 of (length of input) - 1 
-fly.info.movement.T = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                      (fly.info.end$Genotype == "CS")) & 
-                                     (fly.info.end$Category == "T") , ]
+fly.info.movement.T = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                      (fly.info.end$genotype == "CS")) & 
+                                     (fly.info.end$category == "T") , ]
 
 T1 = Hit_by_laser("E1T1", fly.info.movement.T)
 T1 = T1[!is.na(T1$Hit_W), ]
-T1 = T1[, 1:6]
+T1 = T1[, 1:8]
 
-fly.info.movement.R = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                      (fly.info.end$Genotype == "CS")) & 
-                                     (fly.info.end$Category == "R") , ]
+fly.info.movement.R = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                      (fly.info.end$genotype == "CS")) & 
+                                     (fly.info.end$category == "R") , ]
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
-R1 = R1[, 1:6]
-fly.info.movement.N = fly.info.end[((fly.info.end$Genotype == "WT") | 
-                                        (fly.info.end$Genotype == "CS")) & 
-                                        (fly.info.end$Category == "N") , ]
+R1 = R1[, 1:8]
+fly.info.movement.N = fly.info.end[((fly.info.end$genotype == "WT") | 
+                                        (fly.info.end$genotype == "CS")) & 
+                                        (fly.info.end$category == "N") , ]
 
 N1 = Hit_by_laser("E1N1", fly.info.movement.N)
 N1 = N1[!is.na(N1$Hit_W), ]
-N1 = N1[, 1:6]
+N1 = N1[, 1:8]
 
 
 ###Including All Relevant Sessions
@@ -110,6 +110,8 @@ pairwise_CAD = pairwise.wilcox.test(Session1_df$Value, Session1_df$Session, p.ad
 CAD2 = kruskal.test(Value~Session, data = Session2_df)
 pairwise_CAD2 = pairwise.wilcox.test(Session2_df$Value, Session2_df$Session, p.adjust.method = "BH")
 p = c(pairwise_CAD$p.value[1], pairwise_CAD2$p.value[1])
+p2 = c(pairwise_CAD$p.value[2], pairwise_CAD2$p.value[2])
+p4 = c(pairwise_CAD$p.value[4], pairwise_CAD2$p.value[4])
 
 # Confidence Interval
 
@@ -201,7 +203,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     
     # T - Red 
     lines(
-      x = c(168, 171),
+      x = c(173, 176),
       y = c(cumsums_CI[[1]][2,][min_sequence_length],cumsums_CI[[1]][2,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -209,7 +211,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(168, 171),
+      x = c(173, 176),
       y = c(cumsums_CI[[1]][3,][min_sequence_length],cumsums_CI[[1]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -217,7 +219,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(169.5, 169.5),
+      x = c(174.5, 174.5),
       y = c(cumsums_CI[[1]][2,][min_sequence_length],cumsums_CI[[1]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -225,7 +227,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(169, 170),
+      x = c(174, 175),
       y = c(cumsums_CI[[1]][1,][min_sequence_length],cumsums_CI[[1]][1,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -233,7 +235,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     # R - Blue
     lines(
-      x = c(172, 175),
+      x = c(182, 185),
       y = c(cumsums_CI[[2]][2,][min_sequence_length],cumsums_CI[[2]][2,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -241,7 +243,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(172, 175),
+      x = c(182, 185),
       y = c(cumsums_CI[[2]][3,][min_sequence_length],cumsums_CI[[2]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -249,7 +251,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173.5, 173.5),
+      x = c(183.5, 183.5),
       y = c(cumsums_CI[[2]][2,][min_sequence_length],cumsums_CI[[2]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -257,7 +259,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173, 174),
+      x = c(183, 184),
       y = c(cumsums_CI[[2]][1,][min_sequence_length],cumsums_CI[[2]][1,][min_sequence_length]),
       lty = 1,
       lwd = 3,
@@ -309,23 +311,64 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       significance = "****"
     }
     
-    text(182, 
-         57, 
+    if (p2[1] >= 0.05){
+      significance2 = "n.s."
+    }else if (p2[1] < 0.05 & p2[1] >= 0.01){
+      significance2 = "*"
+    }else if (p2[1] < 0.01 & p2[1] >= 0.001){
+      significance2 = "**"
+    }else if (p2[1] < 0.001 & p2[1] >= 0.0001){
+      significance2 = "***"
+    }else if (p2[1] < 0.0001){
+      significance2 = "****"
+    }
+    
+    if (p4[1] >= 0.05){
+      significance4 = "n.s."
+    }else if (p4[1] < 0.05 & p4[1] >= 0.01){
+      significance4 = "*"
+    }else if (p4[1] < 0.01 & p4[1] >= 0.001){
+      significance4 = "**"
+    }else if (p4[1] < 0.001 & p4[1] >= 0.0001){
+      significance4 = "***"
+    }else if (p4[1] < 0.0001){
+      significance4 = "****"
+    }
+    
+    text(179, 
+         cumsums_CI[[2]][3,][min_sequence_length]+2.5, 
          significance, 
          xpd = NA,
-         srt = 270,
-         # font = 24
          cex = 1.5
     )
-    lines(c(176, 178), 
-          c(c(cumsums_CI[[1]][1,][min_sequence_length],cumsums_CI[[1]][1,][min_sequence_length])), 
-          xpd = NA)
-    lines(c(176, 178), 
-          c(c(cumsums_CI[[2]][1,][min_sequence_length],cumsums_CI[[2]][1,][min_sequence_length])), 
-          xpd = NA)
     lines(
-      c(178,178),
-      c(cumsums_CI[[1]][1,][min_sequence_length], cumsums_CI[[2]][1,][min_sequence_length]),
+      c(174.5,183.5),
+      c(cumsums_CI[[2]][3,][min_sequence_length]+1, cumsums_CI[[2]][3,][min_sequence_length]+1),
+      xpd = NA
+    )
+    
+    text(170, 
+         cumsums_CI[[3]][3,][min_sequence_length]+2.5, 
+         significance2, 
+         xpd = NA,
+         cex = 1.5
+    )
+    
+    lines(
+      c(165.5, 174.5),
+      c(cumsums_CI[[3]][3,][min_sequence_length]+1, cumsums_CI[[3]][3,][min_sequence_length]+1),
+      xpd = NA
+    )
+    
+    text(174.5, 
+         cumsums_CI[[3]][3,][min_sequence_length]+6.5, 
+         significance4, 
+         xpd = NA,
+         cex = 1.5
+    )
+    lines(
+      c(165.5, 183.5),
+      c(cumsums_CI[[3]][3,][min_sequence_length]+4, cumsums_CI[[3]][3,][min_sequence_length]+4),
       xpd = NA
     )
 
@@ -393,7 +436,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     # T - Red 
     lines(
-      x = c(172, 175),
+      x = c(173, 176),
       y = c(cumsums_CI[[4]][2,][min_sequence_length],cumsums_CI[[4]][2,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -401,7 +444,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(172, 175),
+      x = c(173, 176),
       y = c(cumsums_CI[[4]][3,][min_sequence_length],cumsums_CI[[4]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -409,7 +452,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173.5, 173.5),
+      x = c(174.5, 174.5),
       y = c(cumsums_CI[[4]][2,][min_sequence_length],cumsums_CI[[4]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -417,15 +460,25 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173, 174),
+      x = c(174, 175),
       y = c(cumsums_CI[[4]][1,][min_sequence_length],cumsums_CI[[4]][1,][min_sequence_length]),
       lty = 1,
       lwd = 2,
       col = "indianred3"
     )
-    # R - Blue
+    
     lines(
       x = c(172, 175),
+      y = c(cumsums_CI[[4]][2,][min_sequence_length],cumsums_CI[[4]][2,][min_sequence_length]),
+      lty = 1,
+      lwd = 2,
+      col = "indianred3"
+    )
+    
+
+    # R - Blue
+    lines(
+      x = c(182, 185),
       y = c(cumsums_CI[[5]][2,][min_sequence_length],cumsums_CI[[5]][2,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -433,7 +486,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(172, 175),
+      x = c(182, 185),
       y = c(cumsums_CI[[5]][3,][min_sequence_length],cumsums_CI[[5]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -441,7 +494,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173.5, 173.5),
+      x = c(183.5, 183.5),
       y = c(cumsums_CI[[5]][2,][min_sequence_length],cumsums_CI[[5]][3,][min_sequence_length]),
       lty = 1,
       lwd = 2,
@@ -449,7 +502,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     )
     
     lines(
-      x = c(173, 174),
+      x = c(183, 184),
       y = c(cumsums_CI[[5]][1,][min_sequence_length],cumsums_CI[[5]][1,][min_sequence_length]),
       lty = 1,
       lwd = 3,
@@ -489,7 +542,7 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
       col = "grey"
     )
     
-    if (p[2] >= 0.05){
+    if (p[1] >= 0.05){
       significance = "n.s."
     }else if (p[2] < 0.05 & p[2] >= 0.01){
       significance = "*"
@@ -500,27 +553,68 @@ pdf(paste0("Training_Session_CS_", Sys.Date(),".pdf"),
     }else if (p[2] < 0.0001){
       significance = "****"
     }
+    
+    if (p2[2] >= 0.05){
+      significance2 = "n.s."
+    }else if (p2[2] < 0.05 & p2[2] >= 0.01){
+      significance2 = "*"
+    }else if (p2[2] < 0.01 & p2[2] >= 0.001){
+      significance2 = "**"
+    }else if (p2[2] < 0.001 & p2[2] >= 0.0001){
+      significance2 = "***"
+    }else if (p2[2] < 0.0001){
+      significance2 = "****"
+    }
+    
+    if (p4[2] >= 0.05){
+      significance4 = "n.s."
+    }else if (p4[2] < 0.05 & p4[2] >= 0.01){
+      significance4 = "*"
+    }else if (p4[2] < 0.01 & p4[2] >= 0.001){
+      significance4 = "**"
+    }else if (p4[2] < 0.001 & p4[2] >= 0.0001){
+      significance4 = "***"
+    }else if (p4[2] < 0.0001){
+      significance4 = "****"
+    }
       
-    text(180, 
-         47, 
+    text(179, 
+         cumsums_CI[[5]][3,][min_sequence_length]+2.5, 
          significance, 
          xpd = NA,
-         srt = 90,
-         # font = 24
          cex = 1.5
-         )
-    lines(c(176, 178), 
-          c(c(cumsums_CI[[4]][1,][min_sequence_length],cumsums_CI[[4]][1,][min_sequence_length])), 
-          xpd = NA)
-    lines(c(176, 178), 
-          c(c(cumsums_CI[[5]][1,][min_sequence_length],cumsums_CI[[5]][1,][min_sequence_length])), 
-          xpd = NA)
+    )
     lines(
-      c(178,178),
-      c(cumsums_CI[[5]][1,][min_sequence_length], cumsums_CI[[4]][1,][min_sequence_length]),
+      c(174.5,183.5),
+      c(cumsums_CI[[5]][3,][min_sequence_length]+1, cumsums_CI[[5]][3,][min_sequence_length]+1),
       xpd = NA
     )
-
+    
+    text(170, 
+         cumsums_CI[[6]][3,][min_sequence_length]+2.5, 
+         significance2, 
+         xpd = NA,
+         cex = 1.5
+    )
+    
+    lines(
+      c(165.5, 174.5),
+      c(cumsums_CI[[6]][3,][min_sequence_length]+1, cumsums_CI[[6]][3,][min_sequence_length]+1),
+      xpd = NA
+    )
+    
+    text(174.5, 
+         cumsums_CI[[6]][3,][min_sequence_length]+6.5, 
+         significance4, 
+         xpd = NA,
+         cex = 1.5
+    )
+    lines(
+      c(165.5, 183.5),
+      c(cumsums_CI[[6]][3,][min_sequence_length]+4, cumsums_CI[[6]][3,][min_sequence_length]+4),
+      xpd = NA
+    )
+    
 dev.off()
 
 save.image("cumsums.Rdata")
