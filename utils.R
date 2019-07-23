@@ -1561,6 +1561,8 @@ plot_WT = function(all_ofs, genotype, i){
     "grey80"
   )
   
+  num = table(m$Session)
+  
   pre_test <- m[nchar(m$Session)==4,] 
   pre_test = data.frame(factor(pre_test$Session), pre_test$Value)
   colnames(pre_test) = c("Session", "Value")
@@ -1583,7 +1585,7 @@ plot_WT = function(all_ofs, genotype, i){
   
   colnames(CI_df_cumsum_wt) = c("Median", "CI_Lower", "CI_Upper")
   
-  result = kruskal.test(Value~as.factor(Session), data = pre_test)
+  result = kruskal.test(Value~Session, data = pre_test)
   if (result$p.value < 0.05){
     print("Difference")
     pairwise_result = pairwise.wilcox.test(pre_test$Value, pre_test$Session, p.adjust.method = "BH")
