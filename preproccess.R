@@ -71,9 +71,7 @@ laser.status = NULL
 fly.pause = NULL
 
 for (ind in 1:nrow(fly.info)) {
-# for (ind in 160:170) {
   for (session in query.sessions) {
-    
     input.file <-list.files(path = paste0(path, fly.info$experimenter[ind],"/CS/CSV/"),
                             pattern = paste0("ProcessedData_Fly", fly.info$fly[ind], "_", session, 
                                              "_", fly.info$gender[ind],"_.*"), full.names = T)

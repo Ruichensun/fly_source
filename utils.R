@@ -47,12 +47,12 @@ combine_flyCSV = function(experimenter, type){
     info = read.csv(input_files[i],header=T,stringsAsFactors=F)
     info$experimenter = experimenter[i]
     info$fly_exp = paste(info$fly,experimenter[i],sep='_')
-    # if (experimenter[i] != "JGLNRS"){
-    #   info$Gap = 0
-    #   info$Exp.date2 = NA
-    # }else{
-    #   info$Age = NA
-    # }
+    if (experimenter[i] != "JGLNRS"){
+      info$Gap = 0
+      info$Exp.date2 = NA
+    }else{
+      info$Age = NA
+    }
     all_info = rbind(all_info,info)
   }
   write.table(all_info,
@@ -1517,36 +1517,37 @@ plot_WT = function(all_ofs, genotype, i){
   }else{
     df = all_ofs[all_ofs$genotype==genotype, ]
   }
-  m = data.frame(
-    session = c(rep("E1-T", length(df[df$type=="T" & df$session=="E1", ][, i])),
-               rep("E1-R", length(df[df$type=="R" & df$session=="E1", ][, i])),
-               rep("E1-N", length(df[df$type=="N" & df$session=="E1", ][, i])),
-               rep("E1T1E1", length(df[df$session=="E1T1E1", ][, i])),
-               rep("E1R1E1", length(df[df$session=="E1R1E1", ][, i])),
-               rep("E1N1E1", length(df[df$session=="E1N1E1", ][, i])),
-               rep("E1T1E1T1E1", length(df[df$session=="E1T1E1T1E1", ][, i])),
-               rep("E1R1E1R1E1", length(df[df$session=="E1R1E1R1E1", ][, i])),
-               rep("E1N1E1N1E1", length(df[df$session=="E1N1E1N1E1", ][, i]))
-               
-    ),
-    value = as.numeric(c(df[df$type=="T" & df$session=="E1", ][, i], 
-                         df[df$type=="R" & df$session=="E1", ][, i],
-                         df[df$type=="N" & df$session=="E1", ][, i],
-                         df[df$session=="E1T1E1", ][, i],
-                         df[df$session=="E1R1E1", ][, i],
-                         df[df$session=="E1N1E1", ][, i],
-                         df[df$session=="E1T1E1T1E1", ][, i],
-                         df[df$session=="E1R1E1R1E1", ][, i],
-                         df[df$session=="E1N1E1N1E1", ][, i]
-                         
-    ))
+  
+  session = c(rep("E1-T", length(df[df$type=="T" & df$session=="E1", ][, i])),
+              rep("E1-R", length(df[df$type=="R" & df$session=="E1", ][, i])),
+              rep("E1-N", length(df[df$type=="N" & df$session=="E1", ][, i])),
+              rep("E1T1E1", length(df[df$session=="E1T1E1", ][, i])),
+              rep("E1R1E1", length(df[df$session=="E1R1E1", ][, i])),
+              rep("E1N1E1", length(df[df$session=="E1N1E1", ][, i])),
+              rep("E1T1E1T1E1", length(df[df$session=="E1T1E1T1E1", ][, i])),
+              rep("E1R1E1R1E1", length(df[df$session=="E1R1E1R1E1", ][, i])),
+              rep("E1N1E1N1E1", length(df[df$session=="E1N1E1N1E1", ][, i]))
+              
   )
-  colnames(m) = c("Session", "Value")
-  m$Session = factor(m$Session, levels=c("E1-T", "E1-R", "E1-N",
-                                         "E1T1E1", "E1R1E1", "E1N1E1",
-                                         "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1"
+  
+  value = as.numeric(c(df[df$type=="T" & df$session=="E1", ][, i], 
+                       df[df$type=="R" & df$session=="E1", ][, i],
+                       df[df$type=="N" & df$session=="E1", ][, i],
+                       df[df$session=="E1T1E1", ][, i],
+                       df[df$session=="E1R1E1", ][, i],
+                       df[df$session=="E1N1E1", ][, i],
+                       df[df$session=="E1T1E1T1E1", ][, i],
+                       df[df$session=="E1R1E1R1E1", ][, i],
+                       df[df$session=="E1N1E1N1E1", ][, i]
+                       
   ))
   
+  # Avoid atomic coersion to factor: 
+  # http://r.789695.n4.nabble.com/as-data-frame-cbind-transforming-numeric-to-factor-td806102.html
+  
+  m = data.frame(I(session), value) 
+  colnames(m) = c("Session", "Value")
+
   s =  c("Pre-test", "Test 1", "Test 2")
   col.pool = c(
     "indianred3",
