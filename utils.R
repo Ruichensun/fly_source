@@ -1560,14 +1560,18 @@ plot_WT = function(all_ofs, genotype, i){
     "light blue",
     "grey80"
   )
-  num = as.data.frame(table(m[!is.na(m$Value),]$Session))$Freq
-  fly_count = sum(length(df[df$type=="T" & df$session=="E1", ][, i]), 
-                        length(df[df$type=="R" & df$session=="E1", ][, i]),
-                        length(df[df$type=="N" & df$session=="E1", ][, i]))
   
-  pre_test = m[1:fly_count, ]
-  test_1 = m[(fly_count + 1):(fly_count * 2), ]
-  test_2 = m[(2 * fly_count + 1):(fly_count * 3), ]
+  pre_test <- m[nchar(m$Session)==4,] 
+  pre_test = data.frame(factor(pre_test$Session), pre_test$Value)
+  colnames(pre_test) = c("Session", "Value")
+  
+  test_1 = m[nchar(m$Session)==6,]
+  test_1 = data.frame(factor(test_1$Session), test_1$Value)
+  colnames(test_1) = c("Session", "Value")
+  
+  test_2 = m[nchar(m$Session)==10,]
+  test_2 = data.frame(factor(test_2$Session), test_2$Value)
+  colnames(test_2) = c("Session", "Value")
   
   CI_df_cumsum_wt = data.frame()
   ses = c("E1-T", "E1-R", "E1-N",
@@ -1579,7 +1583,7 @@ plot_WT = function(all_ofs, genotype, i){
   
   colnames(CI_df_cumsum_wt) = c("Median", "CI_Lower", "CI_Upper")
   
-  result = kruskal.test(Value~Session, data = pre_test)
+  result = kruskal.test(Value~as.factor(Session), data = pre_test)
   if (result$p.value < 0.05){
     print("Difference")
     pairwise_result = pairwise.wilcox.test(pre_test$Value, pre_test$Session, p.adjust.method = "BH")
