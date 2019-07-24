@@ -1564,15 +1564,18 @@ plot_WT = function(all_ofs, genotype, i){
   num = table(m$Session)
   
   pre_test <- m[nchar(m$Session)==4,] 
-  pre_test = data.frame(factor(pre_test$Session), pre_test$Value)
+  pre_test = data.frame(factor(pre_test$Session, levels = c("E1-T", "E1-R", "E1-N")), 
+                        pre_test$Value)
   colnames(pre_test) = c("Session", "Value")
   
   test_1 = m[nchar(m$Session)==6,]
-  test_1 = data.frame(factor(test_1$Session), test_1$Value)
+  test_1 = data.frame(factor(test_1$Session, levels = c("E1T1E1", "E1R1E1", "E1N1E1")), 
+                      test_1$Value)
   colnames(test_1) = c("Session", "Value")
   
   test_2 = m[nchar(m$Session)==10,]
-  test_2 = data.frame(factor(test_2$Session), test_2$Value)
+  test_2 = data.frame(factor(test_2$Session, levels = c("E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1")), 
+                      test_2$Value)
   colnames(test_2) = c("Session", "Value")
   
   CI_df_cumsum_wt = data.frame()
@@ -1653,6 +1656,12 @@ plot_WT = function(all_ofs, genotype, i){
     sig3 = c(rep("n.s.", 3))
     print("There is no significant difference between groups")
   }
+  
+  m = data.frame(factor(m$Session, levels = c("E1-T", "E1-R", "E1-N",
+                                              "E1T1E1", "E1R1E1", "E1N1E1",
+                                              "E1T1E1T1E1", "E1R1E1R1E1", "E1N1E1N1E1")),
+                 m$Value)
+  colnames(m) = c("Session", "Value")
   
   pdf(paste0(genotype, "_", i, "_", Sys.Date(), ".pdf"), onefile = T, width = 8)
   if (i == 9){
