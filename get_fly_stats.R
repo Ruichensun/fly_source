@@ -161,16 +161,22 @@ T1 = Hit_by_laser("E1T1", fly.info.movement.T)
 T1 = T1[!is.na(T1$Hit_W), ]
 T1$Diff = T1$Hit_W - T1$Hit_P
 temp = T1[(T1$Diff>=0.2)|(T1$Hit_All==0),]
+T2 = Hit_by_laser2("E1T1E1T1", temp)
+T.all = cbind(temp, T2)
 
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
 R1$Diff = R1$Hit_W - R1$Hit_P
+R2 = Hit_by_laser2("E1R1E1R1", R1)
+R.all = cbind(R1, R2)
 
 N1 = Hit_by_laser("E1N1", fly.info.movement.N)
 N1 = N1[!is.na(N1$Hit_W), ]
 N1$Diff = N1$Hit_W - N1$Hit_P
+N2 = Hit_by_laser2("E1N1E1N1", N1)
+N.all = cbind(N1, N2)
 
-fly.info.end = rbind(temp, R1, N1)
+fly.info.end = rbind(T.all, R.all, N.all)
 
 write.csv(fly.info.end, file = "data/fly_info_end_final.csv", row.names = TRUE)
 

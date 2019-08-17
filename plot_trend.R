@@ -64,7 +64,7 @@ cumsums_median = list(apply(cumsums_total[[1]][1:min_sequence_length, ], 1, medi
                       apply(cumsums_total[[4]][1:min_sequence_length, ], 1, median),
                       apply(cumsums_total[[5]][1:min_sequence_length, ], 1, median),
                       apply(cumsums_total[[6]][1:min_sequence_length, ], 1, median))
-
+framerate = 50
 cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
                   apply((cumsums_total[[2]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
                   apply((cumsums_total[[3]][1:min_sequence_length,])/framerate, 1, get_Wald_CI),
@@ -77,6 +77,27 @@ cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 
 # Second row is CI lower bound
 # Third row is CI upper bound
 
+cumsums_CI_df <- data.frame(matrix(unlist(cumsums_CI), nrow=min_sequence_length, byrow=T),stringsAsFactors=FALSE)
+colnames(cumsums_CI_df) <- c("Train1.median",
+                             "Train1.CI.L",
+                             "Train1.CI.U",
+                             "Yoked1.median",
+                             "Yoked1.CI.L",
+                             "Yoked1.CI.U",
+                             "Blank1.median",
+                             "Blank1.CI.L",
+                             "Blank1.CI.U",
+                             "Train2.median",
+                             "Train2.CI.L",
+                             "Train2.CI.U",
+                             "Yoked2.median",
+                             "Yoked2.CI.L",
+                             "Yoked2.CI.U",
+                             "Blank2.median",
+                             "Blank2.CI.L",
+                             "Blank2.CI.U"
+                             )
+write.csv(cumsums_CI_df, "cumulative_activity_duration.csv", row.names = F)
 trained_1 = cumsums_total[[1]][min_sequence_length,] 
 yoked_1   = cumsums_total[[2]][min_sequence_length,] 
 blank_1   = cumsums_total[[3]][min_sequence_length,] 
