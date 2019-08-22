@@ -77,7 +77,18 @@ cumsums_CI = list(apply((cumsums_total[[1]][1:min_sequence_length,])/framerate, 
 # Second row is CI lower bound
 # Third row is CI upper bound
 
-cumsums_CI_df <- data.frame(matrix(unlist(cumsums_CI), nrow=min_sequence_length, byrow=T),stringsAsFactors=FALSE)
+
+cumsums_CI_df <- data.frame(matrix(nrow = min_sequence_length, ncol = 18, dimnames = NULL))
+counter = 1
+for (i in 1:6){
+  temp <- cumsums_CI[[i]]
+  for (j in 1:3){
+    temp.temp <- temp[j,]
+    cumsums_CI_df[, counter] <- temp.temp
+    counter = counter + 1
+  }
+}
+
 colnames(cumsums_CI_df) <- c("Train1.median",
                              "Train1.CI.L",
                              "Train1.CI.U",

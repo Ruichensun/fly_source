@@ -133,7 +133,7 @@ for(ind in 1:nrow(fly.info)){
       ofs = one_fly_laser_statistics(input.file, framerate=framerate)
       Type = as.character(fly.info$category[ind])
       Gender = as.character(fly.info$gender[ind])
-      ofs = data.frame(type, gender, ofs)
+      ofs = data.frame(Type, Gender, ofs)
       all_ofls_WT = rbind(all_ofls_WT, ofs)
     }
   }
@@ -142,6 +142,8 @@ for(ind in 1:nrow(fly.info)){
 write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
 print("Done - laser")
+
+
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
@@ -179,6 +181,4 @@ N.all = cbind(N1, N2)
 fly.info.end = rbind(T.all, R.all, N.all)
 
 write.csv(fly.info.end, file = "data/fly_info_end_final.csv", row.names = TRUE)
-
-
 
