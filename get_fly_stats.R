@@ -174,8 +174,32 @@ T1 = Hit_by_laser("E1T1", fly.info.movement.T)
 T1 = T1[!is.na(T1$Hit_W), ]
 T1$Diff = T1$Hit_W - T1$Hit_P
 temp = T1[(T1$Diff>=0.2)|(T1$Hit_All==0),]
-T2 = Hit_by_laser2("E1T1E1T1", temp)
-T.all = cbind(temp, T2)
+T2 = Hit_by_laser("E1T1E1T1", temp[, 1:12])
+colnames(T2)[13] <- "Hit_W_2"
+colnames(T2)[14] <- "Hit_P_2"
+colnames(T2)[15] <- "Hit_All_2"
+
+T2$ID <- NA
+temp$ID <- NA
+for (i in 1:nrow(T2)){
+  T2[i, "ID"] <- paste0(T2[i, "fly"], T2[i, "genotype"], T2[i, "experimenter"])
+}
+for (i in 1:nrow(temp)){
+  temp[i, "ID"] <- paste0(temp[i, "fly"], temp[i, "genotype"], temp[i, "experimenter"])
+}
+
+temp$Hit_W_2 <- NaN
+temp$Hit_P_2 <- NaN
+temp$Hit_All_2 <- NaN
+for (i in 1:nrow(temp)){
+    ind = which(T2$ID == temp[i, "ID"])
+    if (length(ind) != 0){
+      temp[i, "Hit_W_2"] <- T2[ind, "Hit_W_2"]
+      temp[i, "Hit_P_2"] <- T2[ind, "Hit_P_2"]
+      temp[i, "Hit_All_2"] <- T2[ind, "Hit_All_2"]
+    }
+}
+T.all = temp[!is.na(temp$Hit_All_2), ]
 
 R1 = Hit_by_laser("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
@@ -189,7 +213,7 @@ N1$Diff = N1$Hit_W - N1$Hit_P
 N2 = Hit_by_laser2("E1N1E1N1", N1)
 N.all = cbind(N1, N2)
 
-fly.info.end = rbind(T.all, R.all, N.all)
+fly.info.end = rbind(T.all[, c(1:16, 18:20)], R.all, N.all)
 
 write.csv(fly.info.end, file = "data/fly_info_end_final.csv", row.names = TRUE)
 
