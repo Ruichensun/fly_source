@@ -118,12 +118,25 @@ sessions_laser = c(
 for(ind in 1:nrow(fly.info)){
   for(ind.session in 1:length(sessions_laser)){
     if (fly.info$genotype[ind]=="WT"){
-      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/CS/"),
-                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_WT",".csv"),
+      input.file <- list.files(path = paste0("data/", 
+                                             fly.info$experimenter[ind], 
+                                             "/CS/"),
+                               pattern = paste0("ProcessedData_Fly",
+                                                fly.info$fly[ind], 
+                                                "_",
+                                                sessions_laser[ind.session],
+                                                "_WT",".csv"),
                                full.names=T)
     }else if(fly.info$genotype[ind]=="CS"){
-      input.file <- list.files(path = paste0("data/", fly.info$experimenter[ind], "/mutants/"),
-                               pattern = paste0("ProcessedData_Fly",fly.info$fly[ind], "_",sessions_laser[ind.session], "_CS",".csv"),
+      input.file <- list.files(path = paste0("data/", 
+                                             fly.info$experimenter[ind], 
+                                             "/mutants/"),
+                               pattern = paste0("ProcessedData_Fly",
+                                                fly.info$fly[ind], 
+                                                "_",
+                                                sessions_laser[ind.session], 
+                                                "_CS",
+                                                ".csv"),
                                full.names=T)
     }
     if(length(input.file) == 0){next
@@ -142,8 +155,6 @@ for(ind in 1:nrow(fly.info)){
 write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
 print("Done - laser")
-
-
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
 
