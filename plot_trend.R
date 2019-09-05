@@ -137,6 +137,10 @@ colnames(N2_df) = c("Value", "Session")
 Session1_df = rbind.data.frame(T1_df, R1_df, N1_df)
 Session2_df = rbind.data.frame(T2_df, R2_df, N2_df)
 
+write.csv(Session1_df, "Train1_CAD.csv", row.names = F)
+write.csv(Session2_df, "Train2_CAD.csv", row.names = F)
+
+
 CAD = kruskal.test(Value~Session, data = Session1_df)
 pairwise_CAD = pairwise.wilcox.test(Session1_df$Value, Session1_df$Session, p.adjust.method = "BH")
 CAD2 = kruskal.test(Value~Session, data = Session2_df)

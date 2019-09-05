@@ -105,7 +105,7 @@ write.table(all_ofs_mutants, file = "all_ofs_mutants.csv", append = FALSE, col.n
 all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
 print("Done-Mutants")
 
-# # laser segmentation
+# laser WT
 all_ofls_WT = data.frame()
 
 sessions_laser = c(
@@ -154,6 +154,46 @@ for(ind in 1:nrow(fly.info)){
 
 write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+
+# laser MT
+
+all_ofls_MT = data.frame()
+
+sessions_laser = c(
+  "E1T1",
+  "E1T1E1T1",
+  "E1R1",
+  "E1R1E1R1"
+)
+
+for(ind in 1:nrow(fly.info.mutant)){
+  for(ind.session in 1:length(sessions_laser)){
+      input.file <- list.files(path = paste0("data/", 
+                                             fly.info.mutant$experimenter[ind], 
+                                             "/mutants/"),
+                               pattern = paste0("ProcessedData_Fly",
+                                                fly.info.mutant$fly[ind], 
+                                                "_",
+                                                sessions_laser[ind.session], 
+                                                "_", fly.info.mutant[ind, "genotype"],
+                                                ".csv"),
+                               full.names=T)
+    }
+  if(length(input.file) == 0){next
+  }else{
+    print(input.file)
+    framerate = fly.info.mutant$Framerate[ind]
+    ofs = one_fly_laser_statistics(input.file, framerate=framerate)
+    Type = as.character(fly.info.mutant$category[ind])
+    Gender = as.character(fly.info.mutant$gender[ind])
+    ofs = data.frame(Type, Gender, ofs)
+    all_ofls_MT = rbind(all_ofls_MT, ofs)
+  }
+}
+
+# write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+# all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+
 print("Done - laser")
 
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
@@ -170,14 +210,16 @@ fly.info.movement.N = fly.info.end[(fly.info.end$category == "N") , ]
 all_ofs_WT = read.csv("all_ofs_WT.csv", header = T, stringsAsFactors = F)
 all_ofs_mutants = read.csv("all_ofs_mutants.csv", header = T, stringsAsFactors = F)
 all_ofs = rbind(all_ofs_WT, all_ofs_mutants)
-T1 = Hit_by_laser("E1T1", fly.info.movement.T)
+T1 = Hit_by_laser_tf("E1T1", fly.info.movement.T)
 T1 = T1[!is.na(T1$Hit_W), ]
 T1$Diff = T1$Hit_W - T1$Hit_P
 temp = T1[(T1$Diff>=0.2)|(T1$Hit_All==0),]
-T2 = Hit_by_laser("E1T1E1T1", temp[, 1:12])
+T2 = Hit_by_laser_tf("E1T1E1T1", temp[, 1:12])
 colnames(T2)[13] <- "Hit_W_2"
 colnames(T2)[14] <- "Hit_P_2"
 colnames(T2)[15] <- "Hit_All_2"
+colnames(T2)[16] <- "Walk_Frame_2"
+colnames(T2)[17] <- "Pause_Frame_2"
 
 T2$ID <- NA
 temp$ID <- NA
@@ -191,29 +233,33 @@ for (i in 1:nrow(temp)){
 temp$Hit_W_2 <- NaN
 temp$Hit_P_2 <- NaN
 temp$Hit_All_2 <- NaN
+temp$Walk_Frame_2 <- NaN
+temp$Pause_Frame_2 <- NaN
 for (i in 1:nrow(temp)){
     ind = which(T2$ID == temp[i, "ID"])
     if (length(ind) != 0){
       temp[i, "Hit_W_2"] <- T2[ind, "Hit_W_2"]
       temp[i, "Hit_P_2"] <- T2[ind, "Hit_P_2"]
       temp[i, "Hit_All_2"] <- T2[ind, "Hit_All_2"]
+      temp[i, "Walk_Frame_2"] <- T2[ind, "Walk_Frame_2"]
+      temp[i, "Pause_Frame_2"] <- T2[ind, "Pause_Frame_2"]
     }
 }
 T.all = temp[!is.na(temp$Hit_All_2), ]
 
-R1 = Hit_by_laser("E1R1", fly.info.movement.R)
+R1 = Hit_by_laser_tf("E1R1", fly.info.movement.R)
 R1 = R1[!is.na(R1$Hit_W), ]
 R1$Diff = R1$Hit_W - R1$Hit_P
-R2 = Hit_by_laser2("E1R1E1R1", R1)
+R2 = Hit_by_laser2_tf("E1R1E1R1", R1)
 R.all = cbind(R1, R2)
 
-N1 = Hit_by_laser("E1N1", fly.info.movement.N)
+N1 = Hit_by_laser_tf("E1N1", fly.info.movement.N)
 N1 = N1[!is.na(N1$Hit_W), ]
 N1$Diff = N1$Hit_W - N1$Hit_P
-N2 = Hit_by_laser2("E1N1E1N1", N1)
+N2 = Hit_by_laser2_tf("E1N1E1N1", N1)
 N.all = cbind(N1, N2)
 
-fly.info.end = rbind(T.all[, c(1:16, 18:20)], R.all, N.all)
+fly.info.end = rbind(T.all[, c(1:18, 20:24)], R.all, N.all)
 
 write.csv(fly.info.end, file = "data/fly_info_end_final.csv", row.names = TRUE)
 
