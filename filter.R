@@ -1,5 +1,5 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+setwd("E:/Behavioral_project/behavior_experiment_data/Analysis")
+source("E:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 ## Fly info
 fly.info.CS = read.csv("data/fly_info_CS_preprocessed.csv", header = T, stringsAsFactors = F)

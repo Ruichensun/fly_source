@@ -1,6 +1,6 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
-path = "D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/"
+setwd("E:/Behavioral_project/behavior_experiment_data/Analysis")
+source("E:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+path = "E:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter/"
 query.sessions <- c(
   "E1",
   "E1T1",

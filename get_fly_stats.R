@@ -1,6 +1,6 @@
-# source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/prepoccess.R")
-setwd("D:/Behavioral_project/behavior_experiment_data/Analysis")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+# source("E:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/prepoccess.R")
+setwd("E:/Behavioral_project/behavior_experiment_data/Analysis")
+source("E:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
 
 sessions <- c(
   "E1",
@@ -193,6 +193,8 @@ for(ind in 1:nrow(fly.info.mutant)){
 
 # write.table(all_ofls_WT, file = "all_ofls_WT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
 # all_ofls_WT = read.csv("all_ofls_WT.csv", header = T, stringsAsFactors = F)
+write.table(all_ofls_MT, file = "all_ofls_MT.csv", append = FALSE, col.names = TRUE, sep = ",", row.names = FALSE)
+all_ofls_MT = read.csv("all_ofls_MT.csv", header = T, stringsAsFactors = F)
 
 print("Done - laser")
 

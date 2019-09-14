@@ -1,5 +1,6 @@
-setwd("D:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
-source("D:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+setwd("E:/Behavioral_project/behavior_experiment_data/Sorted_data_experimenter")
+source("E:/Behavioral_project/behavior_experiment_data/Analysis/fly_source/utils.R")
+library(zoo)
 
 #Mutants
 type = c("Mutants","Mutants", "mutants")
